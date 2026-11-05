@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=caddy` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s caddy`.
+**Enable**: `OCBOX_SERVICES=caddy` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s caddy`.
 
 Caddy reverse proxy. You do not need it just to open your app: `OCBOX_PORTS`
 already publishes the dev server. Use it to serve several backends under one
@@ -23,13 +23,13 @@ must listen on `0.0.0.0`.
 
 **Routing.** The configuration is in `services/caddy/Caddyfile` and is shared
 by every project. For a project-specific one, mount your own in
-`projects/<name>.yaml`:
+`projects/<name>/compose.yaml`:
 
 ```yaml
 services:
   caddy:
     volumes:
-      - ${OCBOX_CONFIG_DIR}/projects/<name>.Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${OCBOX_PROJECT_CONFIG}/Caddyfile:/etc/caddy/Caddyfile:ro
 ```
 
 For example, frontend and API under the same address:

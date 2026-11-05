@@ -1,0 +1,13 @@
+# Compose override for this project, merged on top of the box's compose.yaml
+# and the selected services. Use it to tweak a service for this project only.
+# To refer to files in this directory, use ${OCBOX_PROJECT_CONFIG}: relative
+# paths resolve against the opencode-box repository.
+
+services:
+  # PostGIS instead of plain PostgreSQL (only applies when "postgres" is in
+  # OCBOX_SERVICES).
+  postgres:
+    image: postgis/postgis:18-3.6-alpine
+    # SQL scripts to run when the database is first created:
+    # volumes:
+    #   - ${OCBOX_PROJECT_CONFIG}/initdb:/docker-entrypoint-initdb.d:ro

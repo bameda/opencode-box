@@ -40,7 +40,7 @@ ocbox -s postgres -- psql         # a single command in the box
 Options given on the command line take precedence over the project's
 [settings](configuration.md#per-project-settings). Use them to try something
 once; for a project you work on every day, put them in
-`projects/<name>.env` and just run `ocbox`.
+`projects/<name>/project.env` and just run `ocbox`.
 
 ## Projects and their services
 

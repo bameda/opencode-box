@@ -52,9 +52,9 @@ ocbox --down                     # stop the project's services (keeps data)
 ocbox --help                     # every option
 ```
 
-Projects remember their services, ports and other options in
-`~/.config/ocbox/projects/<name>.env`, so day to day `ocbox` is usually
-enough.
+Each project keeps its services, ports and other options in its own
+directory, `~/.config/ocbox/projects/<name>/`, so day to day `ocbox` is
+usually enough.
 
 ## Documentation
 

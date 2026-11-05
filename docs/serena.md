@@ -17,7 +17,7 @@ ocbox --serena                     # once
 ```
 
 To enable it for good, add `OCBOX_SERENA=1` to the project's settings,
-`~/.config/ocbox/projects/<name>.env`.
+`~/.config/ocbox/projects/<name>/project.env`.
 
 When enabled, the box registers Serena as a local MCP server in OpenCode's
 system configuration, pinned to the current project. It is regenerated on

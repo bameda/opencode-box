@@ -9,6 +9,7 @@ SERVICES_DIR="$BOX_DIR/services"
 # outside this repository.
 CONFIG_DIR="${OCBOX_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/ocbox}"
 USER_SERVICES_DIR="$CONFIG_DIR/services"
+PROJECT_SERVICES_DIR=""   # set once the project is known
 
 die()  { printf 'ocbox: %s\n' "$*" >&2; exit 1; }
 info() { printf '[ocbox] %s\n' "$*" >&2; }
@@ -22,7 +23,7 @@ Run opencode in a container with access to PROJECT_DIR only (default: $PWD).
 Options:
   -s, --services LIST    Comma-separated services from the catalog.
                          E.g. -s postgres,redis,mailpit   (see --list)
-  -l, --list             List the services available in services/
+  -l, --list             List the services available to the project
   -p, --port PORT        Publish a port of the opencode container on
                          127.0.0.1 (repeatable). E.g. -p 3000
       --git-rw           Mount .git read-write (read-only by default)
@@ -45,32 +46,45 @@ Anything after "--" replaces the default command (opencode):
 Configuration directory: ~/.config/ocbox (or $OCBOX_CONFIG_DIR), out of the
 agent's reach:
   ocbox.env, secrets.env     global settings and API keys
-  projects/<dir-name>.env    OCBOX_SERVICES, OCBOX_PORTS, OCBOX_GIT_RW, OCBOX_SERENA...
-  projects/<dir-name>.yaml   compose override for that project only
+  projects/<dir-name>/       one directory per project, named after it:
+    project.env              OCBOX_SERVICES, OCBOX_PORTS, OCBOX_SERENA...
+    secrets.env              the project's secrets
+    compose.yaml             compose override for the project
+    AGENTS.md                private instructions for the agent
+    services/<name>/         services only the project uses
   services/<name>/           your own services (same layout as the catalog)
   opencode/                  opencode's global configuration
 USAGE
 }
 
-# Each service is a directory <name>/ with a compose.yaml inside, either in
-# your configuration directory or in the catalog; yours wins on name clashes.
+# Each service is a directory <name>/ with a compose.yaml inside. They are
+# looked up in the project's configuration, then in yours, then in the
+# catalog: the first one found wins.
+service_dirs() {
+  [[ -n "$PROJECT_SERVICES_DIR" ]] && printf '%s\n' "$PROJECT_SERVICES_DIR"
+  printf '%s\n' "$USER_SERVICES_DIR" "$SERVICES_DIR"
+}
+
 available_services() {
   local dir d
-  for dir in "$USER_SERVICES_DIR" "$SERVICES_DIR"; do
+  while read -r dir; do
     for d in "$dir"/*/; do
       [[ -f "$d/compose.yaml" ]] || continue
       d="$(basename "$d")"
       [[ "$d" == _* ]] || printf '%s\n' "$d"
     done
-  done | sort -u
+  done < <(service_dirs) | sort -u
 }
 
 service_file() {
-  if [[ -f "$USER_SERVICES_DIR/$1/compose.yaml" ]]; then
-    printf '%s/%s/compose.yaml' "$USER_SERVICES_DIR" "$1"
-  else
-    printf '%s/%s/compose.yaml' "$SERVICES_DIR" "$1"
-  fi
+  local dir
+  while read -r dir; do
+    if [[ -f "$dir/$1/compose.yaml" ]]; then
+      printf '%s/%s/compose.yaml' "$dir" "$1"
+      return
+    fi
+  done < <(service_dirs)
+  printf '%s/%s/compose.yaml' "$SERVICES_DIR" "$1"
 }
 
 init_config() {
@@ -108,7 +122,10 @@ list_services() {
   echo "Available services:"
   while read -r s; do
     desc="$(sed -n '1s/^# *//p' "$(service_file "$s")")"
-    [[ "$(service_file "$s")" == "$USER_SERVICES_DIR"/* ]] && desc="[yours] $desc"
+    case "$(service_file "$s")" in
+      "$PROJECT_SERVICES_DIR"/*) desc="[project] $desc" ;;
+      "$USER_SERVICES_DIR"/*)    desc="[yours] $desc" ;;
+    esac
     printf '  %-12s %s\n' "$s" "$desc"
   done < <(available_services)
   echo
@@ -127,7 +144,7 @@ cmd=()
 while (($#)); do
   case "$1" in
     -s|--services) services="${2:?missing service list}"; shift 2 ;;
-    -l|--list)     list_services; exit 0 ;;
+    -l|--list)     action=list; shift ;;
     --init)
       if [[ -n "${2:-}" && "$2" != -* ]]; then init_config "$2"; else init_config; fi
       exit 0 ;;
@@ -157,14 +174,24 @@ case "$CONFIG_DIR/" in "$BOX_DIR"/*)
   die "the configuration directory must live outside the opencode-box repo" ;;
 esac
 
-command -v docker >/dev/null || die "docker is not installed"
-docker compose version >/dev/null 2>&1 || die "the 'docker compose' plugin (v2) is missing"
-
 # --- Project -------------------------------------------------------------------
 project="${project:-$PWD}"
 [[ -d "$project" ]] || die "directory does not exist: $project"
 PROJECT_DIR="$(cd "$project" && pwd -P)"
 HOME_REAL="$(cd "$HOME" && pwd -P)"
+
+# The project's own configuration: ~/.config/ocbox/projects/<directory name>/
+name="$(basename "$PROJECT_DIR")"
+PROJECT_CONFIG="$CONFIG_DIR/projects/$name"
+PROJECT_SERVICES_DIR="$PROJECT_CONFIG/services"
+
+if [[ "$action" == list ]]; then
+  list_services
+  exit 0
+fi
+
+command -v docker >/dev/null || die "docker is not installed"
+docker compose version >/dev/null 2>&1 || die "the 'docker compose' plugin (v2) is missing"
 
 # Guards against accidentally mounting more than intended.
 [[ "$PROJECT_DIR" != "/" ]] || die "refusing to mount the whole /"
@@ -185,7 +212,6 @@ case "$PROJECT_DIR/" in "$CONFIG_DIR"/*)
   die "the project is inside your ocbox configuration directory" ;;
 esac
 
-name="$(basename "$PROJECT_DIR")"
 slug="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' \
         | sed -E 's/-+/-/g; s/^-//; s/-$//')"
 hash="$(printf '%s' "$PROJECT_DIR" | sha1sum | cut -c1-8)"
@@ -194,10 +220,10 @@ compose_project="ocbox-${slug:-project}-${hash}"
 # --- Settings (from your configuration directory, not from the project) -----
 # Everything is exported, so these files can also override service versions,
 # ports or credentials (POSTGRES_VERSION, MAILPIT_UI_PORT...).
-# Order: ocbox.env, secrets.env, then projects/<name>.env (wins).
-proj_env="$CONFIG_DIR/projects/$name.env"
-proj_yaml="$CONFIG_DIR/projects/$name.yaml"
-for f in "$CONFIG_DIR/ocbox.env" "$CONFIG_DIR/secrets.env" "$proj_env"; do
+# Order (the last one wins): global ocbox.env and secrets.env, then the
+# project's project.env and secrets.env.
+for f in "$CONFIG_DIR/ocbox.env" "$CONFIG_DIR/secrets.env" \
+         "$PROJECT_CONFIG/project.env" "$PROJECT_CONFIG/secrets.env"; do
   [[ -f "$f" ]] || continue
   set -a
   # shellcheck source=/dev/null
@@ -234,10 +260,12 @@ else
   # --down/--purge load every fragment so all volumes are known.
   while read -r s; do compose_files+=(-f "$(service_file "$s")"); done < <(available_services)
 fi
-[[ -f "$proj_yaml" ]] && compose_files+=(-f "$proj_yaml")
+[[ -f "$PROJECT_CONFIG/compose.yaml" ]] && compose_files+=(-f "$PROJECT_CONFIG/compose.yaml")
 
 export PROJECT_DIR
 OCBOX_CONFIG_DIR="$CONFIG_DIR"; export OCBOX_CONFIG_DIR
+# For paths in the project's compose files: ${OCBOX_PROJECT_CONFIG}/Caddyfile
+OCBOX_PROJECT_CONFIG="$PROJECT_CONFIG"; export OCBOX_PROJECT_CONFIG
 # Must exist before Docker mounts it, or Docker creates it owned by root.
 mkdir -p "$CONFIG_DIR/opencode"
 OCBOX_SERVICES="$(IFS=','; echo "${selected[*]}")"; export OCBOX_SERVICES
@@ -278,6 +306,12 @@ done
 # Serena dashboard (optional), published on 127.0.0.1 only.
 if [[ "$OCBOX_SERENA" == "1" && "$OCBOX_SERENA_DASHBOARD" == "1" ]]; then
   run_args+=(-p "127.0.0.1:${OCBOX_SERENA_DASHBOARD_PORT:-24282}:24282")
+fi
+
+# The project's private instructions for the agent: only this file is
+# mounted, never the directory, which may hold secrets.
+if [[ -f "$PROJECT_CONFIG/AGENTS.md" ]]; then
+  run_args+=(-v "$PROJECT_CONFIG/AGENTS.md:/run/ocbox/project-AGENTS.md:ro")
 fi
 
 # Read-only .git: prevents the agent from planting hooks or .git/config

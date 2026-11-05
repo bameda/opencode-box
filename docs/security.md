@@ -15,10 +15,11 @@ full sandbox: read what it protects and what it does not.
 | `<project>/.git` | the project | **read-only** (unless `--git-rw`) |
 | `/home/dev` | the `ocbox-home` volume | read-write; the box's own home |
 | `/run/ocbox/opencode` | `~/.config/ocbox/opencode` | read-only |
+| `/run/ocbox/project-AGENTS.md` | the project's `AGENTS.md` in your configuration, if any | read-only |
 | `/opt/ocbox/AGENTS.md` | the repository's `docker/AGENTS.md` | read-only |
 
 Nothing else from your host is mounted: not your `$HOME`, not your SSH keys,
-not your other projects, not your ocbox settings.
+not your other projects, not your ocbox settings or secrets.
 
 The `ocbox-home` volume is shared by all projects. It holds the opencode
 login (`~/.local/share/opencode/auth.json`), sessions, tools installed with

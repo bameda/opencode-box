@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=postgres` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s postgres`.
+**Enable**: `OCBOX_SERVICES=postgres` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s postgres`.
 
 PostgreSQL relational database. Requires PostgreSQL 18 or newer.
 
@@ -42,17 +42,17 @@ dropdb --force "$PGDATABASE" && createdb "$PGDATABASE"   # empty the DB
 | `POSTGRES_DB` | `app` |
 
 **Initial SQL.** To run scripts when the database is created, mount them in
-`projects/<name>.yaml`. They only run on an empty database:
+`projects/<name>/compose.yaml`. They only run on an empty database:
 
 ```yaml
 services:
   postgres:
     volumes:
-      - ${OCBOX_CONFIG_DIR}/projects/<name>-initdb:/docker-entrypoint-initdb.d:ro
+      - ${OCBOX_PROJECT_CONFIG}/initdb:/docker-entrypoint-initdb.d:ro
 ```
 
-**PostGIS or other images.** Swap the image in `projects/<name>.yaml`, as in
-`projects/example.yaml`. It must be based on PostgreSQL 18 or newer.
+**PostGIS or other images.** Swap the image in `projects/<name>/compose.yaml`, as in
+`projects/example/compose.yaml`. It must be based on PostgreSQL 18 or newer.
 
 ## Major upgrades
 

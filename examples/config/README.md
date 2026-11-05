@@ -9,8 +9,8 @@ meant to be its own private git repository.
 ~/.config/ocbox/
 ├── ocbox.env           global settings (versions, ports, git identity...)
 ├── secrets.env         API keys; never committed
-├── projects/           one <name>.env (and optional <name>.yaml) per project,
-│                       named after the project's directory
+├── projects/           one directory per project, named after the project's
+│                       directory (see projects/README.md)
 ├── services/           optional: your own services, same layout as the catalog
 └── opencode/           opencode's global configuration
     ├── opencode.jsonc  model, agents, permissions, MCPs...

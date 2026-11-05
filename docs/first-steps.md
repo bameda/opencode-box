@@ -23,16 +23,17 @@ Before configuring anything, answer four questions:
 - **Should the agent be allowed to commit?** Recommended: no. You review the
   diff and commit yourself.
 
-## 2. Create its settings file in your configuration
+## 2. Create its directory in your configuration
 
-Project settings live in your configuration directory, `~/.config/ocbox`,
-not in the opencode-box repository. The file is named after the project's
-**directory name**. For `~/src/shop` it is `projects/shop.env`:
+Each project has a directory in your configuration, `~/.config/ocbox`, named
+after the **project's directory**: for `~/src/shop`, `projects/shop/`. Its
+settings go in `project.env`:
 
 ```fish
 cd ~/.config/ocbox
-cp projects/example.env projects/shop.env
-$EDITOR projects/shop.env
+mkdir projects/shop
+cp projects/example/project.env projects/shop/
+$EDITOR projects/shop/project.env
 ```
 
 ```dotenv
@@ -48,25 +49,30 @@ example, `MAILPIT_UI_PORT=18025`).
 
 If you keep your configuration in a
 [private repository](configuration.md#keeping-it-in-a-private-repository)
-(recommended), commit the file there:
+(recommended), commit the directory there:
 
 ```fish
-git add projects/shop.env
+git add projects/shop
 git commit -m "chore: add shop project"
 ```
 
 Either way it stays out of the agent's reach: `ocbox` never mounts your
 configuration directory.
 
-## 3. (Optional) Project-specific services or tweaks
+## 3. (Optional) Everything else the project needs
 
-If you need something that is not in the catalog, or want to tweak a catalog
-service, create `projects/shop.yaml` from `projects/example.yaml`, also in
-`~/.config/ocbox`. See [per-project settings](configuration.md#per-project-settings).
+The project's directory can hold more than its settings. Add only what you
+need; `projects/example/` has a sample of each:
 
-If that service will be useful for other projects too, make it a service of
-its own instead: see
-[adding your own service](../services/README.md#adding-your-own-service).
+- `secrets.env`, for secrets only this project uses;
+- `AGENTS.md`, with private instructions for the agent in this project;
+- `compose.yaml`, to tweak a service (for example, PostGIS instead of
+  PostgreSQL);
+- `services/<name>/`, for services that are not in the catalog and only
+  this project needs.
+
+See [per-project settings](configuration.md#per-project-settings) for the
+details of each one.
 
 ## 4. Declare the language tools
 
@@ -144,7 +150,7 @@ The database keeps its data between sessions, even after `--down`. See
 ```fish
 cd ~/src/shop
 ocbox --purge                    # stops the services and deletes their data
-rm ~/.config/ocbox/projects/shop.*
+rm -r ~/.config/ocbox/projects/shop
 ```
 
 If you keep your configuration in a repository, commit the removal there

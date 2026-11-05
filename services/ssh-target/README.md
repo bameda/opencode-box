@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=ssh-target` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s ssh-target`.
+**Enable**: `OCBOX_SERVICES=ssh-target` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s ssh-target`.
 
 A disposable Debian machine for **testing Ansible playbooks** (or any SSH
 automation) without touching real infrastructure.
@@ -31,7 +31,7 @@ Values set in your inventory take precedence over these defaults.
 
 ## Setup
 
-In `projects/<name>.env`:
+In `projects/<name>/project.env`:
 
 ```dotenv
 OCBOX_SERVICES=ssh-target
@@ -79,14 +79,14 @@ the box.
 ## Several targets or another distribution
 
 To test against Ubuntu or another Debian release, set the base image in
-`projects/<name>.env` (it must use apt) and rebuild with `ocbox --build`:
+`projects/<name>/project.env` (it must use apt) and rebuild with `ocbox --build`:
 
 ```dotenv
 SSH_TARGET_BASE_IMAGE=ubuntu:24.04
 ```
 
 For several hosts (for example, a web and a db group), add more targets in
-`projects/<name>.yaml`; they share the same test key:
+`projects/<name>/compose.yaml`; they share the same test key:
 
 ```yaml
 services:

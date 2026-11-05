@@ -23,11 +23,11 @@ explains how to use it. `ocbox --list` shows what is available.
 
 ## How services work
 
-Paths such as `projects/<name>.env` refer to your configuration directory,
-`~/.config/ocbox` (see [Configuration](../docs/configuration.md)).
+Paths such as `projects/<name>/project.env` refer to your configuration
+directory, `~/.config/ocbox` (see [Configuration](../docs/configuration.md)).
 
-**Enable** services per project in `projects/<name>.env` (or one-off with
-`ocbox -s`):
+**Enable** services per project in `projects/<name>/project.env` (or one-off
+with `ocbox -s`):
 
 ```dotenv
 OCBOX_SERVICES=postgres,redis,mailpit
@@ -43,8 +43,8 @@ app and the agent find them without configuration. Run `env` in
 beyond your machine.
 
 **Settings** (versions, credentials, ports) are changed through variables:
-in `ocbox.env` for every project, or in `projects/<name>.env` for one. Each
-section below lists them with their defaults.
+in `ocbox.env` for every project, or in `projects/<name>/project.env` for
+one. Each service's README lists them with their defaults.
 
 **Data** is per project: two projects using `postgres` get separate
 databases. Services keep running when you exit opencode.
@@ -57,7 +57,7 @@ databases. Services keep running when you exit opencode.
 **From your host.** Services with a web UI publish it on `127.0.0.1` (see
 each section). Databases are not published by default; to connect a desktop
 tool (DBeaver, TablePlus, RedisInsight...), publish the port in
-`projects/<name>.yaml`:
+`projects/<name>/compose.yaml`:
 
 ```yaml
 services:
@@ -71,31 +71,36 @@ running on your machine.
 
 ## Adding your own service
 
-Any image can join the catalog. Copy `services/_template/` to
-`services/<name>/` and fill in its two files: `compose.yaml` (the service)
-and `README.md` (how to use it). The rules are few:
+Any image can become a service. Copy `services/_template/` and fill in its
+two files: `compose.yaml` (the service) and `README.md` (how to use it).
+Where you put the copy decides who can use it:
 
-1. The service has the same name as the directory; that will be its hostname.
+| Location | Available to |
+|---|---|
+| `~/.config/ocbox/projects/<project>/services/<name>/` | that project only |
+| `~/.config/ocbox/services/<name>/` | all your projects |
+| `services/<name>/` in this repository | everyone using opencode-box (send a pull request) |
+
+They are looked up in that order and the first one found wins, so a
+project's service can replace one of yours, and yours can replace one from
+the catalog. `ocbox --list` marks them as `[project]` or `[yours]`.
+
+The rules are few:
+
+1. The service has the same name as its directory; that is its hostname.
 2. It must be in the `depends_on` of `opencode`, which is what makes `ocbox`
    start it (with `service_healthy` if it has a healthcheck).
 3. Connection variables go in the `environment` of `opencode`.
 4. Volumes without `name:` are per project. Ports are published on
    `127.0.0.1` through a variable, so they can be changed.
 5. The first comment line is the description shown by `ocbox --list`.
+6. Relative paths resolve against the opencode-box repository. To refer to
+   files in your configuration, use `${OCBOX_CONFIG_DIR}` or, for the
+   project's directory, `${OCBOX_PROJECT_CONFIG}`.
+7. Document it in its `README.md`, following the structure of the existing
+   ones. In the catalog, also add a row to the table above.
 
-6. Document it in its `README.md`, following the structure of the existing
-   ones, and add a row to the catalog table above.
-
-This way you can add Keycloak, Elasticsearch/OpenSearch, Kafka, NATS, ClickHouse,
-Meilisearch, an API mock or whatever you need, and they become available to
-every project.
-
-For a service only you or your team use, create it in the `services/`
-directory of your configuration (`~/.config/ocbox/services/<name>/`) instead
-of the catalog: it works the same way, and a service there replaces a catalog
-service with the same name. Inside your own files, refer to other files in
-your configuration with `${OCBOX_CONFIG_DIR}`, since relative paths resolve
-against the opencode-box repository.
-
-For a service only one project needs, put it in `projects/<name>.yaml`
-instead (see `projects/example.yaml`).
+This way you can add Keycloak, Elasticsearch/OpenSearch, Kafka, NATS,
+ClickHouse, Meilisearch, an API mock or whatever you need. Your
+configuration's `projects/example/services/elasticsearch/` is a complete
+example.

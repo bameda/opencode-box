@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=minio` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s minio`.
+**Enable**: `OCBOX_SERVICES=minio` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s minio`.
 
 MinIO, S3-compatible object storage, for uploads and files your app would
 store in S3.

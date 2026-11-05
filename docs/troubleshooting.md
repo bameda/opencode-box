@@ -18,9 +18,11 @@ Run `ocbox --init`, or `./install.sh` from the repository, to create
 
 ### My settings are ignored
 
-Settings files are named after the project's directory: for
-`~/src/my-app`, `projects/my-app.env`. The line `[ocbox] project: ...`
-printed on start shows the services and options that were applied.
+The project's configuration directory must be named after the project's
+directory: for `~/src/my-app`, `~/.config/ocbox/projects/my-app/`, with its
+settings in `project.env`. The line `[ocbox] project: ...` printed on start
+shows the services and options that were applied, and `ocbox --list` marks
+the project's own services as `[project]`.
 
 ### The app does not load in the browser
 

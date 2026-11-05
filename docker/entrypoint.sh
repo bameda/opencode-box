@@ -24,8 +24,8 @@ fi
 # Your configuration is mounted read-only at /run/ocbox/opencode. Link its
 # entries into ~/.config/opencode (where the TUI can still write its own
 # files, such as cli.json), and build the global AGENTS.md from the box's
-# instructions followed by yours: it is the instructions file OpenCode 2
-# reliably loads.
+# instructions, then yours, then the project's private ones (if any): it is
+# the instructions file OpenCode 2 reliably loads.
 user_cfg=/run/ocbox/opencode
 cfg="$HOME/.config/opencode"
 mkdir -p "$cfg"
@@ -44,10 +44,12 @@ if [[ -d "$user_cfg" ]]; then
 fi
 {
   cat /opt/ocbox/AGENTS.md
-  if [[ -f "$user_cfg/AGENTS.md" ]]; then
-    printf '\n'
-    cat "$user_cfg/AGENTS.md"
-  fi
+  for extra in "$user_cfg/AGENTS.md" /run/ocbox/project-AGENTS.md; do
+    if [[ -f "$extra" ]]; then
+      printf '\n'
+      cat "$extra"
+    fi
+  done
 } > "$cfg/AGENTS.md"
 
 # --- MariaDB/MySQL client ------------------------------------------------------

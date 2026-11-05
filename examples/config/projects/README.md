@@ -1,17 +1,29 @@
-# Per-project settings
+# Projects
 
-Files are looked up by the **project directory name**. For `~/src/my-app`
-they would be `my-app.env` and `my-app.yaml`.
+One directory per project, named after the **project's directory**: for
+`~/src/my-app`, `projects/my-app/`. To add a project, copy `example/` and
+adapt it, or create the directory with only the files you need. All of them
+are optional:
 
-They live in your ocbox configuration directory, not inside the project, on
-purpose: a compose file can mount any host path, so if `ocbox` read a file
-from the project itself, the agent could write one and escape the container
-the next time you launched it.
+```
+projects/my-app/
+├── project.env         settings: services, ports, Serena... and service variables
+├── secrets.env         the project's secrets; never committed
+├── compose.yaml        compose override: tweak a service for this project
+├── AGENTS.md           private instructions for the agent in this project
+├── services/<name>/    services only this project uses
+└── ...                 any file the above refer to (initdb/, a Caddyfile...)
+```
 
-- `<name>.env`: `ocbox` defaults for that project (command-line options take
-  precedence), plus any service variable (versions, credentials, ports...).
-- `<name>.yaml`: a compose override merged on top of `compose.yaml`. To
-  refer to files in your configuration directory, use `${OCBOX_CONFIG_DIR}`:
-  relative paths resolve against the opencode-box repository.
+In compose files, refer to files in the project's directory with
+`${OCBOX_PROJECT_CONFIG}`; relative paths resolve against the opencode-box
+repository.
 
-See `example.env` and `example.yaml`.
+These files live in your configuration, not in the project itself, on
+purpose: a compose file can mount any host path, so if `ocbox` read one from
+the project, the agent could write one and escape the container. For the
+same reason, only `AGENTS.md` is visible inside the box; the rest of the
+directory, secrets included, is not.
+
+Full documentation:
+[per-project settings](https://github.com/bameda/opencode-box/blob/main/docs/configuration.md#per-project-settings).

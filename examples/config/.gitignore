@@ -1,5 +1,6 @@
 # Secrets: never committed
 secrets.env
+projects/*/secrets.env
 
 # Whatever opencode may generate in its config directory
 opencode/node_modules/

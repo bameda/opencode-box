@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=redis` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s redis`.
+**Enable**: `OCBOX_SERVICES=redis` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s redis`.
 
 Redis in-memory store, for caches, sessions, queues and rate limiting.
 

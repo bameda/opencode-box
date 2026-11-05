@@ -18,11 +18,16 @@ services:
     stdin_open: true
     tty: true
     working_dir: ${PROJECT_DIR:?Start the container with bin/ocbox}
-    # Your global settings and secrets, from your ocbox configuration directory.
+    # Your settings and secrets, global and the project's, from your ocbox
+    # configuration directory (the last one wins).
     env_file:
       - path: ${OCBOX_CONFIG_DIR:?Start the container with bin/ocbox}/ocbox.env
         required: false
       - path: ${OCBOX_CONFIG_DIR}/secrets.env
+        required: false
+      - path: ${OCBOX_PROJECT_CONFIG}/project.env
+        required: false
+      - path: ${OCBOX_PROJECT_CONFIG}/secrets.env
         required: false
     environment:
       TERM: ${TERM:-xterm-256color}

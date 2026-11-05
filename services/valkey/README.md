@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=valkey` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s valkey`.
+**Enable**: `OCBOX_SERVICES=valkey` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s valkey`.
 
 Valkey, the open-source fork of Redis. It speaks the same protocol, so Redis
 clients and `redis-cli` work with it unchanged.
@@ -15,7 +15,7 @@ clients and `redis-cli` work with it unchanged.
 |---|---|
 | `VALKEY_URL` | `redis://valkey:6379/0` |
 
-If your app expects `REDIS_URL`, map it in `projects/<name>.yaml`:
+If your app expects `REDIS_URL`, map it in `projects/<name>/compose.yaml`:
 
 ```yaml
 services:

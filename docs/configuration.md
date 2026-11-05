@@ -20,7 +20,7 @@ conflicts.
 ~/.config/ocbox/
 ├── ocbox.env           global settings (versions, ports, git identity...)
 ├── secrets.env         API keys; never committed
-├── projects/           <name>.env and <name>.yaml per project
+├── projects/           one directory per project (see below)
 ├── services/           optional: your own services
 └── opencode/           opencode's global configuration
     ├── opencode.jsonc
@@ -46,7 +46,7 @@ machines.
 cd ~/.config/ocbox
 git init -b main
 git add -A
-git status          # secrets.env must NOT be listed
+git status          # no secrets.env may be listed
 git commit -m "chore: initial ocbox configuration"
 ```
 
@@ -62,7 +62,7 @@ git push -u origin main
 
 ```fish
 cd ~/.config/ocbox
-git add projects/my-app.env
+git add projects/my-app
 git commit -m "chore: add my-app project"
 git push
 ```
@@ -77,8 +77,9 @@ file from the examples:
 
 **What stays out of it**:
 
-- `secrets.env` is listed in the directory's `.gitignore`. Recreate it by
-  hand on each machine, or log in with `/connect` instead.
+- Every `secrets.env`, the global one and the projects', is listed in the
+  directory's `.gitignore`. Recreate them by hand on each machine (or log in
+  with `/connect` instead of using an API key).
 - The login, sessions and caches of the box live in the `ocbox-home` Docker
   volume, not here, so they are not synced either.
 
@@ -98,12 +99,23 @@ Each one documents its own options in comments.
 
 ## Per-project settings
 
-Each project can have two files in `projects/`, named after the project's
-**directory name**. For `~/src/my-app` they are:
+Each project has its own directory in `projects/`, named after the
+**project's directory**: for `~/src/my-app`, `projects/my-app/`. Every file
+in it is optional:
 
-- **`projects/my-app.env`**: the project's defaults (services, ports,
-  Serena, `.git` access...) plus any service variable (database name,
-  versions, UI ports...). Command-line options take precedence.
+```
+projects/my-app/
+├── project.env         settings: services, ports, Serena... and service variables
+├── secrets.env         the project's secrets; never committed
+├── compose.yaml        compose override: tweak a service for this project
+├── AGENTS.md           private instructions for the agent in this project
+├── services/<name>/    services only this project uses
+└── ...                 any file the above refer to (initdb/, a Caddyfile...)
+```
+
+- **`project.env`**: the project's defaults (services, ports, Serena, `.git`
+  access...) plus any service variable (database name, versions, UI
+  ports...). Command-line options take precedence.
 
   ```dotenv
   OCBOX_SERVICES=postgres,mailpit
@@ -112,34 +124,61 @@ Each project can have two files in `projects/`, named after the project's
   POSTGRES_DB=myapp
   ```
 
-- **`projects/my-app.yaml`**: a Docker Compose override, merged on top of
-  the box's own. Use it for services only that project needs, or to tweak a
-  catalog service (for example, PostGIS instead of plain PostgreSQL).
+- **`secrets.env`**: secrets only this project uses, such as the key of an
+  external API it talks to. It is ignored by git, like the global one.
+- **`compose.yaml`**: a Docker Compose override, merged on top of the box's
+  own, to tweak a service for this project (for example, PostGIS instead of
+  plain PostgreSQL).
+- **`AGENTS.md`**: instructions for the agent that apply only to this
+  project and that should not go into the project's own repository, because
+  it belongs to your team or a client. They are added after the box's
+  instructions and your personal ones.
+- **`services/`**: services only this project needs, with the same layout as
+  the [catalog](../services/README.md). See
+  [your own services](#your-own-services).
 
-See `projects/example.env` and `projects/example.yaml` in your
-configuration directory.
+The settings files are loaded in this order, and the last one wins:
+`ocbox.env`, `secrets.env`, the project's `project.env`, the project's
+`secrets.env`. All of them are also passed to the opencode container as
+environment variables.
+
+`ocbox --init` creates `projects/example/`, which uses every piece. To add a
+project, copy it and keep only what you need:
+
+```fish
+cd ~/.config/ocbox
+cp -r projects/example projects/my-app
+```
 
 Two details:
 
-- **Paths.** In your compose files, relative paths resolve against the
-  opencode-box repository. To refer to files in your configuration, use
-  `${OCBOX_CONFIG_DIR}`, for example
-  `${OCBOX_CONFIG_DIR}/projects/my-app-initdb`.
-- **Names.** Two projects with the same directory name share these files.
+- **Paths.** In compose files, relative paths resolve against the
+  opencode-box repository. To refer to files in the project's directory, use
+  `${OCBOX_PROJECT_CONFIG}`, for example `${OCBOX_PROJECT_CONFIG}/initdb`.
+- **Names.** Two projects with the same directory name share these settings.
   Their data and services are still separate, because those are keyed by the
   full path.
 
 These files live here, and not inside the project, on purpose. A compose
 file can mount any host path, so if `ocbox` read one from the project, the
 agent could write one that mounted `/` and escaped the container the next
-time you launched it.
+time you launched it. For the same reason, only `AGENTS.md` is visible
+inside the box: the rest of the project's directory, secrets included, is
+not.
 
 ## Your own services
 
-A `services/<name>/` directory in your configuration works exactly like one
-in the catalog: `ocbox -s <name>` and `OCBOX_SERVICES` find it, and it
-replaces a catalog service with the same name. Use it for services only you
-or your team need. See
+Services are looked up in three places, and the first one found wins:
+
+1. the project's `services/` (`projects/<name>/services/<service>/`);
+2. your `services/` (`~/.config/ocbox/services/<service>/`);
+3. the opencode-box [catalog](../services/README.md).
+
+Your services work exactly like the catalog's: `ocbox -s <name>` and
+`OCBOX_SERVICES` find them, and `ocbox --list` marks them as `[project]` or
+`[yours]`. Put a service in the project when only that project needs it,
+and in yours when you use it in several projects. A service with the same
+name as one further down the list replaces it. See
 [adding your own service](../services/README.md#adding-your-own-service).
 
 ## opencode configuration
@@ -198,7 +237,7 @@ If you always need something that mise does not provide, add it to the
 ## Settings reference
 
 The variables ocbox itself reads. Set them in `ocbox.env` (every project) or
-`projects/<name>.env` (one project). Each service has its own variables,
+`projects/<name>/project.env` (one project). Each service has its own variables,
 documented in its README in [services](../services/README.md).
 
 | Variable | Default | Description |
@@ -213,6 +252,7 @@ documented in its README in [services](../services/README.md).
 | `OCBOX_MISE_INSTALL` | `1` | `0` skips `mise install` on start |
 | `OCBOX_HOST_UID` / `OCBOX_HOST_GID` | your UID/GID | Container user; `0` for rootless Docker |
 | `OCBOX_CONFIG_DIR` | `~/.config/ocbox` | Configuration directory (set it in your shell, not in these files) |
+| `OCBOX_PROJECT_CONFIG` | set by `ocbox` | The project's configuration directory, for paths in compose files |
 | `OPENCODE_VERSION` | `latest` | `@opencode/cli` version in the image (rebuild after changing) |
 | `POSTGRES_CLIENT_VERSION` | `18` | PostgreSQL client tools in the image (rebuild after changing) |
 | `SERENA_VERSION` | see `ocbox.env` | Serena version in the image (rebuild after changing) |
