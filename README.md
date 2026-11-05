@@ -18,6 +18,9 @@ image is a matter of copying a template. Optionally,
 [Serena](https://github.com/oraios/serena) gives the agent symbol-level code
 navigation and editing.
 
+New here? [FIRST_STEPS.md](FIRST_STEPS.md) walks through adding a project
+step by step.
+
 ## What the container sees
 
 | Path in the container | Source | Access |
