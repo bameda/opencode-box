@@ -17,8 +17,9 @@ You are running inside an isolated Docker container, not on the user's machine.
   reachable over the network using its name as hostname (`postgres`, `redis`,
   `mailpit`...). Their connection details are in environment variables
   (`DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `S3_ENDPOINT`, `AMQP_URL`...);
-  check them with `env` before configuring anything. When `psql` or `mysql`
-  are configured through `PG*`/`MYSQL_*`, they work without arguments.
+  check them with `env` before configuring anything. `psql` (through `PG*`)
+  and `mariadb`/`mysql` (through a generated `~/.my.cnf`) connect to the
+  project database without arguments.
 - If you need a service that is not in `OCBOX_SERVICES`, do not try to
   install or start it yourself: ask the user to add it.
 - OpenCode 2 does not run language servers: there are no automatic LSP

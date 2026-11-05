@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential pkg-config libssl-dev \
       python3 python3-venv python3-pip \
       nodejs npm \
-      mariadb-client redis-tools sqlite3 \
+      mariadb-client mariadb-client-compat redis-tools sqlite3 \
       ncurses-term \
     && ln -s /usr/bin/fdfind /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
