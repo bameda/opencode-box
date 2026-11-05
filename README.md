@@ -139,10 +139,31 @@ connection details as environment variables in the opencode container. The
 explains this to the agent. Credentials default to `dev`/`dev` (everything is
 local).
 
+PostgreSQL defaults to 18, the latest stable major, and requires 18 or newer
+(see below for major upgrades).
+
 Versions, credentials and ports are changed through variables: for all
 projects in `.env`, or for one in `projects/<name>.env`. If you open two
 projects at once with services that publish a UI, change the port in one of
 them (`MAILPIT_UI_PORT=18025`, for example).
+
+### PostgreSQL major upgrades
+
+The major version is pinned (`POSTGRES_VERSION=18`) rather than following
+`latest`, because each major keeps its data in its own subdirectory: when you
+move to a new major, the project starts with an **empty database**. For a
+development DB the simplest option is to re-run your migrations and seeds. To
+keep the data, dump it first:
+
+```fish
+cd ~/src/my-project
+ocbox -s postgres -- pg_dumpall -f .pg-upgrade.sql   # with the old version
+# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in .env, then:
+ocbox --build -s postgres -- psql -f .pg-upgrade.sql
+rm .pg-upgrade.sql
+```
+
+The old major's files stay in the volume until you run `ocbox --purge`.
 
 `caddy` proxies to the dev server the agent starts (`opencode:3000` by
 default, changed with `PROXY_UPSTREAM`). Edit `services/caddy/Caddyfile` for
@@ -181,7 +202,8 @@ write one that mounted `/` and escaped.
 ### Languages and tools
 
 The image ships the basics (git, ripgrep, fd, jq, build-essential, python3,
-node, uv, and the psql, mysql/mariadb, redis-cli and sqlite3 clients) plus
+node, uv, the PostgreSQL 18 client tools from the official PGDG repository,
+and the mysql/mariadb, redis-cli and sqlite3 clients) plus
 [mise](https://mise.jdx.dev) for everything else. If the project has a
 `mise.toml` or `.tool-versions`, `mise install` runs automatically on start:
 

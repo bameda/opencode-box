@@ -13,6 +13,10 @@ ARG HOST_GID=1000
 # builds: changing it invalidates this layer's cache.
 ARG OPENCODE_VERSION=latest
 
+# PostgreSQL client tools (psql, pg_dump...) from the official PGDG repo.
+# Keep it >= the server's major: pg_dump refuses to dump newer servers.
+ARG POSTGRES_CLIENT_VERSION=18
+
 # Serena (semantic code navigation/editing MCP). INSTALL_SERENA=0 skips it.
 ARG INSTALL_SERENA=1
 ARG SERENA_VERSION=2.1.0
@@ -32,10 +36,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential pkg-config libssl-dev \
       python3 python3-venv python3-pip \
       nodejs npm \
-      postgresql-client mariadb-client redis-tools sqlite3 \
+      mariadb-client redis-tools sqlite3 \
       ncurses-term \
     && ln -s /usr/bin/fdfind /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
+
+# PostgreSQL client from apt.postgresql.org (Debian's is older).
+RUN install -d /usr/share/postgresql-common/pgdg \
+    && curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+         https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+    && . /etc/os-release \
+    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+         > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends "postgresql-client-${POSTGRES_CLIENT_VERSION}" \
+    && rm -rf /var/lib/apt/lists/* \
+    && psql --version
 
 # mise: per-project version manager for languages and tools.
 RUN curl -fsSL https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise sh \

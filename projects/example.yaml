@@ -29,7 +29,7 @@ services:
   # Tweak a catalog service: PostGIS instead of plain PostgreSQL.
   # (Only use this if "postgres" is in OCBOX_SERVICES.)
   postgres:
-    image: postgis/postgis:16-3.5-alpine
+    image: postgis/postgis:18-3.6-alpine
 
 volumes:
   es-data:
