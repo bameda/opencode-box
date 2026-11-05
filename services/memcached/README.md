@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=memcached` in `projects/<name>.env`, or `ocbox -s memcached`.
+**Enable**: `OCBOX_SERVICES=memcached` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s memcached`.
 
 Memcached, a simple key-value cache.
 

@@ -1,0 +1,8 @@
+# Secrets: never committed
+secrets.env
+
+# Whatever opencode may generate in its config directory
+opencode/node_modules/
+opencode/package.json
+opencode/package-lock.json
+opencode/bun.lock*

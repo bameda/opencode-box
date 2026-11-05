@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=myservice` in `projects/<name>.env`, or `ocbox -s myservice`.
+**Enable**: `OCBOX_SERVICES=myservice` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s myservice`.
 
 One or two sentences: what the service is and what a project uses it for.
 

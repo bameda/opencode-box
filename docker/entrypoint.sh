@@ -20,6 +20,36 @@ if [[ "${OCBOX_MISE_INSTALL:-1}" == "1" ]]; then
   done
 fi
 
+# --- opencode configuration -----------------------------------------------------
+# Your configuration is mounted read-only at /run/ocbox/opencode. Link its
+# entries into ~/.config/opencode (where the TUI can still write its own
+# files, such as cli.json), and build the global AGENTS.md from the box's
+# instructions followed by yours: it is the instructions file OpenCode 2
+# reliably loads.
+user_cfg=/run/ocbox/opencode
+cfg="$HOME/.config/opencode"
+mkdir -p "$cfg"
+find "$cfg" -maxdepth 1 -type l -lname "$user_cfg/*" -delete
+if [[ -d "$user_cfg" ]]; then
+  for src in "$user_cfg"/* "$user_cfg"/.[!.]*; do
+    [[ -e "$src" ]] || continue
+    entry="$(basename "$src")"
+    case "$entry" in AGENTS.md|.git|.gitignore) continue ;; esac
+    if [[ -e "$cfg/$entry" && ! -L "$cfg/$entry" ]]; then
+      log "WARNING: ~/.config/opencode/$entry exists in the box's volume and hides yours; remove it with ocbox --shell."
+      continue
+    fi
+    ln -sfn "$src" "$cfg/$entry"
+  done
+fi
+{
+  cat /opt/ocbox/AGENTS.md
+  if [[ -f "$user_cfg/AGENTS.md" ]]; then
+    printf '\n'
+    cat "$user_cfg/AGENTS.md"
+  fi
+} > "$cfg/AGENTS.md"
+
 # --- MariaDB/MySQL client ------------------------------------------------------
 # The mariadb/mysql CLI ignores MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE,
 # so write them to ~/.my.cnf (regenerated on every start; removed again in

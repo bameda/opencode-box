@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=postgres` in `projects/<name>.env`, or `ocbox -s postgres`.
+**Enable**: `OCBOX_SERVICES=postgres` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s postgres`.
 
 PostgreSQL relational database. Requires PostgreSQL 18 or newer.
 
@@ -48,7 +48,7 @@ dropdb --force "$PGDATABASE" && createdb "$PGDATABASE"   # empty the DB
 services:
   postgres:
     volumes:
-      - ./projects/<name>-initdb:/docker-entrypoint-initdb.d:ro
+      - ${OCBOX_CONFIG_DIR}/projects/<name>-initdb:/docker-entrypoint-initdb.d:ro
 ```
 
 **PostGIS or other images.** Swap the image in `projects/<name>.yaml`, as in
@@ -64,7 +64,7 @@ re-run your migrations and seeds. To keep the data, dump it first:
 ```fish
 cd ~/src/my-project
 ocbox -s postgres -- pg_dumpall -f .pg-upgrade.sql      # with the old version
-# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in .env, then:
+# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in ocbox.env, then:
 ocbox --build -s postgres -- psql -d postgres -f .pg-upgrade.sql
 rm .pg-upgrade.sql
 ```

@@ -10,7 +10,7 @@ Skip this if you have already done it.
 
 ```fish
 cd ~/src/opencode-box
-./install.sh
+./install.sh                 # also creates your configuration in ~/.config/ocbox
 ocbox --build ~/src/shop     # builds the image
 ```
 
@@ -30,13 +30,14 @@ Before configuring anything, answer four questions:
 - **Should the agent be allowed to commit?** Recommended: no. You review the
   diff and commit yourself.
 
-## 2. Create its settings file in opencode-box
+## 2. Create its settings file in your configuration
 
-The file is named after the project's **directory name**. For `~/src/shop`
-it is `projects/shop.env`:
+Project settings live in your configuration directory, `~/.config/ocbox`,
+not in the opencode-box repository. The file is named after the project's
+**directory name**. For `~/src/shop` it is `projects/shop.env`:
 
 ```fish
-cd ~/src/opencode-box
+cd ~/.config/ocbox
 cp projects/example.env projects/shop.env
 $EDITOR projects/shop.env
 ```
@@ -52,18 +53,22 @@ If a service of this project publishes a web UI, such as Mailpit, and you
 will have another project open at the same time, change its port here (for
 example, `MAILPIT_UI_PORT=18025`).
 
-Commit the file in opencode-box so the settings are versioned and out of the
-agent's reach:
+If your configuration is a git repository (recommended, see "Your
+configuration" in the README), commit the file there:
 
 ```fish
 git add projects/shop.env
 git commit -m "chore: add shop project"
 ```
 
+Either way it stays out of the agent's reach: `ocbox` never mounts your
+configuration directory.
+
 ## 3. (Optional) Project-specific services or tweaks
 
 If you need something that is not in the catalog, or want to tweak a catalog
-service, create `projects/shop.yaml` from `projects/example.yaml`.
+service, create `projects/shop.yaml` from `projects/example.yaml`, also in
+`~/.config/ocbox`.
 
 If that service will be useful for other projects too, add it to the catalog
 instead, by copying `services/_template/`.
@@ -143,7 +148,7 @@ The database keeps its data between sessions, even after `--down`.
 ```fish
 cd ~/src/shop
 ocbox --purge                    # stops the services and deletes their data
-rm ~/src/opencode-box/projects/shop.*
+rm ~/.config/ocbox/projects/shop.*
 ```
 
 ## Note on project names

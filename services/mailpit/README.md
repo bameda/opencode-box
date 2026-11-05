@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=mailpit` in `projects/<name>.env`, or `ocbox -s mailpit`.
+**Enable**: `OCBOX_SERVICES=mailpit` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s mailpit`.
 
 Mailpit catches every email your app sends, so nothing reaches real
 recipients, and shows it in a web inbox.

@@ -28,7 +28,8 @@ step by step.
 | `<project path>` (same as on the host) | the project | read-write |
 | `<project>/.git` | the project | **read-only** (unless `--git-rw`) |
 | `/home/dev` | `ocbox-home` volume | read-write (the box's own) |
-| `/home/dev/.config/opencode` | this repo's `config/opencode` | read-write |
+| `/run/ocbox/opencode` | your `~/.config/ocbox/opencode` | read-only |
+| `/opt/ocbox/AGENTS.md` | this repo's `docker/AGENTS.md` | read-only |
 
 The container runs with your UID/GID (files it creates are owned by you),
 without `sudo`, without capabilities (`cap_drop: ALL`) and with
@@ -73,18 +74,52 @@ they work the same from fish.
 ## Installation
 
 ```fish
-git clone git@github.com:<you>/opencode-box.git ~/src/opencode-box
+git clone git@github.com:<owner>/opencode-box.git ~/src/opencode-box
 cd ~/src/opencode-box
-./install.sh            # links ~/.local/bin/ocbox and creates .env
-$EDITOR .env            # opencode version, API keys (optional)
+./install.sh            # links ~/.local/bin/ocbox and creates ~/.config/ocbox
 ocbox --build ~/src/my-project
 ```
+
+To update later: `git pull` in the repository, then `ocbox --build`. Your
+configuration is not touched.
 
 If `~/.local/bin` is not in your PATH: `fish_add_path ~/.local/bin`.
 
 The first time, run `/connect` inside opencode to authenticate with your
 provider. Credentials are stored in the `ocbox-home` volume, not in your real
-`$HOME`. Alternatively, put the keys (`ANTHROPIC_API_KEY`, etc.) in `.env`.
+`$HOME`. Alternatively, put the keys (`ANTHROPIC_API_KEY`, etc.) in
+`~/.config/ocbox/secrets.env`.
+
+## Your configuration
+
+Everything personal lives outside this repository, in `~/.config/ocbox` (or
+the directory in `OCBOX_CONFIG_DIR`), so the repository can be shared and
+updated with `git pull` without conflicts. `./install.sh` creates it from
+`examples/config` (you can also run `ocbox --init`, which never overwrites
+existing files):
+
+```
+~/.config/ocbox/
+├── ocbox.env           global settings (versions, ports, git identity...)
+├── secrets.env         API keys; listed in its .gitignore
+├── projects/           <name>.env and <name>.yaml per project
+├── services/           optional: your own services
+└── opencode/           opencode's global configuration
+    ├── opencode.jsonc
+    └── AGENTS.md       your personal instructions for the agent
+```
+
+Make it a private git repository to version it and use it on other machines:
+
+```fish
+cd ~/.config/ocbox
+git init
+git add -A
+git commit -m "chore: initial ocbox configuration"
+```
+
+`ocbox` refuses to mount a project that contains this directory or is inside
+it, so the agent can never change its own settings.
 
 ## Usage
 
@@ -147,22 +182,23 @@ To test Ansible playbooks, `ssh-target` provides a disposable machine. To add
 any other image, see "Adding your own service" in SERVICES.md.
 
 Versions, credentials and ports are changed through variables: for all
-projects in `.env`, or for one in `projects/<name>.env`. If you open two
+projects in `ocbox.env`, or for one in `projects/<name>.env`. If you open two
 projects at once with services that publish a UI, change the port in one of
 them (`MAILPIT_UI_PORT=18025`, for example).
 
 ## Per-project settings
 
-In `projects/` you can keep, by project directory name:
+In the `projects/` directory of your configuration you can keep, by project
+directory name:
 
 - `<name>.env`: default services, ports and `.git` rw, plus any service
   variable (versions, DB, UI ports...).
 - `<name>.yaml`: a compose override for services only that project uses, or
   to tweak a catalog service (for example, PostGIS instead of PostgreSQL).
 
-See `projects/example.*`. They live here and not inside the project on
-purpose: if `ocbox` read a compose file from the project, the agent could
-write one that mounted `/` and escaped.
+See `projects/example.*` there. They live in your configuration and not
+inside the project on purpose: if `ocbox` read a compose file from the
+project, the agent could write one that mounted `/` and escaped.
 
 ## Languages and tools
 
@@ -188,10 +224,16 @@ the `apt-get install` in the `Dockerfile` and run `ocbox --rebuild`.
 
 ## opencode configuration
 
-`config/opencode/` is mounted as `~/.config/opencode`. That is where
-`opencode.jsonc`, agents, commands and the global `AGENTS.md` go; the latter
-already tells the agent it is in a box, that `.git` is read-only and how to
-find the services. Since it is in the repo, it is versioned.
+The `opencode/` directory of your configuration holds opencode's global
+configuration: `opencode.jsonc`, plus `agents/`, `commands/` and `skills/` if
+you use them. It is mounted read-only and linked into `~/.config/opencode` in
+the box, so edit it on your host, not from inside opencode.
+
+The agent's global `AGENTS.md` is built on every start from two parts: the
+box's own instructions (`docker/AGENTS.md` in this repository, which tell the
+agent it is in a container, that `.git` is read-only and how to find the
+services), followed by your `opencode/AGENTS.md`. Improvements to the box's
+instructions arrive with `git pull`, without touching yours.
 
 Automatic updates are disabled (see "OpenCode 2").
 
@@ -209,14 +251,14 @@ It is installed in the image (under `/opt`, out of the agent's reach) and
 
 ```fish
 ocbox --serena                                # one-off
-echo OCBOX_SERENA=1 >> projects/my-app.env    # always for that project
+echo OCBOX_SERENA=1 >> ~/.config/ocbox/projects/my-app.env   # always for that project
 ```
 
 When enabled, the entrypoint generates `/etc/opencode/opencode.json`
 (OpenCode's system config, which has the highest precedence) with Serena as a
 local MCP server, launched with the `ide` context and pinned to the current
 project. That file is regenerated on every start, so there is nothing to
-change in `config/opencode`.
+change in your opencode configuration.
 
 Details:
 
@@ -229,13 +271,13 @@ Details:
   agent writes about the project) in `.serena/` inside the project. Decide
   whether to commit it or add it to `.gitignore`.
 - **Dashboard.** Disabled, since there is no browser inside the box. To use
-  it, set `OCBOX_SERENA_DASHBOARD=1` in `.env` or `projects/<name>.env` and
+  it, set `OCBOX_SERENA_DASHBOARD=1` in `ocbox.env` or `projects/<name>.env` and
   open `http://127.0.0.1:24282/dashboard/` (port configurable with
   `OCBOX_SERENA_DASHBOARD_PORT`).
 - **Code Mode.** By default OpenCode 2 groups MCP tools behind its Code Mode.
   It is disabled for Serena so its tools show up directly and the model uses
   them more. `OCBOX_SERENA_CODEMODE=1` reverts that.
-- **Version.** `SERENA_VERSION` in `.env` and `ocbox --build`. With
+- **Version.** `SERENA_VERSION` in `ocbox.env` and `ocbox --build`. With
   `INSTALL_SERENA=0` the image is built without it.
 
 ## OpenCode 2
@@ -243,20 +285,20 @@ Details:
 The image installs the `@opencode/cli` npm package, which is OpenCode 2
 (`opencode` command). Notes about v2 relevant here:
 
-- The global config lives in `config/opencode/opencode.jsonc` (native v2
-  format), and the terminal client config (`cli.json`) is created by the TUI
-  in that same directory.
+- The global config lives in `opencode/opencode.jsonc` in your
+  configuration (native v2 format). The terminal client config (`cli.json`)
+  is created by the TUI in the box's own volume.
 - It does not run language servers or provide LSP diagnostics; hence Serena
   and the instruction in `AGENTS.md` to validate with lint/typecheck/tests.
 - `update` is set to `"disable"`: the image pins the version. To update,
-  change `OPENCODE_VERSION` in `.env` and run `ocbox --build`, or
+  change `OPENCODE_VERSION` in `ocbox.env` and run `ocbox --build`, or
   `ocbox --rebuild` if you are on `latest`.
 
 ## Rootless Docker
 
 With rootless Docker, the container's root maps to your host user and every
 other UID to subuids. In that case, to keep project files owned by you, set
-`OCBOX_HOST_UID=0` and `OCBOX_HOST_GID=0` in `.env` and run `ocbox --rebuild`.
+`OCBOX_HOST_UID=0` and `OCBOX_HOST_GID=0` in `ocbox.env` and run `ocbox --rebuild`.
 There is still no `sudo`, and the container's root is not root on your
 machine.
 

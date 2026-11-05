@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=rabbitmq` in `projects/<name>.env`, or `ocbox -s rabbitmq`.
+**Enable**: `OCBOX_SERVICES=rabbitmq` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s rabbitmq`.
 
 RabbitMQ message broker, for job queues and messaging between services.
 

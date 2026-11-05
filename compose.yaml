@@ -18,8 +18,11 @@ services:
     stdin_open: true
     tty: true
     working_dir: ${PROJECT_DIR:?Start the container with bin/ocbox}
+    # Your global settings and secrets, from your ocbox configuration directory.
     env_file:
-      - path: .env
+      - path: ${OCBOX_CONFIG_DIR:?Start the container with bin/ocbox}/ocbox.env
+        required: false
+      - path: ${OCBOX_CONFIG_DIR}/secrets.env
         required: false
     environment:
       TERM: ${TERM:-xterm-256color}
@@ -36,8 +39,10 @@ services:
       - ${PROJECT_DIR}:${PROJECT_DIR}
       # The box's own $HOME (auth, sessions, caches, mise...).
       - ocbox-home:/home/dev
-      # opencode's global config, versioned in this repo.
-      - ./config/opencode:/home/dev/.config/opencode
+      # Your opencode configuration (read-only); the entrypoint links it into
+      # ~/.config/opencode and merges your AGENTS.md with the box's own.
+      - ${OCBOX_CONFIG_DIR}/opencode:/run/ocbox/opencode:ro
+      - ./docker/AGENTS.md:/opt/ocbox/AGENTS.md:ro
     security_opt:
       - no-new-privileges:true
     cap_drop:

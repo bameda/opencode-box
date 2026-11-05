@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
 # Working image for OpenCode 2. It only sees what gets mounted into it
-# (the project, its own $HOME in a volume and ./config/opencode).
+# (the project, its own $HOME in a volume and your opencode configuration).
 FROM debian:trixie-slim
 
 # Host user's UID/GID, so files the agent creates in the project are owned

@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=ssh-target` in `projects/<name>.env`, or `ocbox -s ssh-target`.
+**Enable**: `OCBOX_SERVICES=ssh-target` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s ssh-target`.
 
 A disposable Debian machine for **testing Ansible playbooks** (or any SSH
 automation) without touching real infrastructure.

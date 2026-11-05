@@ -4,7 +4,7 @@ Part of the [service catalog](../../SERVICES.md). See
 [How services work](../../SERVICES.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=valkey` in `projects/<name>.env`, or `ocbox -s valkey`.
+**Enable**: `OCBOX_SERVICES=valkey` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s valkey`.
 
 Valkey, the open-source fork of Redis. It speaks the same protocol, so Redis
 clients and `redis-cli` work with it unchanged.

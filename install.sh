@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Symlink bin/ocbox into ~/.local/bin and create .env.
+# Symlink bin/ocbox into ~/.local/bin and create the configuration directory.
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
@@ -7,10 +7,7 @@ mkdir -p "$HOME/.local/bin"
 ln -sfn "$here/bin/ocbox" "$HOME/.local/bin/ocbox"
 echo "Linked: ~/.local/bin/ocbox -> $here/bin/ocbox"
 
-if [[ ! -f "$here/.env" ]]; then
-  cp "$here/.env.example" "$here/.env"
-  echo "Created .env from .env.example"
-fi
+"$here/bin/ocbox" --init
 
 if ! docker compose version >/dev/null 2>&1; then
   echo "WARNING: 'docker compose' not found. On CachyOS: sudo pacman -S docker docker-compose docker-buildx" >&2

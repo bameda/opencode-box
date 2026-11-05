@@ -23,6 +23,9 @@ explains how to use it. `ocbox --list` shows what is available.
 
 ## How services work
 
+Paths such as `projects/<name>.env` refer to your configuration directory,
+`~/.config/ocbox` (see the [README](README.md#your-configuration)).
+
 **Enable** services per project in `projects/<name>.env` (or one-off with
 `ocbox -s`):
 
@@ -40,7 +43,7 @@ app and the agent find them without configuration. Run `env` in
 beyond your machine.
 
 **Settings** (versions, credentials, ports) are changed through variables:
-in `.env` for every project, or in `projects/<name>.env` for one. Each
+in `ocbox.env` for every project, or in `projects/<name>.env` for one. Each
 section below lists them with their defaults.
 
 **Data** is per project: two projects using `postgres` get separate
@@ -86,6 +89,13 @@ and `README.md` (how to use it). The rules are few:
 This way you can add Keycloak, Elasticsearch/OpenSearch, Kafka, NATS, ClickHouse,
 Meilisearch, an API mock or whatever you need, and they become available to
 every project.
+
+For a service only you or your team use, create it in the `services/`
+directory of your configuration (`~/.config/ocbox/services/<name>/`) instead
+of the catalog: it works the same way, and a service there replaces a catalog
+service with the same name. Inside your own files, refer to other files in
+your configuration with `${OCBOX_CONFIG_DIR}`, since relative paths resolve
+against the opencode-box repository.
 
 For a service only one project needs, put it in `projects/<name>.yaml`
 instead (see `projects/example.yaml`).
