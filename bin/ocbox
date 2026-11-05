@@ -33,8 +33,9 @@ Options:
       --rebuild          Same, without cache (updates opencode on 'latest')
       --down             Stop and remove the project's services (keeps data)
       --purge            Like --down, and also delete the project's volumes
-      --init             Create the configuration directory from the examples
-                         (never overwrites existing files)
+      --init [GIT_URL]   Create the configuration directory: clone it from your
+                         private repo if GIT_URL is given, then add any missing
+                         file from the examples (never overwrites anything)
   -h, --help             Show this help
 
 Anything after "--" replaces the default command (opencode):
@@ -73,7 +74,14 @@ service_file() {
 }
 
 init_config() {
-  local created=0 src rel
+  local repo="${1:-}" created=0 src rel
+  if [[ -n "$repo" ]]; then
+    if [[ -e "$CONFIG_DIR" ]]; then
+      die "$CONFIG_DIR already exists; remove it or move it away to clone $repo"
+    fi
+    command -v git >/dev/null || die "git is not installed"
+    git clone "$repo" "$CONFIG_DIR"
+  fi
   mkdir -p "$CONFIG_DIR"
   while IFS= read -r -d '' src; do
     rel="${src#"$BOX_DIR/examples/config/"}"
@@ -120,7 +128,9 @@ while (($#)); do
   case "$1" in
     -s|--services) services="${2:?missing service list}"; shift 2 ;;
     -l|--list)     list_services; exit 0 ;;
-    --init)        init_config; exit 0 ;;
+    --init)
+      if [[ -n "${2:-}" && "$2" != -* ]]; then init_config "$2"; else init_config; fi
+      exit 0 ;;
     -p|--port)     ports+=("${2:?missing port}"); shift 2 ;;
     --git-rw)      cli_git_rw=1; shift ;;
     --serena)      cli_serena=1; shift ;;
