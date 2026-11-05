@@ -142,12 +142,13 @@ The settings files are loaded in this order, and the last one wins:
 `secrets.env`. All of them are also passed to the opencode container as
 environment variables.
 
-`ocbox --init` creates `projects/example/`, which uses every piece. To add a
-project, copy it and keep only what you need:
+The repository has [example projects](../examples/projects/README.md) for
+common cases (Ansible, a Python API, a Node.js app, a Clojure app) and one
+that uses every piece. To add a project, copy the closest one and keep only
+what you need:
 
 ```fish
-cd ~/.config/ocbox
-cp -r projects/example projects/my-app
+cp -r ~/src/opencode-box/examples/projects/python-api ~/.config/ocbox/projects/my-app
 ```
 
 Two details:

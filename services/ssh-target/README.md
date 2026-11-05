@@ -31,6 +31,9 @@ Values set in your inventory take precedence over these defaults.
 
 ## Setup
 
+The [`ansible` example project](../../examples/projects/ansible/) has all
+of this ready to copy.
+
 In `projects/<name>/project.env`:
 
 ```dotenv

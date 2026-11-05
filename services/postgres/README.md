@@ -51,8 +51,10 @@ services:
       - ${OCBOX_PROJECT_CONFIG}/initdb:/docker-entrypoint-initdb.d:ro
 ```
 
-**PostGIS or other images.** Swap the image in `projects/<name>/compose.yaml`, as in
-`projects/example/compose.yaml`. It must be based on PostgreSQL 18 or newer.
+**PostGIS or other images.** Swap the image in the project's
+`compose.yaml`, as in the
+[`reference`](../../examples/projects/reference/compose.yaml) example. It
+must be based on PostgreSQL 18 or newer.
 
 ## Major upgrades
 

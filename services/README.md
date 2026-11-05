@@ -101,6 +101,6 @@ The rules are few:
    ones. In the catalog, also add a row to the table above.
 
 This way you can add Keycloak, Elasticsearch/OpenSearch, Kafka, NATS,
-ClickHouse, Meilisearch, an API mock or whatever you need. Your
-configuration's `projects/example/services/elasticsearch/` is a complete
-example.
+ClickHouse, Meilisearch, an API mock or whatever you need. The
+[`reference`](../examples/projects/reference/services/elasticsearch/) example
+project has a complete one.

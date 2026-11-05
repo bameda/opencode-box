@@ -1,0 +1,10 @@
+# Extra variables for the app inside the box.
+services:
+  opencode:
+    environment:
+      # SQLAlchemy does not accept the postgres:// scheme of DATABASE_URL.
+      # Use the scheme of your driver: postgresql+psycopg (psycopg 3),
+      # postgresql+asyncpg, postgresql+psycopg2...
+      SQLALCHEMY_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/${POSTGRES_DB:-app}
+      # A separate database for the tests (create it once with: createdb app_test)
+      TEST_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/app_test

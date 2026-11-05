@@ -1,9 +1,10 @@
 # Projects
 
 One directory per project, named after the **project's directory**: for
-`~/src/my-app`, `projects/my-app/`. To add a project, copy `example/` and
-adapt it, or create the directory with only the files you need. All of them
-are optional:
+`~/src/my-app`, `projects/my-app/`. To add a project, copy one of the
+[example projects](https://github.com/bameda/opencode-box/tree/main/examples/projects)
+and adapt it, or create the directory with only the files you need. All of
+them are optional:
 
 ```
 projects/my-app/

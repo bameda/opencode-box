@@ -1,0 +1,18 @@
+# A second test host, ssh-target-db, for playbooks with several groups. It
+# shares the test key with ssh-target, so "ssh-target" must be in
+# OCBOX_SERVICES. Delete this file if one host is enough.
+services:
+  opencode:
+    depends_on:
+      ssh-target-db:
+        condition: service_healthy
+
+  ssh-target-db:
+    build:
+      context: ./services/ssh-target
+      args:
+        BASE_IMAGE: ${SSH_TARGET_BASE_IMAGE:-debian:trixie-slim}
+    environment:
+      KEY_OWNER_UID: ${HOST_UID:-1000}
+    volumes:
+      - ssh-target-keys:/keys

@@ -26,13 +26,13 @@ Before configuring anything, answer four questions:
 ## 2. Create its directory in your configuration
 
 Each project has a directory in your configuration, `~/.config/ocbox`, named
-after the **project's directory**: for `~/src/shop`, `projects/shop/`. Its
-settings go in `project.env`:
+after the **project's directory**: for `~/src/shop`, `projects/shop/`. Start
+from the closest [example project](../examples/projects/README.md), here
+the Node.js one, and edit its settings in `project.env`:
 
 ```fish
+cp -r ~/src/opencode-box/examples/projects/node-app ~/.config/ocbox/projects/shop
 cd ~/.config/ocbox
-mkdir projects/shop
-cp projects/example/project.env projects/shop/
 $EDITOR projects/shop/project.env
 ```
 
@@ -62,7 +62,8 @@ configuration directory.
 ## 3. (Optional) Everything else the project needs
 
 The project's directory can hold more than its settings. Add only what you
-need; `projects/example/` has a sample of each:
+need; the [`reference`](../examples/projects/reference/) example has a
+sample of each:
 
 - `secrets.env`, for secrets only this project uses;
 - `AGENTS.md`, with private instructions for the agent in this project;
