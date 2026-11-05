@@ -321,3 +321,7 @@ ocbox --rebuild                     # update the image and opencode
 docker volume ls | grep ocbox       # volumes (home + per-project DBs)
 docker volume rm ocbox-home         # full reset of the box's $HOME
 ```
+
+## License
+
+[MIT](LICENSE) © David Barragán Merino
