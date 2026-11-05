@@ -35,27 +35,30 @@ Anything after "--" replaces the default command (opencode):
   ocbox -- opencode --continue
   ocbox -s postgres -- psql
 
-To add any other image, copy services/_template.yaml to
-services/<name>.yaml. Per-project settings (out of the agent's reach):
+To add any other image, copy services/_template/ to services/<name>/.
+Per-project settings (out of the agent's reach):
   projects/<dir-name>.env    OCBOX_SERVICES, OCBOX_PORTS, OCBOX_GIT_RW, OCBOX_SERENA...
   projects/<dir-name>.yaml   compose override for that project only
 USAGE
 }
 
+# Each service is a directory services/<name>/ with a compose.yaml inside.
 available_services() {
-  local f
-  for f in "$SERVICES_DIR"/*.yaml; do
-    [[ -e "$f" ]] || continue
-    f="$(basename "$f" .yaml)"
-    [[ "$f" == _* ]] || printf '%s\n' "$f"
+  local d
+  for d in "$SERVICES_DIR"/*/; do
+    [[ -f "$d/compose.yaml" ]] || continue
+    d="$(basename "$d")"
+    [[ "$d" == _* ]] || printf '%s\n' "$d"
   done
 }
 
+service_file() { printf '%s/%s/compose.yaml' "$SERVICES_DIR" "$1"; }
+
 list_services() {
   local s desc
-  echo "Available services (services/*.yaml):"
+  echo "Available services (services/<name>/):"
   while read -r s; do
-    desc="$(sed -n '1s/^# *//p' "$SERVICES_DIR/$s.yaml")"
+    desc="$(sed -n '1s/^# *//p' "$(service_file "$s")")"
     printf '  %-12s %s\n' "$s" "$desc"
   done < <(available_services)
 }
@@ -151,7 +154,7 @@ IFS=',' read -ra _req <<<"$services"
 for s in "${_req[@]}"; do
   s="${s//[[:space:]]/}"
   [[ -n "$s" ]] || continue
-  if [[ "$s" == _* || ! -f "$SERVICES_DIR/$s.yaml" ]]; then
+  if [[ "$s" == _* || "$s" == */* || ! -f "$(service_file "$s")" ]]; then
     list_services >&2
     die "unknown service: '$s'"
   fi
@@ -161,11 +164,11 @@ done
 compose_files=(-f "$BOX_DIR/compose.yaml")
 if [[ "$action" == run ]]; then
   for s in "${selected[@]}"; do
-    compose_files+=(-f "$SERVICES_DIR/$s.yaml")
+    compose_files+=(-f "$(service_file "$s")")
   done
 else
   # --down/--purge load every fragment so all volumes are known.
-  while read -r s; do compose_files+=(-f "$SERVICES_DIR/$s.yaml"); done < <(available_services)
+  while read -r s; do compose_files+=(-f "$(service_file "$s")"); done < <(available_services)
 fi
 [[ -f "$proj_yaml" ]] && compose_files+=(-f "$proj_yaml")
 

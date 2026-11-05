@@ -1,7 +1,7 @@
 # MinIO (S3 storage) · minio:9000 · S3_ENDPOINT, AWS_* · console http://127.0.0.1:9001
 #
 # Note: MinIO stopped publishing updated community edition images in 2025.
-# It is fine for local development; for something maintained, copy this file
+# It is fine for local development; for something maintained, copy this directory
 # and swap the image for another S3-compatible one (SeaweedFS, Garage...).
 services:
   opencode:

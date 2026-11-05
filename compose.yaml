@@ -1,5 +1,5 @@
 # Base: just the OpenCode 2 container. Services (databases, caches, mail,
-# proxy...) are added from services/<name>.yaml with "ocbox -s".
+# proxy...) are added from services/<name>/compose.yaml with "ocbox -s".
 # Don't run this directly: use bin/ocbox.
 
 services:

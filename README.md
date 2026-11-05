@@ -13,8 +13,8 @@ ocbox -p 3000 --shell                 # bash inside the box, port 3000
 ```
 
 Auxiliary services (databases, caches, mail, queues, storage, proxy...) form a
-**pluggable catalog** in `services/`: one file per service, and adding a new
-image is a matter of copying a template. Optionally,
+**pluggable catalog** in `services/`: one directory per service, and adding a
+new image is a matter of copying a template. Optionally,
 [Serena](https://github.com/oraios/serena) gives the agent symbol-level code
 navigation and editing.
 
@@ -172,10 +172,10 @@ routes to other services, headers, etc.
 
 ### Adding any other image
 
-Copy `services/_template.yaml` to `services/<name>.yaml` and fill it in. The
-rules are few:
+Copy `services/_template/` to `services/<name>/` and fill in its
+`compose.yaml`. The rules are few:
 
-1. The service has the same name as the file; that will be its hostname.
+1. The service has the same name as the directory; that will be its hostname.
 2. It must be in the `depends_on` of `opencode`, which is what makes `ocbox`
    start it (with `service_healthy` if it has a healthcheck).
 3. Connection variables go in the `environment` of `opencode`.

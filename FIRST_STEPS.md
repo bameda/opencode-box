@@ -64,7 +64,7 @@ If you need something that is not in the catalog, or want to tweak a catalog
 service, create `projects/shop.yaml` from `projects/example.yaml`.
 
 If that service will be useful for other projects too, add it to the catalog
-instead, using `services/_template.yaml`.
+instead, by copying `services/_template/`.
 
 ## 4. Declare the language tools
 
