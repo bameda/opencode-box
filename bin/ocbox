@@ -112,7 +112,7 @@ list_services() {
     printf '  %-12s %s\n' "$s" "$desc"
   done < <(available_services)
   echo
-  echo "How to use each one: services/<name>/README.md (index: SERVICES.md)"
+  echo "How to use each one: services/<name>/README.md (index: services/README.md)"
 }
 
 services=""

@@ -10,7 +10,7 @@
 #   6. If you publish ports, bind them to 127.0.0.1 and use a variable, so
 #      they can be changed when two projects are open at the same time.
 #   7. Explain how to use it in the README.md next to this file, and add it
-#      to the catalog table in SERVICES.md.
+#      to the catalog table in services/README.md.
 
 services:
   opencode:

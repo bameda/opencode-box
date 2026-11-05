@@ -9,22 +9,22 @@ explains how to use it. `ocbox --list` shows what is available.
 
 | Service | What for | Inside the box | On your host |
 |---|---|---|---|
-| [`postgres`](services/postgres/README.md) | PostgreSQL database | `postgres:5432`, `DATABASE_URL`, `PG*` | |
-| [`mariadb`](services/mariadb/README.md) | MySQL-compatible database | `mariadb:3306`, `MYSQL_URL`, `MYSQL_*` | |
-| [`mongodb`](services/mongodb/README.md) | Document database | `mongodb:27017`, `MONGODB_URL` | |
-| [`redis`](services/redis/README.md) | Cache, sessions, queues | `redis:6379`, `REDIS_URL` | |
-| [`valkey`](services/valkey/README.md) | Open-source Redis fork | `valkey:6379`, `VALKEY_URL` | |
-| [`memcached`](services/memcached/README.md) | Key-value cache | `memcached:11211`, `MEMCACHED_SERVERS` | |
-| [`mailpit`](services/mailpit/README.md) | Catches outgoing email | `mailpit:1025`, `SMTP_HOST`, `SMTP_PORT` | inbox at `127.0.0.1:8025` |
-| [`minio`](services/minio/README.md) | S3-compatible storage | `minio:9000`, `S3_ENDPOINT`, `AWS_*` | console at `127.0.0.1:9001` |
-| [`rabbitmq`](services/rabbitmq/README.md) | Message broker | `rabbitmq:5672`, `AMQP_URL` | UI at `127.0.0.1:15672` |
-| [`caddy`](services/caddy/README.md) | Reverse proxy | `PROXY_URL` | `127.0.0.1:8080` |
-| [`ssh-target`](services/ssh-target/README.md) | Disposable host for Ansible tests | `ssh-target:22`, `SSH_TARGET_*`, `ANSIBLE_*` | |
+| [`postgres`](postgres/README.md) | PostgreSQL database | `postgres:5432`, `DATABASE_URL`, `PG*` | |
+| [`mariadb`](mariadb/README.md) | MySQL-compatible database | `mariadb:3306`, `MYSQL_URL`, `MYSQL_*` | |
+| [`mongodb`](mongodb/README.md) | Document database | `mongodb:27017`, `MONGODB_URL` | |
+| [`redis`](redis/README.md) | Cache, sessions, queues | `redis:6379`, `REDIS_URL` | |
+| [`valkey`](valkey/README.md) | Open-source Redis fork | `valkey:6379`, `VALKEY_URL` | |
+| [`memcached`](memcached/README.md) | Key-value cache | `memcached:11211`, `MEMCACHED_SERVERS` | |
+| [`mailpit`](mailpit/README.md) | Catches outgoing email | `mailpit:1025`, `SMTP_HOST`, `SMTP_PORT` | inbox at `127.0.0.1:8025` |
+| [`minio`](minio/README.md) | S3-compatible storage | `minio:9000`, `S3_ENDPOINT`, `AWS_*` | console at `127.0.0.1:9001` |
+| [`rabbitmq`](rabbitmq/README.md) | Message broker | `rabbitmq:5672`, `AMQP_URL` | UI at `127.0.0.1:15672` |
+| [`caddy`](caddy/README.md) | Reverse proxy | `PROXY_URL` | `127.0.0.1:8080` |
+| [`ssh-target`](ssh-target/README.md) | Disposable host for Ansible tests | `ssh-target:22`, `SSH_TARGET_*`, `ANSIBLE_*` | |
 
 ## How services work
 
 Paths such as `projects/<name>.env` refer to your configuration directory,
-`~/.config/ocbox` (see the [README](README.md#your-configuration)).
+`~/.config/ocbox` (see [Configuration](../docs/configuration.md)).
 
 **Enable** services per project in `projects/<name>.env` (or one-off with
 `ocbox -s`):

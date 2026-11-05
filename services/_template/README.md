@@ -1,7 +1,7 @@
 # Service name (`myservice`)
 
-Part of the [service catalog](../../SERVICES.md). See
-[How services work](../../SERVICES.md#how-services-work) for what is common
+Part of the [service catalog](../README.md). See
+[How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
 **Enable**: `OCBOX_SERVICES=myservice` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s myservice`.

@@ -1,7 +1,7 @@
 # MongoDB (`mongodb`)
 
-Part of the [service catalog](../../SERVICES.md). See
-[How services work](../../SERVICES.md#how-services-work) for what is common
+Part of the [service catalog](../README.md). See
+[How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
 **Enable**: `OCBOX_SERVICES=mongodb` in `~/.config/ocbox/projects/<name>.env`, or `ocbox -s mongodb`.

@@ -29,3 +29,6 @@ meant to be its own private git repository.
 
 The agent cannot read or modify this directory: `ocbox` refuses to mount a
 project that contains it or is inside it.
+
+Full documentation:
+[Configuration](https://github.com/bameda/opencode-box/blob/main/docs/configuration.md).

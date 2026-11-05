@@ -4,26 +4,19 @@ This guide walks through adding a project to opencode-box, using a concrete
 example: a Node app in `~/src/shop` that uses PostgreSQL and Redis and runs a
 dev server on port 5173.
 
-## 0. One-time setup
+## 0. Before you start
 
-Skip this if you have already done it.
-
-```fish
-cd ~/src/opencode-box
-./install.sh                 # also creates your configuration in ~/.config/ocbox
-ocbox --build ~/src/shop     # builds the image
-```
-
-Inside opencode, run `/connect` to authenticate with your provider. The login
-is stored in the shared `ocbox-home` volume, so it works for every project.
+You need opencode-box installed and its image built, and to have logged in
+with `/connect` once: see [Installation](installation.md). The login is
+shared by every project.
 
 ## 1. Decide what the project needs
 
 Before configuring anything, answer four questions:
 
-- **Which services does it use?** Check the catalog with `ocbox --list`;
-  [SERVICES.md](SERVICES.md) links to a guide for each one explaining how
-  your app connects to it.
+- **Which services does it use?** Check the catalog with `ocbox --list`.
+  The [service catalog](../services/README.md) links to a guide for each one
+  explaining how your app connects to it.
 - **Is there a port you want to open in your browser?** For example, the dev
   server's.
 - **Do you want Serena?** It pays off in medium and large repos.
@@ -53,8 +46,9 @@ If a service of this project publishes a web UI, such as Mailpit, and you
 will have another project open at the same time, change its port here (for
 example, `MAILPIT_UI_PORT=18025`).
 
-If your configuration is a git repository (recommended, see "Your
-configuration" in the README), commit the file there:
+If you keep your configuration in a
+[private repository](configuration.md#keeping-it-in-a-private-repository)
+(recommended), commit the file there:
 
 ```fish
 git add projects/shop.env
@@ -68,10 +62,11 @@ configuration directory.
 
 If you need something that is not in the catalog, or want to tweak a catalog
 service, create `projects/shop.yaml` from `projects/example.yaml`, also in
-`~/.config/ocbox`.
+`~/.config/ocbox`. See [per-project settings](configuration.md#per-project-settings).
 
-If that service will be useful for other projects too, add it to the catalog
-instead, by copying `services/_template/`.
+If that service will be useful for other projects too, make it a service of
+its own instead: see
+[adding your own service](../services/README.md#adding-your-own-service).
 
 ## 4. Declare the language tools
 
@@ -96,7 +91,7 @@ Two things to check:
 - **Dev server.** It must listen on `0.0.0.0`. With Vite, for example:
   `vite --host 0.0.0.0`.
 
-The global `AGENTS.md` already explains both to the agent, so you can simply
+The box's instructions already explain both to the agent, so you can simply
 ask it to do this.
 
 ## 6. First start and checks
@@ -141,7 +136,8 @@ git commit -am "feat: ..."       # and commit it yourself
 ocbox --down                     # when done, stop PostgreSQL and Redis
 ```
 
-The database keeps its data between sessions, even after `--down`.
+The database keeps its data between sessions, even after `--down`. See
+[Usage](usage.md) for every option.
 
 ## 9. Removing a project
 
@@ -151,8 +147,5 @@ ocbox --purge                    # stops the services and deletes their data
 rm ~/.config/ocbox/projects/shop.*
 ```
 
-## Note on project names
-
-Settings are looked up by directory name. Two projects with the same name in
-different paths share `projects/<name>.env`. Their data and services, on the
-other hand, are independent, because they are keyed by the full path.
+If you keep your configuration in a repository, commit the removal there
+too.
