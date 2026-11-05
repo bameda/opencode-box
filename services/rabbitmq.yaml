@@ -9,6 +9,9 @@ services:
 
   rabbitmq:
     image: rabbitmq:${RABBITMQ_VERSION:-4}-management-alpine
+    # RabbitMQ keeps its data under a directory named after the node, which
+    # includes the hostname: pin it so data survives container recreation.
+    hostname: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-dev}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-dev}
