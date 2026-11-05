@@ -1,0 +1,5 @@
+# Whatever opencode may generate here (plugins, dependencies, etc.)
+node_modules/
+package.json
+package-lock.json
+bun.lock*

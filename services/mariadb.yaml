@@ -1,0 +1,33 @@
+# MariaDB (MySQL-compatible) · mariadb:3306 · MYSQL_URL, MYSQL_HOST/USER/PASSWORD/DATABASE
+services:
+  opencode:
+    environment:
+      MYSQL_HOST: mariadb
+      MYSQL_PORT: "3306"
+      MYSQL_USER: ${MARIADB_USER:-dev}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD:-dev}
+      MYSQL_DATABASE: ${MARIADB_DATABASE:-app}
+      MYSQL_URL: mysql://${MARIADB_USER:-dev}:${MARIADB_PASSWORD:-dev}@mariadb:3306/${MARIADB_DATABASE:-app}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  mariadb:
+    image: mariadb:${MARIADB_VERSION:-11}
+    environment:
+      MARIADB_USER: ${MARIADB_USER:-dev}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-dev}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-app}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  mariadb-data:

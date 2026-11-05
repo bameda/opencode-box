@@ -1,0 +1,51 @@
+# Base: just the OpenCode 2 container. Services (databases, caches, mail,
+# proxy...) are added from services/<name>.yaml with "ocbox -s".
+# Don't run this directly: use bin/ocbox.
+
+services:
+  opencode:
+    image: ocbox:latest
+    build:
+      context: .
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+        OPENCODE_VERSION: ${OPENCODE_VERSION:-latest}
+        INSTALL_SERENA: ${INSTALL_SERENA:-1}
+        SERENA_VERSION: ${SERENA_VERSION:-2.1.0}
+    init: true
+    stdin_open: true
+    tty: true
+    working_dir: ${PROJECT_DIR:?Start the container with bin/ocbox}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TERM: ${TERM:-xterm-256color}
+      COLORTERM: ${COLORTERM:-truecolor}
+      MISE_TRUSTED_CONFIG_PATHS: ${PROJECT_DIR}
+      # Active services, so the agent knows what is available.
+      OCBOX_SERVICES: ${OCBOX_SERVICES:-}
+      # Serena (semantic MCP); controlled by bin/ocbox.
+      OCBOX_SERENA: ${OCBOX_SERENA:-0}
+      OCBOX_SERENA_DASHBOARD: ${OCBOX_SERENA_DASHBOARD:-0}
+      OCBOX_SERENA_CODEMODE: ${OCBOX_SERENA_CODEMODE:-0}
+    volumes:
+      # The only writable host path: the project (at the same path).
+      - ${PROJECT_DIR}:${PROJECT_DIR}
+      # The box's own $HOME (auth, sessions, caches, mise...).
+      - ocbox-home:/home/dev
+      # opencode's global config, versioned in this repo.
+      - ./config/opencode:/home/dev/.config/opencode
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 4096
+
+volumes:
+  # Shared across projects; created by bin/ocbox. External so that
+  # "ocbox --purge" never deletes your login or caches.
+  ocbox-home:
+    name: ocbox-home
+    external: true

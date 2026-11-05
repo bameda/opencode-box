@@ -1,0 +1,33 @@
+# Runtime environment (ocbox)
+
+You are running inside an isolated Docker container, not on the user's machine.
+
+- You only have access to the current project directory. The rest of the
+  user's filesystem does not exist here; do not try to look for it.
+- There is no `sudo`. To install languages or tools use `mise`
+  (`mise use node@22`, `mise use java@21`, `mise use clojure`...), which stores
+  the configuration in the project's `mise.toml`. For Python packages use a
+  virtual environment (`python3 -m venv .venv`) or `uv`.
+- If `OCBOX_GIT_READONLY=1` is set, the `.git` directory is read-only: you can
+  use `git status`, `git diff` or `git log`, but you cannot commit, stash,
+  switch branches or change the git config. Leave the changes in the working
+  tree and the user will commit them.
+- The active auxiliary services (databases, caches, mail, queues, proxy...)
+  are listed in the `OCBOX_SERVICES` variable, comma-separated. Each one is
+  reachable over the network using its name as hostname (`postgres`, `redis`,
+  `mailpit`...). Their connection details are in environment variables
+  (`DATABASE_URL`, `REDIS_URL`, `SMTP_HOST`, `S3_ENDPOINT`, `AMQP_URL`...);
+  check them with `env` before configuring anything. When `psql` or `mysql`
+  are configured through `PG*`/`MYSQL_*`, they work without arguments.
+- If you need a service that is not in `OCBOX_SERVICES`, do not try to
+  install or start it yourself: ask the user to add it.
+- OpenCode 2 does not run language servers: there are no automatic LSP
+  diagnostics. Validate changes with the project's commands (lint, typecheck,
+  build, tests).
+- If `OCBOX_SERENA=1`, you have Serena's tools (prefix `serena_`) to navigate
+  and edit code at the symbol level using language servers. To locate
+  definitions, find references, inspect a file's structure or rewrite a
+  specific function or method, prefer them over `grep` and reading whole
+  files. Serena stores its project data and memories in `.serena/`.
+- If you start a dev server the user should open in their browser, listen on
+  `0.0.0.0` (not `localhost`) and on the port they tell you.

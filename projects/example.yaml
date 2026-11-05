@@ -1,0 +1,35 @@
+# Copy to projects/<directory-name>.yaml
+# Merged with compose.yaml and the selected services. Use it to:
+#   - add services only this project uses, without putting them in the catalog;
+#   - tweak a catalog service (another image, more variables...).
+
+services:
+  opencode:
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # Service specific to this project
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  # Tweak a catalog service: PostGIS instead of plain PostgreSQL.
+  # (Only use this if "postgres" is in OCBOX_SERVICES.)
+  postgres:
+    image: postgis/postgis:16-3.5-alpine
+
+volumes:
+  es-data:

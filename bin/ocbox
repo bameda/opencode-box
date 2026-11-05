@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# ocbox — run OpenCode 2 in a container that can only see the given project,
+# plus whatever auxiliary services (DB, cache, mail, proxy...) you ask for.
+set -euo pipefail
+
+BOX_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd -P)"
+SERVICES_DIR="$BOX_DIR/services"
+
+die()  { printf 'ocbox: %s\n' "$*" >&2; exit 1; }
+info() { printf '[ocbox] %s\n' "$*" >&2; }
+
+usage() {
+  cat <<'USAGE'
+Usage: ocbox [options] [PROJECT_DIR] [-- COMMAND...]
+
+Run opencode in a container with access to PROJECT_DIR only (default: $PWD).
+
+Options:
+  -s, --services LIST    Comma-separated services from the catalog.
+                         E.g. -s postgres,redis,mailpit   (see --list)
+  -l, --list             List the services available in services/
+  -p, --port PORT        Publish a port of the opencode container on
+                         127.0.0.1 (repeatable). E.g. -p 3000
+      --git-rw           Mount .git read-write (read-only by default)
+      --serena           Enable Serena (semantic code navigation/editing MCP)
+      --no-serena        Disable it even if the project enables it
+      --shell            Open bash in the container instead of opencode
+      --build            Rebuild the image (with --pull) before starting
+      --rebuild          Same, without cache (updates opencode on 'latest')
+      --down             Stop and remove the project's services (keeps data)
+      --purge            Like --down, and also delete the project's volumes
+  -h, --help             Show this help
+
+Anything after "--" replaces the default command (opencode):
+  ocbox -- opencode --continue
+  ocbox -s postgres -- psql
+
+To add any other image, copy services/_template.yaml to
+services/<name>.yaml. Per-project settings (out of the agent's reach):
+  projects/<dir-name>.env    OCBOX_SERVICES, OCBOX_PORTS, OCBOX_GIT_RW, OCBOX_SERENA...
+  projects/<dir-name>.yaml   compose override for that project only
+USAGE
+}
+
+available_services() {
+  local f
+  for f in "$SERVICES_DIR"/*.yaml; do
+    [[ -e "$f" ]] || continue
+    f="$(basename "$f" .yaml)"
+    [[ "$f" == _* ]] || printf '%s\n' "$f"
+  done
+}
+
+list_services() {
+  local s desc
+  echo "Available services (services/*.yaml):"
+  while read -r s; do
+    desc="$(sed -n '1s/^# *//p' "$SERVICES_DIR/$s.yaml")"
+    printf '  %-12s %s\n' "$s" "$desc"
+  done < <(available_services)
+}
+
+services=""
+ports=()
+cli_git_rw=0
+cli_serena=""
+action=run
+build=""
+project=""
+cmd=()
+
+while (($#)); do
+  case "$1" in
+    -s|--services) services="${2:?missing service list}"; shift 2 ;;
+    -l|--list)     list_services; exit 0 ;;
+    -p|--port)     ports+=("${2:?missing port}"); shift 2 ;;
+    --git-rw)      cli_git_rw=1; shift ;;
+    --serena)      cli_serena=1; shift ;;
+    --no-serena)   cli_serena=0; shift ;;
+    --shell)       cmd=(bash); shift ;;
+    --build)       build=pull; shift ;;
+    --rebuild)     build=nocache; shift ;;
+    --down)        action=down; shift ;;
+    --purge)       action=purge; shift ;;
+    -h|--help)     usage; exit 0 ;;
+    --)            shift; cmd=("$@"); break ;;
+    -*)            die "unknown option: $1 (see --help)" ;;
+    *)
+      [[ -z "$project" ]] || die "only one project directory is allowed"
+      project="$1"; shift ;;
+  esac
+done
+
+command -v docker >/dev/null || die "docker is not installed"
+docker compose version >/dev/null 2>&1 || die "the 'docker compose' plugin (v2) is missing"
+
+# --- Project -------------------------------------------------------------------
+project="${project:-$PWD}"
+[[ -d "$project" ]] || die "directory does not exist: $project"
+PROJECT_DIR="$(cd "$project" && pwd -P)"
+HOME_REAL="$(cd "$HOME" && pwd -P)"
+
+# Guards against accidentally mounting more than intended.
+[[ "$PROJECT_DIR" != "/" ]] || die "refusing to mount the whole /"
+[[ "$PROJECT_DIR" != "$HOME_REAL" ]] || die "refusing to mount your whole \$HOME"
+case "$HOME_REAL/" in "$PROJECT_DIR"/*)
+  die "$PROJECT_DIR contains your \$HOME; pick a specific project directory" ;;
+esac
+case "$BOX_DIR/" in "$PROJECT_DIR"/*)
+  die "the project contains the ocbox repo; the agent could modify its own sandbox" ;;
+esac
+case "$PROJECT_DIR/" in "$BOX_DIR"/*)
+  die "the project is inside the ocbox repo" ;;
+esac
+
+name="$(basename "$PROJECT_DIR")"
+slug="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' \
+        | sed -E 's/-+/-/g; s/^-//; s/-$//')"
+hash="$(printf '%s' "$PROJECT_DIR" | sha1sum | cut -c1-8)"
+compose_project="ocbox-${slug:-project}-${hash}"
+
+# --- Per-project settings (they live in this repo, not in the project) --------
+# Everything is exported, so these files can also override service versions,
+# ports or credentials (POSTGRES_VERSION, MAILPIT_UI_PORT...).
+# Order: the repo's .env (global), then projects/<name>.env (wins).
+proj_env="$BOX_DIR/projects/$name.env"
+proj_yaml="$BOX_DIR/projects/$name.yaml"
+if [[ -f "$BOX_DIR/.env" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$BOX_DIR/.env"
+  set +a
+fi
+if [[ -f "$proj_env" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$proj_env"
+  set +a
+fi
+services="${services:-${OCBOX_SERVICES:-}}"
+if ((${#ports[@]} == 0)) && [[ -n "${OCBOX_PORTS:-}" ]]; then
+  read -ra ports <<<"$OCBOX_PORTS"
+fi
+git_rw=$(( cli_git_rw || ${OCBOX_GIT_RW:-0} ))
+OCBOX_SERENA="${cli_serena:-${OCBOX_SERENA:-0}}"; export OCBOX_SERENA
+OCBOX_SERENA_DASHBOARD="${OCBOX_SERENA_DASHBOARD:-0}"; export OCBOX_SERENA_DASHBOARD
+
+# --- Selected services ----------------------------------------------------------
+selected=()
+IFS=',' read -ra _req <<<"$services"
+for s in "${_req[@]}"; do
+  s="${s//[[:space:]]/}"
+  [[ -n "$s" ]] || continue
+  if [[ "$s" == _* || ! -f "$SERVICES_DIR/$s.yaml" ]]; then
+    list_services >&2
+    die "unknown service: '$s'"
+  fi
+  [[ " ${selected[*]} " == *" $s "* ]] || selected+=("$s")
+done
+
+compose_files=(-f "$BOX_DIR/compose.yaml")
+if [[ "$action" == run ]]; then
+  for s in "${selected[@]}"; do
+    compose_files+=(-f "$SERVICES_DIR/$s.yaml")
+  done
+else
+  # --down/--purge load every fragment so all volumes are known.
+  while read -r s; do compose_files+=(-f "$SERVICES_DIR/$s.yaml"); done < <(available_services)
+fi
+[[ -f "$proj_yaml" ]] && compose_files+=(-f "$proj_yaml")
+
+export PROJECT_DIR
+OCBOX_SERVICES="$(IFS=','; echo "${selected[*]}")"; export OCBOX_SERVICES
+# OCBOX_HOST_UID/GID override the container user (e.g. 0 for rootless Docker).
+HOST_UID="${OCBOX_HOST_UID:-$(id -u)}"; export HOST_UID
+HOST_GID="${OCBOX_HOST_GID:-$(id -g)}"; export HOST_GID
+
+dc() {
+  docker compose --project-directory "$BOX_DIR" -p "$compose_project" \
+    "${compose_files[@]}" "$@"
+}
+
+case "$action" in
+  down)  dc down --remove-orphans; exit 0 ;;
+  purge) dc down --remove-orphans --volumes; exit 0 ;;
+esac
+
+docker volume inspect ocbox-home >/dev/null 2>&1 \
+  || docker volume create ocbox-home >/dev/null
+
+case "$build" in
+  pull)    dc build --pull opencode ;;
+  nocache) dc build --pull --no-cache opencode ;;
+esac
+
+run_args=(--rm)
+[[ -t 0 && -t 1 ]] || run_args+=(-T)
+
+for p in "${ports[@]}"; do
+  if [[ "$p" == *:* ]]; then
+    run_args+=(-p "$p")
+  else
+    run_args+=(-p "127.0.0.1:$p:$p")
+  fi
+done
+
+# Serena dashboard (optional), published on 127.0.0.1 only.
+if [[ "$OCBOX_SERENA" == "1" && "$OCBOX_SERENA_DASHBOARD" == "1" ]]; then
+  run_args+=(-p "127.0.0.1:${OCBOX_SERENA_DASHBOARD_PORT:-24282}:24282")
+fi
+
+# Read-only .git: prevents the agent from planting hooks or .git/config
+# settings (core.fsmonitor, core.hooksPath...) that would run on your host.
+if ((git_rw == 0)) && [[ -d "$PROJECT_DIR/.git" ]]; then
+  run_args+=(-v "$PROJECT_DIR/.git:$PROJECT_DIR/.git:ro" -e OCBOX_GIT_READONLY=1)
+fi
+
+((${#cmd[@]})) || cmd=(opencode)
+
+info "project: $PROJECT_DIR  ·  services: ${OCBOX_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $OCBOX_SERENA == 1 ]] && echo yes || echo no )"
+dc run "${run_args[@]}" opencode "${cmd[@]}"

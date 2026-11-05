@@ -1,0 +1,32 @@
+# Short description (this first line is what "ocbox --list" shows)
+#
+# Template for adding any image to the catalog:
+#   1. Copy this file to services/<name>.yaml (without the leading "_").
+#   2. The service must have the same name as the file: that is its hostname.
+#   3. Add it to the depends_on of "opencode" so ocbox starts it.
+#   4. Put the connection variables in the environment of "opencode".
+#   5. Volumes without "name:" are per project.
+#   6. If you publish ports, bind them to 127.0.0.1 and use a variable, so
+#      they can be changed when two projects are open at the same time.
+
+services:
+  opencode:
+    environment:
+      MYSERVICE_URL: http://myservice:8080
+    depends_on:
+      myservice:
+        condition: service_started   # or service_healthy if it has a healthcheck
+
+  myservice:
+    image: vendor/image:${MYSERVICE_VERSION:-latest}
+    environment:
+      SOMETHING: value
+    volumes:
+      - myservice-data:/data
+    # ports:
+    #   - "127.0.0.1:${MYSERVICE_PORT:-8080}:8080"
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  myservice-data:

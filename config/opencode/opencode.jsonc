@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // The image decides the version (OPENCODE_VERSION in .env + ocbox --build).
+  "update": "disable"
+
+  // Your default model, agents, permissions, global MCPs, etc. go here.
+  // Serena is NOT defined here: the entrypoint adds it to /etc/opencode only
+  // for projects with OCBOX_SERENA=1.
+}

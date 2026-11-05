@@ -1,0 +1,14 @@
+# Memcached · memcached:11211 · MEMCACHED_SERVERS
+services:
+  opencode:
+    environment:
+      MEMCACHED_SERVERS: memcached:11211
+    depends_on:
+      memcached:
+        condition: service_started
+
+  memcached:
+    image: memcached:${MEMCACHED_VERSION:-1}-alpine
+    command: ["memcached", "-m", "${MEMCACHED_MEMORY_MB:-128}"]
+    security_opt:
+      - no-new-privileges:true

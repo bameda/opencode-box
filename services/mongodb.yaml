@@ -1,0 +1,26 @@
+# MongoDB · mongodb:27017 · MONGODB_URL
+services:
+  opencode:
+    environment:
+      MONGODB_URL: mongodb://${MONGO_USER:-dev}:${MONGO_PASSWORD:-dev}@mongodb:27017/?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  mongodb:
+    image: mongo:${MONGO_VERSION:-8}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-dev}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-dev}
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  mongodb-data:

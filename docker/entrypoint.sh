@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log() { printf '[ocbox] %s\n' "$*" >&2; }
+
+# If the image lacks your terminal's terminfo (e.g. xterm-ghostty), fall
+# back to a generic one so the TUI renders correctly.
+if ! infocmp "${TERM:-dumb}" >/dev/null 2>&1; then
+  export TERM=xterm-256color
+fi
+
+# Install the tools the project declares (mise.toml, .tool-versions...).
+if [[ "${OCBOX_MISE_INSTALL:-1}" == "1" ]]; then
+  for f in mise.toml .mise.toml mise.local.toml .mise/config.toml .tool-versions; do
+    if [[ -f "$f" ]]; then
+      log "Installing project tools with mise ($f)..."
+      mise install || log "WARNING: 'mise install' failed; continuing anyway."
+      break
+    fi
+  done
+fi
+
+# --- Serena ---------------------------------------------------------------------
+# OpenCode's system config (/etc/opencode) is regenerated on every start, so
+# Serena only shows up in projects that enable it, and anything the agent
+# might write there disappears with the container.
+system_config=/etc/opencode/opencode.json
+serena_enabled=0
+if [[ "${OCBOX_SERENA:-0}" == "1" ]]; then
+  if command -v serena >/dev/null 2>&1; then
+    serena_enabled=1
+  else
+    log "WARNING: OCBOX_SERENA=1 but the image was built without Serena (INSTALL_SERENA=0)."
+  fi
+fi
+
+if ((serena_enabled)); then
+  cfg="$SERENA_HOME/serena_config.yml"
+  if [[ ! -f "$cfg" ]]; then
+    mkdir -p "$SERENA_HOME"
+    cp /opt/serena/serena_config.base.yml "$cfg"
+  fi
+  # There is no browser inside the box: the dashboard only makes sense when
+  # its port is published (OCBOX_SERENA_DASHBOARD=1, handled by bin/ocbox).
+  if [[ "${OCBOX_SERENA_DASHBOARD:-0}" == "1" ]]; then
+    dash=True; listen=0.0.0.0
+  else
+    dash=False; listen=127.0.0.1
+  fi
+  sed -i -E \
+    -e "s/^web_dashboard:.*/web_dashboard: ${dash}/" \
+    -e 's/^web_dashboard_open_on_launch:.*/web_dashboard_open_on_launch: False/' \
+    -e "s/^web_dashboard_listen_address:.*/web_dashboard_listen_address: ${listen}/" \
+    "$cfg"
+
+  codemode=false
+  [[ "${OCBOX_SERENA_CODEMODE:-0}" == "1" ]] && codemode=true
+  jq -n --arg project "$PWD" --argjson codemode "$codemode" '{
+    "$schema": "https://opencode.ai/config.json",
+    mcp: { servers: { serena: {
+      type: "local",
+      command: ["serena", "start-mcp-server",
+                "--context", "ide",
+                "--project", $project,
+                "--open-web-dashboard", "false"],
+      codemode: $codemode,
+      timeout: { startup: 120000 }
+    } } }
+  }' > "$system_config"
+  log "Serena enabled for $PWD"
+else
+  # shellcheck disable=SC2016  # $schema is literal
+  printf '{ "$schema": "https://opencode.ai/config.json" }\n' > "$system_config"
+fi
+
+exec "$@"
