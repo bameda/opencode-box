@@ -25,7 +25,7 @@ Options:
       --serena           Enable Serena (semantic code navigation/editing MCP)
       --no-serena        Disable it even if the project enables it
       --shell            Open bash in the container instead of opencode
-      --build            Rebuild the image (with --pull) before starting
+      --build            Rebuild the images (with --pull) before starting
       --rebuild          Same, without cache (updates opencode on 'latest')
       --down             Stop and remove the project's services (keeps data)
       --purge            Like --down, and also delete the project's volumes
@@ -189,8 +189,9 @@ docker volume inspect ocbox-home >/dev/null 2>&1 \
   || docker volume create ocbox-home >/dev/null
 
 case "$build" in
-  pull)    dc build --pull opencode ;;
-  nocache) dc build --pull --no-cache opencode ;;
+  # Builds opencode plus any selected service with its own image (ssh-target).
+  pull)    dc build --pull ;;
+  nocache) dc build --pull --no-cache ;;
 esac
 
 run_args=(--rm)

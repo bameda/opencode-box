@@ -29,5 +29,13 @@ You are running inside an isolated Docker container, not on the user's machine.
   definitions, find references, inspect a file's structure or rewrite a
   specific function or method, prefer them over `grep` and reading whole
   files. Serena stores its project data and memories in `.serena/`.
+- If `ssh-target` is in `OCBOX_SERVICES`, there is a disposable Debian host
+  for testing Ansible playbooks (or any SSH automation): host `ssh-target`,
+  user `ansible` with passwordless sudo, key in `$SSH_TARGET_KEY`. The
+  `ANSIBLE_*` variables already point ansible at that user and key. Use it to
+  run playbooks for real and to check idempotence (a second run must report
+  no changes). Never run playbooks against any other host: real
+  infrastructure is the user's job, from outside the box. The target has no
+  systemd, so tasks that manage services through it will fail there.
 - If you start a dev server the user should open in their browser, listen on
   `0.0.0.0` (not `localhost`) and on the port they tell you.

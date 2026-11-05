@@ -132,6 +132,7 @@ the next session; stop them with `ocbox --down`.
 | `minio` | S3 | `minio:9000` | `S3_ENDPOINT`, `AWS_*` | `127.0.0.1:9001` |
 | `rabbitmq` | queues | `rabbitmq:5672` | `AMQP_URL` | `127.0.0.1:15672` |
 | `caddy` | reverse proxy | — | `PROXY_URL` | `127.0.0.1:8080` |
+| `ssh-target` | test SSH host | `ssh-target:22` | `SSH_TARGET_*`, `ANSIBLE_*` | |
 
 Each service is reachable from the box by its name and exposes its
 connection details as environment variables in the opencode container. The
@@ -229,6 +230,108 @@ already tells the agent it is in a box, that `.git` is read-only and how to
 find the services. Since it is in the repo, it is versioned.
 
 Automatic updates are disabled (see "OpenCode 2").
+
+## Testing Ansible playbooks
+
+The box works well for Ansible projects: the agent writes roles and
+playbooks and validates them with `ansible-lint` and `--syntax-check`. The
+`ssh-target` service adds a disposable machine to **run them for real**
+without touching your infrastructure.
+
+What it provides:
+
+- A Debian container reachable as `ssh-target`, with SSH, Python and a user
+  `ansible` with passwordless sudo, so `become: true` works.
+- A test key pair generated per project and mounted read-only in the box. The
+  key only opens these targets; your real SSH keys never enter the box.
+- `ANSIBLE_PRIVATE_KEY_FILE`, `ANSIBLE_REMOTE_USER` and
+  `ANSIBLE_HOST_KEY_CHECKING` preset inside the box, so a minimal inventory is
+  enough.
+
+### Setup
+
+In `projects/<name>.env`:
+
+```dotenv
+OCBOX_SERVICES=ssh-target
+```
+
+In the project's `mise.toml`, so ansible is installed in the box:
+
+```toml
+[tools]
+python = "3.13"
+"pipx:ansible" = "latest"
+"pipx:ansible-lint" = "latest"
+```
+
+And a test inventory in the project, for example `inventories/test/hosts.ini`:
+
+```ini
+[web]
+ssh-target
+```
+
+The first `ocbox` builds the target's image; after that it starts in a
+couple of seconds.
+
+### Usage
+
+Ask the agent to test the playbook against the test inventory, or do it
+yourself from `ocbox --shell`:
+
+```bash
+ansible -i inventories/test all -m ping
+ansible-playbook -i inventories/test site.yml
+ansible-playbook -i inventories/test site.yml   # 2nd run: changed=0
+ssh -i "$SSH_TARGET_KEY" ansible@ssh-target    # look around by hand
+```
+
+The second run is the idempotence check: a well-written playbook must
+report no changes. To start again from a clean machine, run `ocbox --down`:
+the target's filesystem is not persisted.
+
+Once it works, apply it to your real infrastructure **from the host**,
+first with `--check --diff`. The vault password and the real SSH keys stay
+outside the box.
+
+### Several targets or another distribution
+
+To test against Ubuntu or another Debian release, set the base image in
+`projects/<name>.env` (it must use apt) and rebuild with `ocbox --build`:
+
+```dotenv
+SSH_TARGET_BASE_IMAGE=ubuntu:24.04
+```
+
+For several hosts (for example, a web and a db group), add more targets in
+`projects/<name>.yaml`; they share the same test key:
+
+```yaml
+services:
+  opencode:
+    depends_on:
+      ssh-target-2:
+        condition: service_healthy
+  ssh-target-2:
+    build:
+      context: ./services/ssh-target
+      args:
+        BASE_IMAGE: ${SSH_TARGET_BASE_IMAGE:-debian:trixie-slim}
+    environment:
+      KEY_OWNER_UID: ${HOST_UID:-1000}
+    volumes:
+      - ssh-target-keys:/keys
+```
+
+### Limitations
+
+- There is no systemd in the targets, so tasks such as
+  `systemd: name=nginx state=started enabled=true` fail there. Validate those
+  parts with `--check` against a real or virtual machine.
+- Only Debian/Ubuntu bases are supported, since the image is built with apt.
+- Molecule's Docker driver is not usable: it needs the Docker socket, which
+  the box never gets.
 
 ## Serena
 

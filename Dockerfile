@@ -30,7 +30,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # are installed per project with mise.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl wget gnupg \
-      git less nano vim-tiny tree file procps \
+      git less nano vim-tiny tree file procps openssh-client \
       ripgrep fd-find jq \
       unzip zip xz-utils bzip2 zstd \
       build-essential pkg-config libssl-dev \
