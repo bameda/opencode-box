@@ -61,6 +61,8 @@ list_services() {
     desc="$(sed -n '1s/^# *//p' "$(service_file "$s")")"
     printf '  %-12s %s\n' "$s" "$desc"
   done < <(available_services)
+  echo
+  echo "How to use each one: services/<name>/README.md (index: SERVICES.md)"
 }
 
 services=""

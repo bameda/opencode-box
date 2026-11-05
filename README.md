@@ -118,21 +118,23 @@ the next session; stop them with `ocbox --down`.
 
 ## Services
 
-`ocbox --list` shows the catalog. Included out of the box:
+`ocbox --list` shows the catalog. Included out of the box (see
+**[SERVICES.md](SERVICES.md)** and each service's own README for how to use
+it):
 
 | Service | Type | Hostname:port | Variables in the box | UI on the host |
 |---|---|---|---|---|
-| `postgres` | DB | `postgres:5432` | `DATABASE_URL`, `PG*` | |
-| `mariadb` | DB (MySQL) | `mariadb:3306` | `MYSQL_URL`, `MYSQL_*` | |
-| `mongodb` | document DB | `mongodb:27017` | `MONGODB_URL` | |
-| `redis` | cache | `redis:6379` | `REDIS_URL` | |
-| `valkey` | cache | `valkey:6379` | `VALKEY_URL` | |
-| `memcached` | cache | `memcached:11211` | `MEMCACHED_SERVERS` | |
-| `mailpit` | mail (SMTP) | `mailpit:1025` | `SMTP_HOST`, `SMTP_PORT` | `127.0.0.1:8025` |
-| `minio` | S3 | `minio:9000` | `S3_ENDPOINT`, `AWS_*` | `127.0.0.1:9001` |
-| `rabbitmq` | queues | `rabbitmq:5672` | `AMQP_URL` | `127.0.0.1:15672` |
-| `caddy` | reverse proxy | — | `PROXY_URL` | `127.0.0.1:8080` |
-| `ssh-target` | test SSH host | `ssh-target:22` | `SSH_TARGET_*`, `ANSIBLE_*` | |
+| [`postgres`](services/postgres/README.md) | DB | `postgres:5432` | `DATABASE_URL`, `PG*` | |
+| [`mariadb`](services/mariadb/README.md) | DB (MySQL) | `mariadb:3306` | `MYSQL_URL`, `MYSQL_*` | |
+| [`mongodb`](services/mongodb/README.md) | document DB | `mongodb:27017` | `MONGODB_URL` | |
+| [`redis`](services/redis/README.md) | cache | `redis:6379` | `REDIS_URL` | |
+| [`valkey`](services/valkey/README.md) | cache | `valkey:6379` | `VALKEY_URL` | |
+| [`memcached`](services/memcached/README.md) | cache | `memcached:11211` | `MEMCACHED_SERVERS` | |
+| [`mailpit`](services/mailpit/README.md) | mail (SMTP) | `mailpit:1025` | `SMTP_HOST`, `SMTP_PORT` | `127.0.0.1:8025` |
+| [`minio`](services/minio/README.md) | S3 | `minio:9000` | `S3_ENDPOINT`, `AWS_*` | `127.0.0.1:9001` |
+| [`rabbitmq`](services/rabbitmq/README.md) | queues | `rabbitmq:5672` | `AMQP_URL` | `127.0.0.1:15672` |
+| [`caddy`](services/caddy/README.md) | reverse proxy | — | `PROXY_URL` | `127.0.0.1:8080` |
+| [`ssh-target`](services/ssh-target/README.md) | test SSH host | `ssh-target:22` | `SSH_TARGET_*`, `ANSIBLE_*` | |
 
 Each service is reachable from the box by its name and exposes its
 connection details as environment variables in the opencode container. The
@@ -140,54 +142,16 @@ connection details as environment variables in the opencode container. The
 explains this to the agent. Credentials default to `dev`/`dev` (everything is
 local).
 
-PostgreSQL defaults to 18, the latest stable major, and requires 18 or newer
-(see below for major upgrades).
+PostgreSQL defaults to 18, the latest stable major, and requires 18 or newer.
+To test Ansible playbooks, `ssh-target` provides a disposable machine. To add
+any other image, see "Adding your own service" in SERVICES.md.
 
 Versions, credentials and ports are changed through variables: for all
 projects in `.env`, or for one in `projects/<name>.env`. If you open two
 projects at once with services that publish a UI, change the port in one of
 them (`MAILPIT_UI_PORT=18025`, for example).
 
-### PostgreSQL major upgrades
-
-The major version is pinned (`POSTGRES_VERSION=18`) rather than following
-`latest`, because each major keeps its data in its own subdirectory: when you
-move to a new major, the project starts with an **empty database**. For a
-development DB the simplest option is to re-run your migrations and seeds. To
-keep the data, dump it first:
-
-```fish
-cd ~/src/my-project
-ocbox -s postgres -- pg_dumpall -f .pg-upgrade.sql   # with the old version
-# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in .env, then:
-ocbox --build -s postgres -- psql -f .pg-upgrade.sql
-rm .pg-upgrade.sql
-```
-
-The old major's files stay in the volume until you run `ocbox --purge`.
-
-`caddy` proxies to the dev server the agent starts (`opencode:3000` by
-default, changed with `PROXY_UPSTREAM`). Edit `services/caddy/Caddyfile` for
-routes to other services, headers, etc.
-
-### Adding any other image
-
-Copy `services/_template/` to `services/<name>/` and fill in its
-`compose.yaml`. The rules are few:
-
-1. The service has the same name as the directory; that will be its hostname.
-2. It must be in the `depends_on` of `opencode`, which is what makes `ocbox`
-   start it (with `service_healthy` if it has a healthcheck).
-3. Connection variables go in the `environment` of `opencode`.
-4. Volumes without `name:` are per project. Ports are published on
-   `127.0.0.1` through a variable, so they can be changed.
-5. The first comment line is the description shown by `--list`.
-
-This way you can add Keycloak, Elasticsearch/OpenSearch, Kafka, NATS,
-ClickHouse, Meilisearch, an API mock or whatever you need, and they become
-available to every project.
-
-### Per-project settings
+## Per-project settings
 
 In `projects/` you can keep, by project directory name:
 
@@ -200,7 +164,7 @@ See `projects/example.*`. They live here and not inside the project on
 purpose: if `ocbox` read a compose file from the project, the agent could
 write one that mounted `/` and escaped.
 
-### Languages and tools
+## Languages and tools
 
 The image ships the basics (git, ripgrep, fd, jq, build-essential, python3,
 node, uv, the PostgreSQL 18 client tools from the official PGDG repository,
@@ -222,7 +186,7 @@ Tools are kept in the `ocbox-home` volume, so they are downloaded only once.
 If you always need something that is not available through mise, add it to
 the `apt-get install` in the `Dockerfile` and run `ocbox --rebuild`.
 
-### opencode configuration
+## opencode configuration
 
 `config/opencode/` is mounted as `~/.config/opencode`. That is where
 `opencode.jsonc`, agents, commands and the global `AGENTS.md` go; the latter
@@ -230,108 +194,6 @@ already tells the agent it is in a box, that `.git` is read-only and how to
 find the services. Since it is in the repo, it is versioned.
 
 Automatic updates are disabled (see "OpenCode 2").
-
-## Testing Ansible playbooks
-
-The box works well for Ansible projects: the agent writes roles and
-playbooks and validates them with `ansible-lint` and `--syntax-check`. The
-`ssh-target` service adds a disposable machine to **run them for real**
-without touching your infrastructure.
-
-What it provides:
-
-- A Debian container reachable as `ssh-target`, with SSH, Python and a user
-  `ansible` with passwordless sudo, so `become: true` works.
-- A test key pair generated per project and mounted read-only in the box. The
-  key only opens these targets; your real SSH keys never enter the box.
-- `ANSIBLE_PRIVATE_KEY_FILE`, `ANSIBLE_REMOTE_USER` and
-  `ANSIBLE_HOST_KEY_CHECKING` preset inside the box, so a minimal inventory is
-  enough.
-
-### Setup
-
-In `projects/<name>.env`:
-
-```dotenv
-OCBOX_SERVICES=ssh-target
-```
-
-In the project's `mise.toml`, so ansible is installed in the box:
-
-```toml
-[tools]
-python = "3.13"
-"pipx:ansible" = "latest"
-"pipx:ansible-lint" = "latest"
-```
-
-And a test inventory in the project, for example `inventories/test/hosts.ini`:
-
-```ini
-[web]
-ssh-target
-```
-
-The first `ocbox` builds the target's image; after that it starts in a
-couple of seconds.
-
-### Usage
-
-Ask the agent to test the playbook against the test inventory, or do it
-yourself from `ocbox --shell`:
-
-```bash
-ansible -i inventories/test all -m ping
-ansible-playbook -i inventories/test site.yml
-ansible-playbook -i inventories/test site.yml   # 2nd run: changed=0
-ssh -i "$SSH_TARGET_KEY" ansible@ssh-target    # look around by hand
-```
-
-The second run is the idempotence check: a well-written playbook must
-report no changes. To start again from a clean machine, run `ocbox --down`:
-the target's filesystem is not persisted.
-
-Once it works, apply it to your real infrastructure **from the host**,
-first with `--check --diff`. The vault password and the real SSH keys stay
-outside the box.
-
-### Several targets or another distribution
-
-To test against Ubuntu or another Debian release, set the base image in
-`projects/<name>.env` (it must use apt) and rebuild with `ocbox --build`:
-
-```dotenv
-SSH_TARGET_BASE_IMAGE=ubuntu:24.04
-```
-
-For several hosts (for example, a web and a db group), add more targets in
-`projects/<name>.yaml`; they share the same test key:
-
-```yaml
-services:
-  opencode:
-    depends_on:
-      ssh-target-2:
-        condition: service_healthy
-  ssh-target-2:
-    build:
-      context: ./services/ssh-target
-      args:
-        BASE_IMAGE: ${SSH_TARGET_BASE_IMAGE:-debian:trixie-slim}
-    environment:
-      KEY_OWNER_UID: ${HOST_UID:-1000}
-    volumes:
-      - ssh-target-keys:/keys
-```
-
-### Limitations
-
-- There is no systemd in the targets, so tasks such as
-  `systemd: name=nginx state=started enabled=true` fail there. Validate those
-  parts with `--check` against a real or virtual machine.
-- Only Debian/Ubuntu bases are supported, since the image is built with apt.
-- Molecule's Docker driver is not usable: it needs the Docker socket, which
-  the box never gets.
 
 ## Serena
 

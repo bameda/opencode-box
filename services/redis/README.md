@@ -1,0 +1,34 @@
+# Redis (`redis`)
+
+Part of the [service catalog](../../SERVICES.md). See
+[How services work](../../SERVICES.md#how-services-work) for what is common
+to every service: enabling, data, `--down`/`--purge` and host access.
+
+**Enable**: `OCBOX_SERVICES=redis` in `projects/<name>.env`, or `ocbox -s redis`.
+
+Redis in-memory store, for caches, sessions, queues and rate limiting.
+
+**Inside the box**
+
+| Variable | Value |
+|---|---|
+| `REDIS_URL` | `redis://redis:6379/0` |
+
+**Explore it**
+
+```bash
+redis-cli -u "$REDIS_URL" ping
+redis-cli -u "$REDIS_URL" --scan --pattern 'session:*'
+redis-cli -u "$REDIS_URL" monitor        # watch commands live
+redis-cli -u "$REDIS_URL" flushall       # empty it
+```
+
+**Data**: not persisted. It survives between sessions while the container
+runs, and is lost on `ocbox --down`, which is usually what you want for a
+cache.
+
+**Settings**
+
+| Variable | Default |
+|---|---|
+| `REDIS_VERSION` | `7` |

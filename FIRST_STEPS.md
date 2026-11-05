@@ -21,7 +21,9 @@ is stored in the shared `ocbox-home` volume, so it works for every project.
 
 Before configuring anything, answer four questions:
 
-- **Which services does it use?** Check the catalog with `ocbox --list`.
+- **Which services does it use?** Check the catalog with `ocbox --list`;
+  [SERVICES.md](SERVICES.md) links to a guide for each one explaining how
+  your app connects to it.
 - **Is there a port you want to open in your browser?** For example, the dev
   server's.
 - **Do you want Serena?** It pays off in medium and large repos.

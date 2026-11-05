@@ -1,0 +1,33 @@
+# Memcached (`memcached`)
+
+Part of the [service catalog](../../SERVICES.md). See
+[How services work](../../SERVICES.md#how-services-work) for what is common
+to every service: enabling, data, `--down`/`--purge` and host access.
+
+**Enable**: `OCBOX_SERVICES=memcached` in `projects/<name>.env`, or `ocbox -s memcached`.
+
+Memcached, a simple key-value cache.
+
+**Inside the box**
+
+| Variable | Value |
+|---|---|
+| `MEMCACHED_SERVERS` | `memcached:11211` |
+
+**Explore it.** There is no dedicated client in the image; Python is enough
+for a quick check:
+
+```bash
+python3 -c "import socket; s=socket.create_connection(('memcached',11211)); s.sendall(b'stats\r\n'); print(s.recv(4096).decode())"
+```
+
+Send `flush_all` instead of `stats` to empty it.
+
+**Data**: not persisted.
+
+**Settings**
+
+| Variable | Default |
+|---|---|
+| `MEMCACHED_VERSION` | `1` |
+| `MEMCACHED_MEMORY_MB` | `128` |
