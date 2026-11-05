@@ -1,6 +1,6 @@
 # My ocbox configuration
 
-Personal configuration for [opencode-box](https://github.com/<owner>/opencode-box):
+Personal configuration for [opencode-box](https://github.com/bameda/opencode-box):
 the settings of each project, global settings and my opencode configuration.
 It lives in `~/.config/ocbox` (or wherever `OCBOX_CONFIG_DIR` points) and is
 meant to be its own private git repository.

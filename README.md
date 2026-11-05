@@ -60,21 +60,87 @@ mise and caches (npm, maven, cargo...).
   something there (a `.bashrc`, a cache) that affects another project's
   session. If you need full separation, use another volume.
 
-## Requirements (CachyOS)
+## Requirements
 
-```fish
-sudo pacman -S docker docker-compose docker-buildx
+- Linux with **Docker Engine** and the **Docker Compose plugin ≥ 2.24**.
+- **git**, to clone the repository.
+- Your user in the `docker` group (or [rootless Docker](#rootless-docker)).
+
+All scripts are bash with a shebang, so they work the same from fish, zsh or
+any other shell.
+
+### Arch Linux, CachyOS, Manjaro, EndeavourOS
+
+```bash
+sudo pacman -S --needed docker docker-compose docker-buildx git
 sudo systemctl enable --now docker.service
-sudo usermod -aG docker $USER   # log out and back in
 ```
 
-Docker Compose ≥ 2.24 is required. All scripts are bash with a shebang, so
-they work the same from fish.
+### Debian and Ubuntu
+
+The Docker packages in the distribution repositories (`docker.io`,
+`docker-compose`...) can be too old, so use Docker's official repository.
+This block works on both, since it reads the distribution and release from
+`/etc/os-release`. Run it in **bash** (from fish, type `bash` first):
+
+```bash
+# Remove unofficial packages that conflict with Docker's own
+sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc 2>/dev/null | cut -f1)
+
+# Add Docker's repository
+sudo apt update
+sudo apt install -y ca-certificates curl git
+. /etc/os-release
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL "https://download.docker.com/linux/$ID/gpg" -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/$ID
+Suites: ${UBUNTU_CODENAME:-$VERSION_CODENAME}
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+# Install Docker Engine and the Compose plugin
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+On derivatives such as Linux Mint or Pop!_OS, `$ID` is not `ubuntu`:
+replace `$ID` with `ubuntu` in the two URLs, and
+`${UBUNTU_CODENAME:-$VERSION_CODENAME}` with the Ubuntu release it is based
+on (for example `noble`).
+
+### Other distributions
+
+Follow [Docker's installation guide](https://docs.docker.com/engine/install/)
+and make sure the Compose plugin is installed.
+
+### After installing (every distribution)
+
+Let your user run Docker without `sudo`, then **log out and back in** for it
+to take effect:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Check that everything works:
+
+```bash
+docker compose version          # must be 2.24 or newer
+docker run --rm hello-world
+```
+
+Being in the `docker` group is equivalent to having root access on the host
+(see "What it does NOT protect"); rootless Docker avoids that.
 
 ## Installation
 
 ```fish
-git clone git@github.com:<owner>/opencode-box.git ~/src/opencode-box
+git clone https://github.com/bameda/opencode-box.git ~/src/opencode-box
 cd ~/src/opencode-box
 ./install.sh            # links ~/.local/bin/ocbox and creates ~/.config/ocbox
 ocbox --build ~/src/my-project
