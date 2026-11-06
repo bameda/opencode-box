@@ -24,7 +24,7 @@ Options:
   -s, --services LIST    Comma-separated services from the catalog.
                          E.g. -s postgres,redis,mailpit   (see --list)
   -l, --list             List the services available to the project
-  -p, --port PORT        Publish a port of the opencode container on
+  -p, --port PORT        Publish a port of the box on
                          127.0.0.1 (repeatable). E.g. -p 3000
       --git-rw           Mount .git read-write (read-only by default)
       --serena           Enable Serena (semantic code navigation/editing MCP)
@@ -323,4 +323,4 @@ fi
 ((${#cmd[@]})) || cmd=(opencode)
 
 info "project: $PROJECT_DIR  ·  services: ${OCBOX_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $OCBOX_SERENA == 1 ]] && echo yes || echo no )"
-dc run "${run_args[@]}" opencode "${cmd[@]}"
+dc run "${run_args[@]}" box "${cmd[@]}"

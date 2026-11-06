@@ -1,6 +1,6 @@
 # Mailpit (test SMTP server) · mailpit:1025 · SMTP_HOST/SMTP_PORT · UI http://127.0.0.1:8025
 services:
-  opencode:
+  box:
     environment:
       SMTP_HOST: mailpit
       SMTP_PORT: "1025"

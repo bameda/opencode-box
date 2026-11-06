@@ -1,6 +1,6 @@
 # Extra variables for the app inside the box.
 services:
-  opencode:
+  box:
     environment:
       # SQLAlchemy does not accept the postgres:// scheme of DATABASE_URL.
       # Use the scheme of your driver: postgresql+psycopg (psycopg 3),

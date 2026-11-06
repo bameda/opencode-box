@@ -1,6 +1,6 @@
 # MariaDB (MySQL-compatible) · mariadb:3306 · MYSQL_URL, MYSQL_HOST/USER/PASSWORD/DATABASE
 services:
-  opencode:
+  box:
     environment:
       MYSQL_HOST: mariadb
       MYSQL_PORT: "3306"

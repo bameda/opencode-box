@@ -3,13 +3,13 @@
 # A throwaway Debian machine the agent can run playbooks against, so they can
 # be tested without touching real infrastructure. Access is key-based only,
 # with a test key pair generated per project and shared through a volume
-# (mounted read-only in the opencode container at /run/ssh-target).
+# (mounted read-only in the box at /run/ssh-target).
 #
 # Its filesystem is not persisted: "ocbox --down" resets it to a clean state.
 # No systemd inside, so tasks that manage services with systemd won't work.
 # See "Testing Ansible playbooks" in the README.
 services:
-  opencode:
+  box:
     environment:
       SSH_TARGET_HOST: ssh-target
       SSH_TARGET_USER: ansible

@@ -1,6 +1,6 @@
 # Memcached · memcached:11211 · MEMCACHED_SERVERS
 services:
-  opencode:
+  box:
     environment:
       MEMCACHED_SERVERS: memcached:11211
     depends_on:

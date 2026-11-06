@@ -3,7 +3,7 @@
 # Don't run this directly: use bin/ocbox.
 
 services:
-  opencode:
+  box:
     image: ocbox:latest
     build:
       context: .

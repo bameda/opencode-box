@@ -2,7 +2,7 @@
 #
 # A service only this project needs: same layout as the catalog's services.
 services:
-  opencode:
+  box:
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
     depends_on:

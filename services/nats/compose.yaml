@@ -1,6 +1,6 @@
 # NATS (messaging, with JetStream) · nats:4222 · NATS_URL
 services:
-  opencode:
+  box:
     environment:
       NATS_URL: nats://nats:4222
       NATS_MONITOR_URL: http://nats:8222

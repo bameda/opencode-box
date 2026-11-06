@@ -8,7 +8,7 @@
 # major uses its own subdirectory. Re-run your migrations/seeds, or move the
 # data over (see "PostgreSQL major upgrades" in the README).
 services:
-  opencode:
+  box:
     environment:
       PGHOST: postgres
       PGPORT: "5432"

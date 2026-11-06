@@ -1,6 +1,6 @@
 # MongoDB · mongodb:27017 · MONGODB_URL
 services:
-  opencode:
+  box:
     environment:
       MONGODB_URL: mongodb://${MONGO_USER:-dev}:${MONGO_PASSWORD:-dev}@mongodb:27017/?authSource=admin
     depends_on:

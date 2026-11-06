@@ -4,7 +4,7 @@
 # and helm work against it, and Pods are simulated. It needs no privileges,
 # unlike kind or k3s, which would give the agent a way out of the box.
 services:
-  opencode:
+  box:
     environment:
       KUBECONFIG: /run/ocbox/kwok/kubeconfig
     volumes:

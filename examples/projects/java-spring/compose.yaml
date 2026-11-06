@@ -1,5 +1,5 @@
 services:
-  opencode:
+  box:
     environment:
       # Spring Boot properties as environment variables.
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-app}

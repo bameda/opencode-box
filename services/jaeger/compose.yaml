@@ -1,6 +1,6 @@
 # Jaeger (OpenTelemetry traces) · OTLP on jaeger:4317/4318 · OTEL_EXPORTER_OTLP_ENDPOINT · UI http://127.0.0.1:16686
 services:
-  opencode:
+  box:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf

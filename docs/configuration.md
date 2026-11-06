@@ -94,7 +94,7 @@ Keep the repository **private**: it lists your projects and their settings.
   `ocbox.env` and has permissions `600`. Not needed if you log in with
   `/connect`.
 
-Both are also passed as environment variables to the opencode container.
+Both are also passed as environment variables to the box.
 Each one documents its own options in comments.
 
 ## Per-project settings
@@ -139,7 +139,7 @@ projects/my-app/
 
 The settings files are loaded in this order, and the last one wins:
 `ocbox.env`, `secrets.env`, the project's `project.env`, the project's
-`secrets.env`. All of them are also passed to the opencode container as
+`secrets.env`. All of them are also passed to the box as
 environment variables.
 
 The repository has [example projects](../examples/projects/README.md) for

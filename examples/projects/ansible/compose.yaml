@@ -2,7 +2,7 @@
 # shares the test key with ssh-target, so "ssh-target" must be in
 # OCBOX_SERVICES. Delete this file if one host is enough.
 services:
-  opencode:
+  box:
     depends_on:
       ssh-target-db:
         condition: service_healthy

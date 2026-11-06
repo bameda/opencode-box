@@ -4,7 +4,7 @@
 # It is fine for local development; for something maintained, copy this directory
 # and swap the image for another S3-compatible one (SeaweedFS, Garage...).
 services:
-  opencode:
+  box:
     environment:
       S3_ENDPOINT: http://minio:9000
       AWS_ENDPOINT_URL: http://minio:9000

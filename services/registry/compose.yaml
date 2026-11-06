@@ -1,6 +1,6 @@
 # OCI registry · registry:5000 · OCI_REGISTRY · also on 127.0.0.1:5000
 services:
-  opencode:
+  box:
     environment:
       OCI_REGISTRY: registry:5000
     depends_on:

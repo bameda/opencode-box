@@ -4,8 +4,8 @@
 #   1. Copy this directory to services/<name>/ (without the leading "_").
 #   2. The service must have the same name as the directory: that is its
 #      hostname.
-#   3. Add it to the depends_on of "opencode" so ocbox starts it.
-#   4. Put the connection variables in the environment of "opencode".
+#   3. Add it to the depends_on of "box" so ocbox starts it.
+#   4. Put the connection variables in the environment of "box".
 #   5. Volumes without "name:" are per project.
 #   6. If you publish ports, bind them to 127.0.0.1 and use a variable, so
 #      they can be changed when two projects are open at the same time.
@@ -13,7 +13,7 @@
 #      to the catalog table in services/README.md.
 
 services:
-  opencode:
+  box:
     environment:
       MYSERVICE_URL: http://myservice:8080
     depends_on:

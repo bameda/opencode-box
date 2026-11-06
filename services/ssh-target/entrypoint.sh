@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepares the test key pair (shared with the opencode container through a
+# Prepares the test key pair (shared with the box through a
 # volume) and starts sshd in the foreground.
 set -euo pipefail
 
@@ -15,7 +15,7 @@ flock 9
 if [[ ! -f "$keys/id_ed25519" ]]; then
   ssh-keygen -q -t ed25519 -N '' -C ocbox-ssh-target -f "$keys/id_ed25519"
 fi
-# The private key must belong to the opencode container user, or ssh refuses it.
+# The private key must belong to the box user, or ssh refuses it.
 chown "$owner" "$keys/id_ed25519" "$keys/id_ed25519.pub"
 chmod 600 "$keys/id_ed25519"
 chmod 644 "$keys/id_ed25519.pub"

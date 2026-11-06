@@ -1,6 +1,6 @@
 # Redis · redis:6379 · REDIS_URL
 services:
-  opencode:
+  box:
     environment:
       REDIS_URL: redis://redis:6379/0
     depends_on:

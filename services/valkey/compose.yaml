@@ -1,6 +1,6 @@
 # Valkey (open-source Redis fork) · valkey:6379 · VALKEY_URL
 services:
-  opencode:
+  box:
     environment:
       VALKEY_URL: redis://valkey:6379/0
     depends_on:

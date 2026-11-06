@@ -1,6 +1,6 @@
 # WireMock (mock external HTTP APIs) · http://wiremock:8080 · WIREMOCK_URL
 services:
-  opencode:
+  box:
     environment:
       WIREMOCK_URL: http://wiremock:8080
     depends_on:

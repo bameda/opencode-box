@@ -1,5 +1,5 @@
 services:
-  opencode:
+  box:
     environment:
       # Build in the box's volume, apart from the project's target/: the box
       # and the host use different toolchains and would keep invalidating

@@ -41,7 +41,7 @@ OCBOX_SERVICES=postgres,redis,mailpit
 
 **Each service runs in its own container**, from its official image, and is
 reachable from the box by its name (`postgres`, `redis`...). Its connection
-details are set as environment variables in the opencode container, so your
+details are set as environment variables in the box, so your
 app and the agent find them without configuration. Run `env` in
 `ocbox --shell` to see them all.
 
@@ -94,9 +94,9 @@ the catalog. `ocbox --list` marks them as `[project]` or `[yours]`.
 The rules are few:
 
 1. The service has the same name as its directory; that is its hostname.
-2. It must be in the `depends_on` of `opencode`, which is what makes `ocbox`
+2. It must be in the `depends_on` of `box`, which is what makes `ocbox`
    start it (with `service_healthy` if it has a healthcheck).
-3. Connection variables go in the `environment` of `opencode`.
+3. Connection variables go in the `environment` of `box`.
 4. Volumes without `name:` are per project. Ports are published on
    `127.0.0.1` through a variable, so they can be changed.
 5. The first comment line is the description shown by `ocbox --list`.

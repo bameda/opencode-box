@@ -1,6 +1,6 @@
 # Extra variables for the app inside the box.
 services:
-  opencode:
+  box:
     environment:
       # JDBC form of the database URL, for next.jdbc and similar.
       JDBC_DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-app}?user=${POSTGRES_USER:-dev}&password=${POSTGRES_PASSWORD:-dev}
