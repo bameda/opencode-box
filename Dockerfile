@@ -27,7 +27,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8
 
 # Base tools. Specific languages (node, python, java, clojure, rust, go...)
-# are installed per project with mise.
+# are installed per project with mise. The -dev libraries let mise compile
+# Ruby and let native extensions build (pg, mysql2, psych...).
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl wget gnupg \
       git less nano vim-tiny tree file procps openssh-client \
@@ -36,7 +37,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       build-essential pkg-config libssl-dev \
       python3 python3-venv python3-pip \
       nodejs npm \
-      mariadb-client mariadb-client-compat redis-tools sqlite3 \
+      mariadb-client mariadb-client-compat redis-tools sqlite3 kcat \
+      libyaml-dev zlib1g-dev libffi-dev libgmp-dev libreadline-dev \
+      libmariadb-dev \
       ncurses-term \
     && ln -s /usr/bin/fdfind /usr/local/bin/fd \
     && rm -rf /var/lib/apt/lists/*
@@ -49,7 +52,8 @@ RUN install -d /usr/share/postgresql-common/pgdg \
     && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
          > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
-    && apt-get install -y --no-install-recommends "postgresql-client-${POSTGRES_CLIENT_VERSION}" \
+    && apt-get install -y --no-install-recommends \
+         "postgresql-client-${POSTGRES_CLIENT_VERSION}" libpq-dev \
     && rm -rf /var/lib/apt/lists/* \
     && psql --version
 
