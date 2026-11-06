@@ -65,6 +65,7 @@ roke -p 5173                     # publish the dev server on 127.0.0.1:5173
 roke --shell                     # bash inside the box
 roke --list                      # available agents and services
 roke --settings                  # this project's settings and allowed destinations
+roke --urls                      # where the app and the services are: URLs, ports, variables
 roke --down                      # stop the project's services (keeps data)
 roke --help                      # every option
 ```

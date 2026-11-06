@@ -48,6 +48,10 @@ details are set as environment variables in the box, so your
 app and the agent find them without configuration. Run `env` in
 `roke --shell` to see them all.
 
+**`roke --urls`** shows, for the current project, the address and the
+variables of each service it uses, and the URLs of their web UIs on your
+host, with your own settings applied.
+
 **Credentials** default to `dev`/`dev`: everything is local and never exposed
 beyond your machine.
 

@@ -51,6 +51,7 @@ Access (this time; ROKE_GIT_RW and ROKE_SERENA to keep them)
 Information
   -l, --list             The available agents and services
       --settings         This project's settings and allowed destinations
+      --urls             How to reach the project's services and ports
   -h, --help             This help
 
 Maintenance
@@ -187,6 +188,7 @@ while (($#)); do
     -s|--services) services="${2:?missing service list}"; shift 2 ;;
     -l|--list)     action=list; shift ;;
     --settings)    action=settings; shift ;;
+    --urls)        action=urls; shift ;;
     --update)
       [[ -d "$BOX_DIR/.git" ]] || die "$BOX_DIR is not a git clone; reinstall roke to update it"
       info "updating $BOX_DIR"
@@ -238,7 +240,7 @@ name="$(basename "$PROJECT_DIR")"
 PROJECT_CONFIG="$CONFIG_DIR/projects/$name"
 PROJECT_SERVICES_DIR="$PROJECT_CONFIG/services"
 
-if [[ "$action" == run || "$action" == down || "$action" == purge ]]; then
+if [[ "$action" == run || "$action" == down || "$action" == purge || "$action" == urls ]]; then
   command -v docker >/dev/null || die "docker is not installed"
   docker compose version >/dev/null 2>&1 || die "the 'docker compose' plugin (v2) is missing"
 fi
@@ -411,7 +413,7 @@ for s in "${_req[@]}"; do
 done
 
 compose_files=(-f "$BOX_DIR/compose.yaml")
-if [[ "$action" == run ]]; then
+if [[ "$action" == run || "$action" == urls ]]; then
   for s in "${selected[@]}"; do
     compose_files+=(-f "$(service_file "$s")")
   done
@@ -505,7 +507,7 @@ done
 if [[ "$ROKE_SERENA" == "1" && "$ROKE_SERENA_DASHBOARD" == "1" ]]; then
   publish+=("127.0.0.1:${ROKE_SERENA_DASHBOARD_PORT:-24282}:24282")
 fi
-if ((${#publish[@]})) && [[ "$action" == run ]]; then
+if ((${#publish[@]})) && [[ "$action" == run || "$action" == urls ]]; then
   runtime_dir="${XDG_RUNTIME_DIR:-/tmp}/roke"
   mkdir -p "$runtime_dir"
   ports_file="$runtime_dir/$compose_project.ports.yaml"
@@ -532,6 +534,104 @@ dc() {
 }
 
 case "$action" in
+  urls)
+    # The resolved compose configuration says where everything is; each
+    # service's variables are told apart by comparing the configuration with
+    # and without it. It is formatted inside the box's image, which has
+    # Python, so nothing else is needed on the host.
+    docker image inspect roke:latest >/dev/null 2>&1 \
+      || die "the box's image is not built yet: run roke --build first"
+    base_files=(-f "$BOX_DIR/compose.yaml")
+    [[ -n "${ports_file:-}" ]] && base_files+=(-f "$ports_file")
+    config_json() {
+      docker compose --project-directory "$BOX_DIR" -p "$compose_project" "$@" config --format json 2>/dev/null
+    }
+    running=false
+    [[ -n "$(dc ps --status running --quiet gateway 2>/dev/null)" ]] && running=true
+    read -r -d '' urls_py <<'PY' || true
+import json, re, sys
+
+d = json.load(sys.stdin)
+full = d["full"]["services"]
+box_env = full["box"].get("environment") or {}
+base_env = d["base"]["services"]["box"].get("environment") or {}
+gateway = full.get("gateway", {})
+forwards = {}
+for key, value in (gateway.get("environment") or {}).items():
+    if key.startswith("ROKE_FORWARD_") and value:
+        port, target = value.split(None, 1)
+        forwards[str(port)] = target
+
+state = "running" if d["running"] else "not running: start it with roke"
+print(f"{d['project']} ({state})")
+labels = list(d["services"]) + ["app", "serena"] + [t.split(":")[0] for t in forwards.values()]
+col = max(12, *(len(x) for x in labels)) + 1
+
+print("\nOpen from your browser")
+rows = []
+for p in gateway.get("ports") or []:
+    host, published, target = p.get("host_ip") or "", p.get("published"), str(p.get("target"))
+    url = f"http://127.0.0.1:{published}"
+    note = "" if host == "127.0.0.1" else "(also reachable from your network)"
+    if target in forwards:
+        label = forwards[target].split(":")[0]
+    elif target == "24282":
+        label, url = "serena", url + "/dashboard/"
+    else:
+        label, note = "app", f"(box port {target}) {note}".strip()
+    rows.append((label, url, note))
+if not rows:
+    print("  nothing published: roke -p PORT for the app; services publish their UIs")
+for label, url, note in sorted(rows):
+    print(f"  {label:<{col}}{url} {note}".rstrip())
+
+def wrap(items, indent=2 + col, width=78):
+    line = ""
+    for item in items:
+        if line and indent + len(line) + 1 + len(item) > width:
+            print(" " * indent + line)
+            line = item
+        else:
+            line = f"{line} {item}".strip()
+    if line:
+        print(" " * indent + line)
+
+print("\nReach from inside the box")
+if not d["services"]:
+    print("  no services: roke -s LIST, or ROKE_SERVICES in the project's settings")
+for name, conf in d["services"].items():
+    env = conf["services"]["box"].get("environment") or {}
+    own = [k for k in env if k not in base_env]
+    ports = {int(m) for k in own for m in re.findall(rf"\b{re.escape(name)}:(\d+)", str(box_env.get(k, env[k])))}
+    ports |= {int(t.split(":")[1]) for t in forwards.values() if t.split(":")[0] == name}
+    # Pairs such as SMTP_HOST=mailpit and SMTP_PORT=1025.
+    for k in own:
+        if k.endswith("_HOST") and str(box_env.get(k, env[k])) == name:
+            port = str(box_env.get(k[:-5] + "_PORT", env.get(k[:-5] + "_PORT", "")))
+            if port.isdigit():
+                ports.add(int(port))
+    print(f"  {name:<{col}}" + (" · ".join(f"{name}:{p}" for p in sorted(ports)) or name))
+    wrap([f"{k}={box_env.get(k, env[k])}" for k in own])
+
+others = sorted(n for n in full if n not in ("box", "gateway") and n not in d["services"])
+if others:
+    print("\nOther containers of the project (from its compose.yaml): " + ", ".join(others))
+PY
+    {
+      printf '{"project": "%s", "running": %s, "full": ' "$name" "$running"
+      dc config --format json 2>/dev/null
+      printf ', "base": '
+      config_json "${base_files[@]}"
+      printf ', "services": {'
+      sep=""
+      for s in "${selected[@]}"; do
+        printf '%s"%s": ' "$sep" "$s"
+        config_json "${base_files[@]}" -f "$(service_file "$s")"
+        sep=", "
+      done
+      printf '}}'
+    } | docker run --rm -i --network none --entrypoint python3 roke:latest -c "$urls_py"
+    exit 0 ;;
   blocked)
     if [[ -z "$(dc ps --status running --quiet gateway 2>/dev/null)" ]]; then
       die "the project is not running; start it with roke, reproduce the problem, then run roke --blocked"

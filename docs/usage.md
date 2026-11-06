@@ -2,6 +2,7 @@
 
 - [Command line](#command-line)
 - [Checking the settings](#checking-the-settings)
+- [Finding the services and ports](#finding-the-services-and-ports)
 - [Choosing the agent](#choosing-the-agent)
 - [Projects and their services](#projects-and-their-services)
 - [Opening the app in your browser](#opening-the-app-in-your-browser)
@@ -62,6 +63,7 @@ lists them grouped like this:
 |---|---|
 | `-l`, `--list` | The available agents and services |
 | `--settings` | This project's settings and allowed destinations |
+| `--urls` | How to reach the project's services and ports, from your browser and from inside the box |
 | `-h`, `--help` | The help |
 
 **Maintenance**
@@ -109,6 +111,33 @@ Allowed destinations (restricted mode), by layer:
              api.anthropic.com claude.ai platform.claude.com
   ...
 ```
+
+## Finding the services and ports
+
+`roke --urls` shows where everything is in the current project, with the
+values that actually apply (your ports, your database name...):
+
+```text
+shop (running)
+
+Open from your browser
+  app          http://127.0.0.1:5173 (box port 5173)
+  mailpit      http://127.0.0.1:18025
+
+Reach from inside the box
+  postgres     postgres:5432
+               DATABASE_URL=postgres://dev:dev@postgres:5432/shop
+               PGDATABASE=shop PGHOST=postgres PGPASSWORD=dev PGPORT=5432
+               PGUSER=dev
+  mailpit      mailpit:1025 · mailpit:8025
+               MAILPIT_API=http://mailpit:8025/api SMTP_HOST=mailpit
+               SMTP_PORT=1025
+```
+
+It reads the project's resolved configuration, so it needs Docker and the
+box's image (`roke --build`), but not the project running. Options such as
+`-s` and `-p` apply, so `roke --urls -s redis` shows what that run would
+look like.
 
 ## Choosing the agent
 
