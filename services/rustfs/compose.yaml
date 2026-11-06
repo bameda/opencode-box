@@ -1,0 +1,40 @@
+# RustFS (S3-compatible storage) · rustfs:9000 · S3_ENDPOINT, AWS_* · console http://127.0.0.1:9001
+services:
+  # The project's network is internal: the gateway publishes the console.
+  gateway:
+    environment:
+      ROKE_FORWARD_RUSTFS: "49001 rustfs:9001"
+    ports:
+      - "127.0.0.1:${RUSTFS_CONSOLE_PORT:-9001}:49001"
+
+  box:
+    environment:
+      S3_ENDPOINT: http://rustfs:9000
+      AWS_ENDPOINT_URL: http://rustfs:9000
+      AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY:-dev}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY:-devdevdev}
+      AWS_REGION: us-east-1
+    depends_on:
+      rustfs:
+        condition: service_healthy
+
+  rustfs:
+    image: rustfs/rustfs:${RUSTFS_VERSION:-1.0.4}
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-dev}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-devdevdev}
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes:
+      - rustfs-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  rustfs-data:

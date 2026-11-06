@@ -140,7 +140,7 @@ publishes them on `127.0.0.1`:
 
 - **The box's**, with `-p` or `ROKE_PORTS`: the dev server listens in the
   gateway's network namespace, so `roke -p 5173` works as before.
-- **The services' web UIs** (Mailpit, MinIO, RabbitMQ, Jaeger...): each
+- **The services' web UIs** (Mailpit, RustFS, Grafana, Jaeger...): each
   service's compose file asks the gateway to forward a port to it. See
   [publishing a service's port](../services/README.md#publishing-a-services-port).
 

@@ -1,6 +1,6 @@
 # Proxy to the dev server the agent starts inside the box (it must listen on
 # 0.0.0.0). Change the target with PROXY_UPSTREAM.
-# You can add routes to other services by name (mailpit:8025, minio:9000...).
+# You can add routes to other services by name (mailpit:8025, rustfs:9000...).
 :80 {
 	encode gzip
 	reverse_proxy {$PROXY_UPSTREAM}

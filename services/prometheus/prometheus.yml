@@ -1,0 +1,16 @@
+# Default Prometheus configuration for a roke project. To scrape other
+# targets, mount your own in the project's compose.yaml (see README.md).
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # The app in the box, if it exposes Prometheus metrics: port 9464 is the
+  # default of OpenTelemetry's Prometheus exporter.
+  - job_name: app
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["box:9464"]

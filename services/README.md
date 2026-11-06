@@ -16,11 +16,13 @@ explains how to use it. `roke --list` shows what is available.
 | [`valkey`](valkey/README.md) | Open-source Redis fork | `valkey:6379`, `VALKEY_URL` | |
 | [`memcached`](memcached/README.md) | Key-value cache | `memcached:11211`, `MEMCACHED_SERVERS` | |
 | [`mailpit`](mailpit/README.md) | Catches outgoing email | `mailpit:1025`, `SMTP_HOST`, `SMTP_PORT` | inbox at `127.0.0.1:8025` |
-| [`minio`](minio/README.md) | S3-compatible storage | `minio:9000`, `S3_ENDPOINT`, `AWS_*` | console at `127.0.0.1:9001` |
+| [`rustfs`](rustfs/README.md) | S3-compatible storage | `rustfs:9000`, `S3_ENDPOINT`, `AWS_*` | console at `127.0.0.1:9001` |
 | [`rabbitmq`](rabbitmq/README.md) | Message broker | `rabbitmq:5672`, `AMQP_URL` | UI at `127.0.0.1:15672` |
 | [`kafka`](kafka/README.md) | Kafka-compatible broker (Redpanda) | `kafka:9092`, `KAFKA_BOOTSTRAP_SERVERS` | |
 | [`nats`](nats/README.md) | Messaging with JetStream | `nats:4222`, `NATS_URL` | |
 | [`jaeger`](jaeger/README.md) | OpenTelemetry traces | `jaeger:4318`, `OTEL_EXPORTER_OTLP_ENDPOINT` | UI at `127.0.0.1:16686` |
+| [`prometheus`](prometheus/README.md) | Metrics, scraped or pushed with OTLP | `prometheus:9090`, `OTEL_EXPORTER_OTLP_METRICS_*` | UI at `127.0.0.1:9090` |
+| [`grafana`](grafana/README.md) | Dashboards, with Prometheus and Jaeger preconfigured | `grafana:3000`, `GRAFANA_URL` | UI at `127.0.0.1:3001` |
 | [`wiremock`](wiremock/README.md) | Mock of external HTTP APIs | `wiremock:8080`, `WIREMOCK_URL` | |
 | [`caddy`](caddy/README.md) | Reverse proxy | `PROXY_URL` | `127.0.0.1:8080` |
 | [`kwok`](kwok/README.md) | Simulated Kubernetes API, for charts and manifests | `kwok:8080`, `KUBECONFIG` | |

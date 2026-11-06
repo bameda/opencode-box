@@ -46,7 +46,7 @@ For example, frontend and API under the same address:
 ```
 
 Any service is reachable by name as an upstream (`mailpit:8025`,
-`minio:9000`...).
+`rustfs:9000`...).
 
 **Settings**
 

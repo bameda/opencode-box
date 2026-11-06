@@ -173,7 +173,7 @@ Then open `http://127.0.0.1:5173`. The server must listen on `0.0.0.0`, not
 `localhost` (for example `vite --host 0.0.0.0`); the box's instructions
 already tell the agent so.
 
-Services with a web UI (Mailpit, MinIO, RabbitMQ...) publish it themselves;
+Services with a web UI (Mailpit, RustFS, Grafana...) publish it themselves;
 do not add their ports to `-p`. See the [service catalog](../services/README.md).
 
 ## Running other commands
