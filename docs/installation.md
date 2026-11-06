@@ -89,25 +89,45 @@ host; [rootless Docker](#rootless-docker) avoids that.
 ## Install roke
 
 ```fish
-git clone https://github.com/bameda/roke.git ~/src/roke
-~/src/roke/install.sh
+curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh | bash
 ```
 
-`install.sh` does two things:
+The installer:
 
-- It links `roke` into `~/.local/bin`. If that directory is not in your
-  `PATH`, add it (in fish: `fish_add_path ~/.local/bin`).
-- It creates your configuration directory, `~/.config/roke`, from the
-  examples. It never overwrites existing files. See
-  [Configuration](configuration.md).
+- clones roke into `~/.local/share/roke`;
+- links the `roke` command into `~/.local/bin`, and tells you how to add it
+  to your `PATH` if it is not there;
+- creates your configuration directory, `~/.config/roke`, from the examples
+  (see [Configuration](configuration.md)), never overwriting existing files;
+- checks that Docker and its Compose plugin are installed.
 
-Choose your default agent (it is written to `~/.config/roke/roke.env`):
+The whole script runs from its last line, so a download cut halfway runs
+nothing. To read it before running it:
 
 ```fish
-roke --default-agent claude       # or codex, or opencode; see agents/README.md
+curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh -o install.sh
+less install.sh
+bash install.sh
 ```
 
-Any project can use a different one later, with `roke --set-agent`.
+Run it again at any time: if roke is already installed, it updates it.
+Its settings are environment variables, placed before `bash`:
+
+| Variable | Default | Description |
+|---|---|---|
+| `ROKE_CONFIG_REPO` | — | Your private configuration repository, cloned into `~/.config/roke` on the first install |
+| `ROKE_DIR` | `~/.local/share/roke` | Where to install roke |
+| `ROKE_VERSION` | `main` | Branch or tag to install |
+| `ROKE_BIN_DIR` | `~/.local/bin` | Where to link the `roke` command |
+
+To work on roke itself, clone the repository wherever you want and run
+`./install.sh` from it: it uses that clone instead.
+
+Then choose your default agent:
+
+```fish
+roke --default-agent claude      # or codex, or opencode; see agents/README.md
+```
 
 The image installs every agent by default. To make it smaller, keep only
 the ones you use in `ROKE_AGENTS` (see [Agents](../agents/README.md)).
@@ -131,32 +151,32 @@ project instead.
 
 If you keep your configuration in a private repository (see
 [Configuration](configuration.md#keeping-it-in-a-private-repository)), pass
-its URL to `install.sh`. It clones the repository into `~/.config/roke` and
+its URL to the installer. It clones the repository into `~/.config/roke` and
 adds any missing file from the examples:
 
 ```fish
-git clone https://github.com/bameda/roke.git ~/src/roke
-~/src/roke/install.sh git@github.com:<you>/roke-config.git
+curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh \
+  | ROKE_CONFIG_REPO=git@github.com:<you>/roke-config.git bash
 ```
 
 Your secrets are not in that repository, so recreate
-`~/.config/roke/secrets.env` by hand if you use it, or log in again with
-logging in again from the agent.
+`~/.config/roke/secrets.env` by hand if you use it, or log in again from
+the agent.
 
 ## Updating
 
 ```fish
-cd ~/src/roke
-git pull
-roke --build
+roke --update
+roke --build          # in each project, to rebuild its images
 ```
 
-Your configuration is not touched. Releases with incompatible changes are
-marked with `!` in the commit history (for example
+`roke --update` pulls the latest version of roke; running the installer
+again does the same. Your configuration is not touched. Releases with
+incompatible changes are marked with `!` in the commit history (for example
 `feat(postgres)!: ...`): read their description, which explains what to
 change.
 
-`roke --build` rebuilds the image only where something changed. Agents
+`roke --build` rebuilds the images only where something changed. Agents
 installed from a channel (`latest`, `stable`) are not updated by it, since
 Docker reuses the cached layer: run `roke --rebuild` to fetch their newest
 release, or pin versions with `ROKE_AGENT_VERSIONS` in `roke.env` and run
@@ -186,7 +206,7 @@ root is not root on your machine.
 cd ~/src/my-project && roke --purge       # for each project: services and data
 docker image rm roke:latest
 rm ~/.local/bin/roke
-rm -rf ~/src/roke
+rm -rf ~/.local/share/roke
 ```
 
 `~/.config/roke` is left in place, so remove it too if you no longer need

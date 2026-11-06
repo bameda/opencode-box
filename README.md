@@ -35,8 +35,7 @@ agent's reach.
 2. Install roke:
 
    ```fish
-   git clone https://github.com/bameda/roke.git ~/src/roke
-   ~/src/roke/install.sh
+   curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh | bash
    ```
 
 3. Choose your default agent: `roke --default-agent claude`, `codex` or

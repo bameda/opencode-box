@@ -68,12 +68,13 @@ git commit -m "chore: add my-app project"
 git push
 ```
 
-**On another machine**, pass the repository's URL to `install.sh` (or to
+**On another machine**, pass the repository's URL to the installer (or to
 `roke --init`). It clones it into `~/.config/roke` and adds any missing
 file from the examples:
 
 ```fish
-~/src/roke/install.sh git@github.com:<you>/roke-config.git
+curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh \
+  | ROKE_CONFIG_REPO=git@github.com:<you>/roke-config.git bash
 ```
 
 **What stays out of it**:

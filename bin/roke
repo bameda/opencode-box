@@ -60,6 +60,7 @@ Maintenance
       --purge            Stop them and delete all the project's data
       --init [GIT_URL]   Create ~/.config/roke, cloning GIT_URL if given; never
                          overwrites existing files
+      --update           Update roke itself (then --build to rebuild the images)
 
 Examples
   roke                           start the agent in the current project
@@ -186,6 +187,13 @@ while (($#)); do
     -s|--services) services="${2:?missing service list}"; shift 2 ;;
     -l|--list)     action=list; shift ;;
     --settings)    action=settings; shift ;;
+    --update)
+      [[ -d "$BOX_DIR/.git" ]] || die "$BOX_DIR is not a git clone; reinstall roke to update it"
+      info "updating $BOX_DIR"
+      git -C "$BOX_DIR" pull --ff-only \
+        || die "could not update: $BOX_DIR has local changes or diverged (git -C $BOX_DIR status)"
+      info "updated. Rebuild the images in your projects with: roke --build"
+      exit 0 ;;
     --init)
       if [[ -n "${2:-}" && "$2" != -* ]]; then init_config "$2"; else init_config; fi
       exit 0 ;;

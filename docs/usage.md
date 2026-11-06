@@ -73,6 +73,7 @@ lists them grouped like this:
 | `--down` | Stop the project's services, keeping their data |
 | `--purge` | Stop them and delete all the project's data |
 | `--init [GIT_URL]` | Create the [configuration directory](configuration.md), cloning it if a URL is given |
+| `--update` | Update roke itself; then `--build` rebuilds the images |
 
 Examples:
 
