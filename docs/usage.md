@@ -26,6 +26,9 @@ so they start with dashes: `roke --build`, not `roke build`.
 | `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
 | `--git-rw` | Mount `.git` read-write, so the agent can commit |
 | `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
+| `--network MODE` | `restricted` (default) or `open`, for this run; see [Network](network.md) |
+| `--allow ENTRY` | Allow a network destination for the project, from its next start |
+| `--blocked` | Show what the project tried to reach and was denied |
 | `--shell` | Open bash in the box instead of the agent |
 | `--build` | Rebuild the images (pulling newer base images) before starting |
 | `--rebuild` | Same, without cache: also updates agents installed from a channel |

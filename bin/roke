@@ -29,6 +29,10 @@ Options:
   -s, --services LIST    Comma-separated services from the catalog.
                          E.g. -s postgres,redis,mailpit   (see --list)
   -l, --list             List the agents and the services available to the project
+      --network MODE     restricted (default) or open, this time
+      --allow ENTRY      Allow a destination for this project: domain, IP or
+                         CIDR, with an optional :port (db.example.com:5432)
+      --blocked          Show what the project tried to reach and was denied
   -p, --port PORT        Publish a port of the box on
                          127.0.0.1 (repeatable). E.g. -p 3000
       --git-rw           Mount .git read-write (read-only by default)
@@ -162,6 +166,7 @@ ports=()
 cli_git_rw=0
 cli_serena=""
 cli_agent=""
+cli_network=""
 set_value=""
 action=run
 build=""
@@ -180,6 +185,9 @@ while (($#)); do
       if [[ -n "${2:-}" && "$2" != -* ]]; then init_config "$2"; else init_config; fi
       exit 0 ;;
     -p|--port)     ports+=("${2:?missing port}"); shift 2 ;;
+    --network)     cli_network="${2:?missing network mode}"; shift 2 ;;
+    --allow)       action=allow; set_value="${2:?missing destination}"; shift 2 ;;
+    --blocked)     action=blocked; shift ;;
     --git-rw)      cli_git_rw=1; shift ;;
     --serena)      cli_serena=1; shift ;;
     --no-serena)   cli_serena=0; shift ;;
@@ -275,6 +283,20 @@ check_agent_name() {
 }
 
 case "$action" in
+  allow)
+    [[ "$set_value" =~ ^(\*\.)?[A-Za-z0-9.-]+(/[0-9]{1,2})?(:[0-9]{1,5})?$ ]] \
+      || die "not a destination: '$set_value' (use a domain, IP or CIDR, with an optional :port)"
+    current=""
+    if [[ -f "$PROJECT_CONFIG/project.env" ]]; then
+      current="$(sed -n 's/^ROKE_NETWORK_ALLOW="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' "$PROJECT_CONFIG/project.env" | tail -n1)"
+    fi
+    if [[ " $current " == *" $set_value "* ]]; then
+      info "$set_value is already allowed for $name"
+    else
+      set_setting "$PROJECT_CONFIG/project.env" ROKE_NETWORK_ALLOW "\"${current:+$current }$set_value\""
+      info "allowed for $name: $set_value (from the next start; in $PROJECT_CONFIG/project.env)"
+    fi
+    exit 0 ;;
   default-agent)
     check_agent_name "$set_value"
     set_setting "$CONFIG_DIR/roke.env" ROKE_AGENT "$set_value"
@@ -302,14 +324,22 @@ esac
 # ports or credentials (POSTGRES_VERSION, MAILPIT_UI_PORT...).
 # Order (the last one wins): global roke.env and secrets.env, then the
 # project's project.env and secrets.env.
-for f in "$CONFIG_DIR/roke.env" "$CONFIG_DIR/secrets.env" \
-         "$PROJECT_CONFIG/project.env" "$PROJECT_CONFIG/secrets.env"; do
-  [[ -f "$f" ]] || continue
-  set -a
-  # shellcheck source=/dev/null
-  source "$f"
-  set +a
-done
+# ROKE_NETWORK_ALLOW is the exception: the project's adds to the global one.
+load_settings() {
+  local f
+  for f in "$@"; do
+    [[ -f "$f" ]] || continue
+    set -a
+    # shellcheck source=/dev/null
+    source "$f"
+    set +a
+  done
+}
+load_settings "$CONFIG_DIR/roke.env" "$CONFIG_DIR/secrets.env"
+global_allow="${ROKE_NETWORK_ALLOW:-}"
+unset ROKE_NETWORK_ALLOW
+load_settings "$PROJECT_CONFIG/project.env" "$PROJECT_CONFIG/secrets.env"
+project_allow="${ROKE_NETWORK_ALLOW:-}"
 services="${services:-${ROKE_SERVICES:-}}"
 if ((${#ports[@]} == 0)) && [[ -n "${ROKE_PORTS:-}" ]]; then
   read -ra ports <<<"$ROKE_PORTS"
@@ -377,6 +407,45 @@ else
 fi
 [[ -f "$PROJECT_CONFIG/compose.yaml" ]] && compose_files+=(-f "$PROJECT_CONFIG/compose.yaml")
 
+# --- Network ---------------------------------------------------------------------
+ROKE_NETWORK="${cli_network:-${ROKE_NETWORK:-restricted}}"
+[[ "$ROKE_NETWORK" == restricted || "$ROKE_NETWORK" == open ]] \
+  || die "network mode must be restricted or open, not '$ROKE_NETWORK'"
+export ROKE_NETWORK
+
+# Allowed destinations, by layers: the base list, the agent's, the selected
+# services' and yours (global and the project's). Comments and blank lines
+# are ignored.
+allow_files=("$BOX_DIR/docker/gateway/allow.txt" "$BOX_DIR/agents/$ROKE_AGENT/allow.txt")
+for s in "${selected[@]}"; do
+  allow_files+=("$(dirname "$(service_file "$s")")/allow.txt")
+done
+ROKE_NETWORK_ALLOW_ALL="$(
+  { for f in "${allow_files[@]}"; do [[ -f "$f" ]] && cat "$f"; done
+    printf '%s\n' "$global_allow" "$project_allow"
+  } | sed 's/#.*//' | tr -s ' \t' '\n' | sed '/^$/d' | sort -u | paste -sd ' '
+)"
+export ROKE_NETWORK_ALLOW_ALL
+
+# The box shares the gateway's network, so its ports are published on the
+# gateway, through a compose file generated for this run.
+publish=()
+for p in "${ports[@]}"; do
+  if [[ "$p" == *:* ]]; then publish+=("$p"); else publish+=("127.0.0.1:$p:$p"); fi
+done
+if [[ "$ROKE_SERENA" == "1" && "$ROKE_SERENA_DASHBOARD" == "1" ]]; then
+  publish+=("127.0.0.1:${ROKE_SERENA_DASHBOARD_PORT:-24282}:24282")
+fi
+if ((${#publish[@]})) && [[ "$action" == run ]]; then
+  runtime_dir="${XDG_RUNTIME_DIR:-/tmp}/roke"
+  mkdir -p "$runtime_dir"
+  ports_file="$runtime_dir/$compose_project.ports.yaml"
+  { echo "services:"; echo "  gateway:"; echo "    ports:"
+    for p in "${publish[@]}"; do echo "      - \"$p\""; done
+  } > "$ports_file"
+  compose_files+=(-f "$ports_file")
+fi
+
 export PROJECT_DIR
 ROKE_CONFIG_DIR="$CONFIG_DIR"; export ROKE_CONFIG_DIR
 # For paths in the project's compose files: ${ROKE_PROJECT_CONFIG}/Caddyfile
@@ -394,6 +463,14 @@ dc() {
 }
 
 case "$action" in
+  blocked)
+    if [[ -z "$(dc ps --status running --quiet gateway 2>/dev/null)" ]]; then
+      die "the project is not running; start it with roke, reproduce the problem, then run roke --blocked"
+    fi
+    dc exec -T gateway roke-gateway blocked
+    echo
+    echo "To allow one: roke --allow DESTINATION (in this project), or ROKE_NETWORK_ALLOW in roke.env"
+    exit 0 ;;
   down)  dc down --remove-orphans; exit 0 ;;
   purge) dc down --remove-orphans --volumes; exit 0 ;;
 esac
@@ -408,18 +485,6 @@ esac
 run_args=(--rm)
 [[ -t 0 && -t 1 ]] || run_args+=(-T)
 
-for p in "${ports[@]}"; do
-  if [[ "$p" == *:* ]]; then
-    run_args+=(-p "$p")
-  else
-    run_args+=(-p "127.0.0.1:$p:$p")
-  fi
-done
-
-# Serena dashboard (optional), published on 127.0.0.1 only.
-if [[ "$ROKE_SERENA" == "1" && "$ROKE_SERENA_DASHBOARD" == "1" ]]; then
-  run_args+=(-p "127.0.0.1:${ROKE_SERENA_DASHBOARD_PORT:-24282}:24282")
-fi
 
 # Your instructions for every agent.
 if [[ -f "$CONFIG_DIR/AGENTS.md" ]]; then
@@ -440,5 +505,5 @@ fi
 
 # Without a command, the entrypoint runs the agent.
 
-info "project: $PROJECT_DIR  ·  agent: $ROKE_AGENT  ·  services: ${ROKE_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $ROKE_SERENA == 1 ]] && echo yes || echo no )"
+info "project: $PROJECT_DIR  ·  agent: $ROKE_AGENT  ·  network: $ROKE_NETWORK  ·  services: ${ROKE_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $ROKE_SERENA == 1 ]] && echo yes || echo no )"
 dc run "${run_args[@]}" box "${cmd[@]}"

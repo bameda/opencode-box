@@ -241,6 +241,8 @@ documented in its README in [services](../services/README.md).
 |---|---|---|
 | `ROKE_AGENT` | — | The coding agent to run (`--agent`); required when several are installed |
 | `ROKE_SERVICES` | — | Services to start, comma-separated (`-s`) |
+| `ROKE_NETWORK` | `restricted` | `restricted` or `open` (`--network`); see [Network](network.md) |
+| `ROKE_NETWORK_ALLOW` | — | Allowed destinations, space-separated; the project's add to the global ones (`--allow`) |
 | `ROKE_PORTS` | — | Ports to publish on 127.0.0.1, space-separated (`-p`) |
 | `ROKE_GIT_RW` | `0` | `1` mounts `.git` read-write (`--git-rw`) |
 | `ROKE_SERENA` | `0` | `1` enables Serena (`--serena`) |

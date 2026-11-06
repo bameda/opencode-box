@@ -24,6 +24,13 @@ settings in `project.env`. The line `[roke] project: ...` printed on start
 shows the services and options that were applied, and `roke --list` marks
 the project's own services as `[project]`.
 
+### Something cannot connect (a download, an API, a database...)
+
+The network is restricted by default. Run `roke --blocked` to see what the
+project tried to reach and was denied, then allow it with
+`roke --allow DESTINATION` and start the project again. See
+[Network](network.md).
+
 ### The app does not load in the browser
 
 Publish its port (`-p 5173` or `ROKE_PORTS`) and make the dev server

@@ -3,6 +3,24 @@
 # Don't run this directly: use bin/roke.
 
 services:
+  # The only container with a route out of the project's internal network:
+  # it enforces the network policy (see docs/network.md) and publishes the
+  # project's ports on the host.
+  gateway:
+    image: roke-gateway:latest
+    build: ./docker/gateway
+    environment:
+      ROKE_NETWORK: ${ROKE_NETWORK:-restricted}
+      ROKE_NETWORK_ALLOW_ALL: ${ROKE_NETWORK_ALLOW_ALL:-}
+    cap_add:
+      - NET_ADMIN
+    networks:
+      default:
+        aliases: [box]   # the box listens in the gateway's network namespace
+      egress: {}
+    security_opt:
+      - no-new-privileges:true
+
   box:
     image: roke:latest
     build:
@@ -54,11 +72,25 @@ services:
       # The agents' install and setup scripts and the box's instructions,
       # mounted so that updates arrive with git pull, without a rebuild.
       - ./agents:/opt/roke/agents:ro
+    # No network of its own: it shares the gateway's, so all its traffic goes
+    # through the gateway's firewall, which it has no capabilities to change.
+    network_mode: service:gateway
+    depends_on:
+      gateway:
+        condition: service_healthy
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     pids_limit: 4096
+
+networks:
+  # Every container of the project joins this network unless it says
+  # otherwise, and it has no route out: only the gateway does.
+  default:
+    internal: true
+  # The gateway's way out, to the host (published ports) and the internet.
+  egress: {}
 
 volumes:
   # Per project (the compose project's name is its prefix). "roke --purge"

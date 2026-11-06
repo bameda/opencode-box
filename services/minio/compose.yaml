@@ -4,6 +4,13 @@
 # It is fine for local development; for something maintained, copy this directory
 # and swap the image for another S3-compatible one (SeaweedFS, Garage...).
 services:
+  # The project's network is internal: the gateway publishes the UI.
+  gateway:
+    environment:
+      ROKE_FORWARD_MINIO: "49001 minio:9001"
+    ports:
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:49001"
+
   box:
     environment:
       S3_ENDPOINT: http://minio:9000
@@ -23,8 +30,6 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-devdevdev}
     volumes:
       - minio-data:/data
-    ports:
-      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     security_opt:
       - no-new-privileges:true
 

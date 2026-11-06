@@ -7,12 +7,20 @@
 #   3. Add it to the depends_on of "box" so roke starts it.
 #   4. Put the connection variables in the environment of "box".
 #   5. Volumes without "name:" are per project.
-#   6. If you publish ports, bind them to 127.0.0.1 and use a variable, so
-#      they can be changed when two projects are open at the same time.
+#   6. The project's network is internal: to publish a port (a web UI), ask
+#      the gateway to forward it (see the commented block below), with the
+#      host port in a variable so it can be changed.
 #   7. Explain how to use it in the README.md next to this file, and add it
 #      to the catalog table in services/README.md.
 
 services:
+  # To publish the service's web UI on the host, through the gateway:
+  # gateway:
+  #   environment:
+  #     ROKE_FORWARD_MYSERVICE: "45999 myservice:8080"
+  #   ports:
+  #     - "127.0.0.1:${MYSERVICE_PORT:-8080}:45999"
+
   box:
     environment:
       MYSERVICE_URL: http://myservice:8080
@@ -26,8 +34,6 @@ services:
       SOMETHING: value
     volumes:
       - myservice-data:/data
-    # ports:
-    #   - "127.0.0.1:${MYSERVICE_PORT:-8080}:8080"
     security_opt:
       - no-new-privileges:true
 

@@ -55,18 +55,18 @@ container, with files the agent cannot modify.
   and settings from `~/.config/roke` and from its own repository, and
   refuses to mount a project that contains either of them. A compose file
   written by the agent could otherwise mount any host path.
+- **The network is restricted by default.** The box only reaches the
+  destinations you allow, and the services have no route out at all; see
+  [Network](network.md).
 - **Published ports** listen on `127.0.0.1` by default, never on your
   network. Only a full mapping you write yourself (such as `-p 3000:3000`
   or `ports:` in a compose file) can change that.
 
 ## What it does NOT protect
 
-- **The network.** The box has internet access, since it needs it to talk
-  to the model provider. By default it also reaches everything your host
-  reaches: your LAN and **your corporate VPN** while it is up, since traffic
-  goes out through your machine. If that worries you, block private networks
-  for containers with rules in the `DOCKER-USER` iptables chain, keeping the
-  ranges Docker itself uses.
+- **Allowed destinations.** In restricted mode, the box can still reach
+  the destinations you allow, and in open mode anything at all. See
+  [Network](network.md).
 - **What you run on the host afterwards.** The agent can edit any file in
   the project: `package.json`, `Makefile`, `.envrc`, scripts, tests... If
   you later run them outside the box, you run whatever it wrote. Review the

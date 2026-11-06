@@ -60,21 +60,33 @@ databases. Services keep running when you exit the agent.
 | `roke --down` | Stops the project's services. Data in volumes is kept. |
 | `roke --purge` | Stops them and deletes all their data. |
 
-**From your host.** Services with a web UI publish it on `127.0.0.1` (see
-each section). Databases are not published by default; to connect a desktop
-tool (DBeaver, TablePlus, RedisInsight...), publish the port in
-`projects/<name>/compose.yaml`:
+**No internet.** Services are on the project's internal network, with no
+route out, so the agent cannot use one of them to send data out. They can
+talk to the box and to each other. See [Network](../docs/network.md).
+
+**From your host.** Services with a web UI publish it on `127.0.0.1`
+through the project's gateway (see each service's README). Databases are not
+published by default; to connect a desktop tool (DBeaver, TablePlus,
+RedisInsight...), publish the port as shown below.
+
+### Publishing a service's port
+
+The project's network is internal, so a service cannot publish ports
+itself: it asks the gateway to forward one. In `projects/<name>/compose.yaml`,
+or in the service's own compose file:
 
 ```yaml
 services:
-  postgres:
+  gateway:
+    environment:
+      ROKE_FORWARD_POSTGRES: "45432 postgres:5432"   # gateway port, then service:port
     ports:
-      - "127.0.0.1:15432:5432"
+      - "127.0.0.1:15432:45432"                      # host port -> gateway port
 ```
 
-Use a host port that does not clash with other projects or with services
-running on your machine.
-
+Use a gateway port that nothing else in the project uses (the catalog's
+services use ports from 45000 up), and a host port that does not clash with
+other projects or with services running on your machine.
 ## Adding your own service
 
 Any image can become a service. Copy `services/_template/` and fill in its
@@ -97,8 +109,10 @@ The rules are few:
 2. It must be in the `depends_on` of `box`, which is what makes `roke`
    start it (with `service_healthy` if it has a healthcheck).
 3. Connection variables go in the `environment` of `box`.
-4. Volumes without `name:` are per project. Ports are published on
-   `127.0.0.1` through a variable, so they can be changed.
+4. Volumes without `name:` are per project. To publish a port (a web UI),
+   ask the gateway to forward it, as in
+   [publishing a service's port](#publishing-a-services-port), with the host
+   port in a variable so it can be changed.
 5. The first comment line is the description shown by `roke --list`.
 6. Relative paths resolve against the roke repository. To refer to
    files in your configuration, use `${ROKE_CONFIG_DIR}` or, for the

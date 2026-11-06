@@ -96,6 +96,7 @@ Copy [`_template/`](_template/) to `agents/<name>/` and fill in its files:
 | `install.sh` | at build time, as root | Installs the agent. Receives the version from `ROKE_AGENT_VERSIONS`, or `default` |
 | `setup.sh` | on every start, as the box's user, sourced by the entrypoint | Links your configuration, places the instructions, registers Serena, and sets `AGENT_COMMAND` |
 | `AGENTS.md` | — | Optional: instructions for this agent only |
+| `allow.txt` | — | Destinations the agent needs in restricted network mode: its API, its login (see [Network](../docs/network.md)) |
 | `README.md` | — | How to use it; its first line is shown by `roke --list` |
 
 `setup.sh` receives these variables and helpers:

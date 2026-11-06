@@ -1,5 +1,12 @@
 # RabbitMQ · rabbitmq:5672 · AMQP_URL · UI http://127.0.0.1:15672
 services:
+  # The project's network is internal: the gateway publishes the UI.
+  gateway:
+    environment:
+      ROKE_FORWARD_RABBITMQ: "45672 rabbitmq:15672"
+    ports:
+      - "127.0.0.1:${RABBITMQ_UI_PORT:-15672}:45672"
+
   box:
     environment:
       AMQP_URL: amqp://${RABBITMQ_USER:-dev}:${RABBITMQ_PASSWORD:-dev}@rabbitmq:5672/
@@ -17,8 +24,6 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-dev}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
-    ports:
-      - "127.0.0.1:${RABBITMQ_UI_PORT:-15672}:15672"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s

@@ -17,6 +17,9 @@ every other project stay out of the agent's reach.
 - **Services on demand**: databases, caches, queues, test email, tracing,
   API mocks, a simulated Kubernetes API and more, each in its own
   container, with separate data for every project.
+- **Restricted network**: by default, the agent only reaches the
+  destinations you allow, with any protocol; `roke --blocked` shows what was
+  denied and `roke --allow` opens it.
 - **Per-project tools**: languages and tools are installed with
   [mise](https://mise.jdx.dev) from the project's `mise.toml`.
 - **Semantic code navigation**, optionally, with
@@ -81,16 +84,18 @@ usually enough.
 | [Services](services/README.md) | The service catalog, how to use each one and how to add your own |
 | [Example projects](examples/projects/README.md) | Ready-made configurations: Ansible, Helm, Python, Node.js, Go, Rust, Rails, Spring Boot, Clojure |
 | [Serena](docs/serena.md) | Semantic code navigation and editing |
+| [Network](docs/network.md) | How the pieces fit, restricted and open mode, allowing destinations |
 | [Security](docs/security.md) | What the container can and cannot reach |
 | [Troubleshooting](docs/troubleshooting.md) | Common problems, known limitations and maintenance |
 
 ## Security in a nutshell
 
 The agent can read and write the project, but nothing else on your
-machine. It **can** reach the network, including your LAN and VPN, and
-anything it writes runs on your host if you later run it there: review the
+machine, and by default it only reaches the network destinations you allow.
+Anything it writes runs on your host if you later run it there: review the
 diff before running the project's scripts or committing. Read
-[Security](docs/security.md) for the details.
+[Security](docs/security.md) and [Network](docs/network.md) for the
+details.
 
 ## License
 

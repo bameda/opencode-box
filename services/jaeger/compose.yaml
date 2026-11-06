@@ -1,5 +1,12 @@
 # Jaeger (OpenTelemetry traces) · OTLP on jaeger:4317/4318 · OTEL_EXPORTER_OTLP_ENDPOINT · UI http://127.0.0.1:16686
 services:
+  # The project's network is internal: the gateway publishes the UI.
+  gateway:
+    environment:
+      ROKE_FORWARD_JAEGER: "46686 jaeger:16686"
+    ports:
+      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:46686"
+
   box:
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
@@ -11,7 +18,5 @@ services:
 
   jaeger:
     image: jaegertracing/jaeger:${JAEGER_VERSION:-2.23.0}
-    ports:
-      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686"
     security_opt:
       - no-new-privileges:true

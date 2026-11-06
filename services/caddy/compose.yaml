@@ -1,5 +1,12 @@
 # Caddy (reverse proxy) · http://127.0.0.1:8080 -> box:3000 · edit services/caddy/Caddyfile
 services:
+  # The project's network is internal: the gateway publishes the UI.
+  gateway:
+    environment:
+      ROKE_FORWARD_CADDY: "48080 caddy:80"
+    ports:
+      - "127.0.0.1:${CADDY_PORT:-8080}:48080"
+
   box:
     environment:
       PROXY_URL: http://127.0.0.1:${CADDY_PORT:-8080}
@@ -14,8 +21,6 @@ services:
     volumes:
       - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
-    ports:
-      - "127.0.0.1:${CADDY_PORT:-8080}:80"
     security_opt:
       - no-new-privileges:true
 
