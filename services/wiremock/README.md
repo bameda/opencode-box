@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=wiremock` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s wiremock`.
+**Enable**: `ROKE_SERVICES=wiremock` in `~/.config/roke/projects/<name>/project.env`, or `roke -s wiremock`.
 
 [WireMock](https://wiremock.org/) simulates the HTTP APIs your app depends
 on (payments, email providers, third-party services...), so it can be
@@ -18,7 +18,7 @@ instead of the real API and define the responses.
 | `WIREMOCK_URL` | `http://wiremock:8080` |
 
 **Define responses** through its admin API, from your tests or from
-`ocbox --shell`:
+`roke --shell`:
 
 ```bash
 curl -s -X POST "$WIREMOCK_URL/__admin/mappings" -d '{
@@ -43,7 +43,7 @@ services:
       - ${PROJECT_DIR}/wiremock:/home/wiremock:ro
 ```
 
-**Data**: mappings created through the API are lost on `ocbox --down`.
+**Data**: mappings created through the API are lost on `roke --down`.
 
 **Settings**
 

@@ -1,4 +1,4 @@
-# Personal configuration lives in ~/.config/ocbox, never in this repository.
+# Personal configuration lives in ~/.config/roke, never in this repository.
 # These patterns guard against files left over from older layouts.
 .env
 /projects/

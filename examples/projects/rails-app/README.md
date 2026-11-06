@@ -42,7 +42,7 @@ must listen on `0.0.0.0`: `bin/rails server -b 0.0.0.0`.
 
 ## Check it
 
-From `ocbox --shell`:
+From `roke --shell`:
 
 ```bash
 bundle install

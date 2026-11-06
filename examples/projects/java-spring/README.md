@@ -41,7 +41,7 @@ no Docker inside, on purpose, so:
 
 ## Check it
 
-From `ocbox --shell`:
+From `roke --shell`:
 
 ```bash
 ./mvnw test                      # or ./gradlew test

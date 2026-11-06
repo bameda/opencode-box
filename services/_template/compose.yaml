@@ -1,10 +1,10 @@
-# Short description (this first line is what "ocbox --list" shows)
+# Short description (this first line is what "roke --list" shows)
 #
 # Template for adding any image to the catalog:
 #   1. Copy this directory to services/<name>/ (without the leading "_").
 #   2. The service must have the same name as the directory: that is its
 #      hostname.
-#   3. Add it to the depends_on of "box" so ocbox starts it.
+#   3. Add it to the depends_on of "box" so roke starts it.
 #   4. Put the connection variables in the environment of "box".
 #   5. Volumes without "name:" are per project.
 #   6. If you publish ports, bind them to 127.0.0.1 and use a variable, so

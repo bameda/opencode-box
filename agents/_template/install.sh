@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Installs the agent in the image. Runs as root at build time, after the
 # box's user ("dev") exists.
-#   $1  version from OCBOX_AGENT_VERSIONS, or "default"
+#   $1  version from ROKE_AGENT_VERSIONS, or "default"
 set -euo pipefail
 
 version="${1:-default}"

@@ -14,11 +14,11 @@ Serena is installed in the image, under `/opt` and out of the agent's reach,
 and **enabled per project**:
 
 ```fish
-ocbox --serena                     # once
+roke --serena                      # once
 ```
 
-To enable it for good, add `OCBOX_SERENA=1` to the project's settings,
-`~/.config/ocbox/projects/<name>/project.env`.
+To enable it for good, add `ROKE_SERENA=1` to the project's settings,
+`~/.config/roke/projects/<name>/project.env`.
 
 When enabled, the box registers Serena as an MCP server for the selected
 agent, pinned to the current project and with the Serena context that suits
@@ -37,8 +37,8 @@ how it is registered there.
   the agent writes about the project) in `.serena/` inside the project.
   Decide whether to commit it or add it to `.gitignore`.
 - **Dashboard.** Disabled, since there is no browser in the box. To use it,
-  set `OCBOX_SERENA_DASHBOARD=1` and open
+  set `ROKE_SERENA_DASHBOARD=1` and open
   `http://127.0.0.1:24282/dashboard/` (the port can be changed with
-  `OCBOX_SERENA_DASHBOARD_PORT`).
-- **Version.** Set `SERENA_VERSION` in `ocbox.env` and run `ocbox --build`.
+  `ROKE_SERENA_DASHBOARD_PORT`).
+- **Version.** Set `SERENA_VERSION` in `roke.env` and run `roke --build`.
   With `INSTALL_SERENA=0`, the image is built without Serena.

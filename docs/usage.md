@@ -10,15 +10,15 @@
 ## Command line
 
 ```text
-ocbox [options] [PROJECT_DIR] [-- COMMAND...]
+roke [options] [PROJECT_DIR] [-- COMMAND...]
 ```
 
 `PROJECT_DIR` defaults to the current directory. All actions are options,
-so they start with dashes: `ocbox --build`, not `ocbox build`.
+so they start with dashes: `roke --build`, not `roke build`.
 
 | Option | Description |
 |---|---|
-| `-a`, `--agent NAME` | The coding agent to run this time; defaults to `OCBOX_AGENT` |
+| `-a`, `--agent NAME` | The coding agent to run this time; defaults to `ROKE_AGENT` |
 | `--set-agent NAME` | The current project's own agent; `default` to use the default again |
 | `--default-agent NAME` | The default agent, for projects without their own |
 | `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
@@ -37,15 +37,15 @@ so they start with dashes: `ocbox --build`, not `ocbox build`.
 Anything after `--` replaces the default command, which is the agent:
 
 ```fish
-ocbox -- claude --continue        # resume Claude Code's last session
-ocbox -- opencode --continue      # resume OpenCode's last session
-ocbox -s postgres -- psql         # a single command in the box
+roke -- claude --continue         # resume Claude Code's last session
+roke -- opencode --continue       # resume OpenCode's last session
+roke -s postgres -- psql          # a single command in the box
 ```
 
 Options given on the command line take precedence over the project's
 [settings](configuration.md#per-project-settings). Use them to try something
 once; for a project you work on every day, put them in
-`projects/<name>/project.env` and just run `ocbox`.
+`projects/<name>/project.env` and just run `roke`.
 
 ## Choosing the agent
 
@@ -53,19 +53,19 @@ No agent is the default. The one that runs comes from, in order of
 precedence:
 
 1. `--agent NAME` on the command line;
-2. `OCBOX_AGENT` in the project's `project.env`;
-3. `OCBOX_AGENT` in `ocbox.env`.
+2. `ROKE_AGENT` in the project's `project.env`;
+3. `ROKE_AGENT` in `roke.env`.
 
 If none is set and the image has a single agent, that one runs.
-`ocbox --list` shows which agent will run in the current project and where
+`roke --list` shows which agent will run in the current project and where
 that choice comes from.
 
 To change the agent without editing files:
 
 ```fish
-ocbox --default-agent claude     # the default (ocbox.env)
-ocbox --set-agent opencode       # this project's own (project.env)
-ocbox --set-agent default        # this project uses the default again
+roke --default-agent claude      # the default (roke.env)
+roke --set-agent opencode        # this project's own (project.env)
+roke --set-agent default         # this project uses the default again
 ```
 
 All agents share the box's home volume, so you can switch between them
@@ -75,7 +75,7 @@ what carries over and what does not.
 
 ## Projects and their services
 
-Each project gets its own set of containers, named `ocbox-<name>-<hash>`
+Each project gets its own set of containers, named `roke-<name>-<hash>`
 after its path. Two projects using `postgres` therefore get two separate
 databases, and you can have several projects open at once.
 
@@ -86,8 +86,8 @@ done:
 | Command | Services | Data (databases, buckets, queues...) |
 |---|---|---|
 | exit the agent | keep running | kept |
-| `ocbox --down` | stopped and removed | kept |
-| `ocbox --purge` | stopped and removed | **deleted** |
+| `roke --down` | stopped and removed | kept |
+| `roke --purge` | stopped and removed | **deleted** |
 
 Some services do not keep data at all (Redis, Mailpit...); each
 [service's README](../services/README.md) says what it keeps.
@@ -96,10 +96,10 @@ Some services do not keep data at all (Redis, Mailpit...); each
 
 When the agent starts a dev server, it runs inside the box. To open it from
 your browser, publish its port, either once with `-p` or for good with
-`OCBOX_PORTS` in the project's settings:
+`ROKE_PORTS` in the project's settings:
 
 ```fish
-ocbox -p 5173
+roke -p 5173
 ```
 
 Then open `http://127.0.0.1:5173`. The server must listen on `0.0.0.0`, not
@@ -112,8 +112,8 @@ do not add their ports to `-p`. See the [service catalog](../services/README.md)
 ## Running other commands
 
 ```fish
-ocbox --shell                     # interactive bash in the box
-ocbox -- psql                     # one command, then exit
+roke --shell                      # interactive bash in the box
+roke -- psql                      # one command, then exit
 ```
 
 The shell has the same environment as the agent: the project's tools, the
@@ -136,7 +136,7 @@ git commit -am "feat: ..."
 This also protects your host: hooks or settings planted in `.git` would run
 the next time you used git outside the box (see [Security](security.md)).
 
-To let the agent commit, use `--git-rw`, or `OCBOX_GIT_RW=1` in the
-project's settings. Set your git identity in `ocbox.env` (`GIT_AUTHOR_NAME`
+To let the agent commit, use `--git-rw`, or `ROKE_GIT_RW=1` in the
+project's settings. Set your git identity in `roke.env` (`GIT_AUTHOR_NAME`
 and friends). There are no SSH keys in the box, so `git push` and
 `git pull` always happen on the host.

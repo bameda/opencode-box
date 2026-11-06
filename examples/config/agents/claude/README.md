@@ -5,4 +5,4 @@ Linked into `~/.claude` in the box, read-only: `settings.json`,
 `commands/`, `skills/` and `rules/` if you use them. Edit them here, not
 from inside Claude Code.
 
-Docs: https://github.com/bameda/opencode-box/blob/main/agents/claude/README.md
+Docs: https://github.com/bameda/roke/blob/main/agents/claude/README.md

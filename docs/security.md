@@ -1,6 +1,6 @@
 # Security
 
-opencode-box limits what the agent can touch on your machine. It is not a
+roke limits what the agent can touch on your machine. It is not a
 full sandbox: read what it protects and what it does not.
 
 - [What the container sees](#what-the-container-sees)
@@ -13,16 +13,16 @@ full sandbox: read what it protects and what it does not.
 |---|---|---|
 | `<project path>` (same as on the host) | the project | read-write |
 | `<project>/.git` | the project | **read-only** (unless `--git-rw`) |
-| `/home/dev` | the `ocbox-home` volume | read-write; the box's own home |
-| `/run/ocbox/agent-config` | `~/.config/ocbox/agents/<agent>` | read-only |
-| `/run/ocbox/user-AGENTS.md` | `~/.config/ocbox/AGENTS.md`, if any | read-only |
-| `/run/ocbox/project-AGENTS.md` | the project's `AGENTS.md` in your configuration, if any | read-only |
-| `/opt/ocbox/agents` | the repository's `agents/` (setup scripts, the box's instructions) | read-only |
+| `/home/dev` | the `roke-home` volume | read-write; the box's own home |
+| `/run/roke/agent-config` | `~/.config/roke/agents/<agent>` | read-only |
+| `/run/roke/user-AGENTS.md` | `~/.config/roke/AGENTS.md`, if any | read-only |
+| `/run/roke/project-AGENTS.md` | the project's `AGENTS.md` in your configuration, if any | read-only |
+| `/opt/roke/agents` | the repository's `agents/` (setup scripts, the box's instructions) | read-only |
 
 Nothing else from your host is mounted: not your `$HOME`, not your SSH keys,
-not your other projects, not your ocbox settings or secrets.
+not your other projects, not your roke settings or secrets.
 
-The `ocbox-home` volume is shared by all projects and agents. It holds each
+The `roke-home` volume is shared by all projects and agents. It holds each
 agent's login and sessions, tools installed with mise and caches (npm,
 maven, cargo...).
 
@@ -36,8 +36,8 @@ maven, cargo...).
 - **`.git` is read-only** by default. Otherwise the agent could plant hooks,
   or settings such as `core.fsmonitor`, that would run on your host the next
   time you used git there.
-- **Settings live outside the project.** `ocbox` only reads compose files
-  and settings from `~/.config/ocbox` and from its own repository, and
+- **Settings live outside the project.** `roke` only reads compose files
+  and settings from `~/.config/roke` and from its own repository, and
   refuses to mount a project that contains either of them. A compose file
   written by the agent could otherwise mount any host path.
 - **Published ports** listen on `127.0.0.1` by default, never on your

@@ -2,7 +2,7 @@
 
 - [Requirements](#requirements)
 - [Install Docker](#install-docker)
-- [Install opencode-box](#install-opencode-box)
+- [Install roke](#install-roke)
 - [Updating](#updating)
 - [Rootless Docker](#rootless-docker)
 - [Uninstalling](#uninstalling)
@@ -86,37 +86,37 @@ docker run --rm hello-world
 Being in the `docker` group is equivalent to having root access on the
 host; [rootless Docker](#rootless-docker) avoids that.
 
-## Install opencode-box
+## Install roke
 
 ```fish
-git clone https://github.com/bameda/opencode-box.git ~/src/opencode-box
-~/src/opencode-box/install.sh
+git clone https://github.com/bameda/roke.git ~/src/roke
+~/src/roke/install.sh
 ```
 
 `install.sh` does two things:
 
-- It links `ocbox` into `~/.local/bin`. If that directory is not in your
+- It links `roke` into `~/.local/bin`. If that directory is not in your
   `PATH`, add it (in fish: `fish_add_path ~/.local/bin`).
-- It creates your configuration directory, `~/.config/ocbox`, from the
+- It creates your configuration directory, `~/.config/roke`, from the
   examples. It never overwrites existing files. See
   [Configuration](configuration.md).
 
-Choose your default agent (it is written to `~/.config/ocbox/ocbox.env`):
+Choose your default agent (it is written to `~/.config/roke/roke.env`):
 
 ```fish
-ocbox --default-agent claude      # or opencode; see agents/README.md
+roke --default-agent claude       # or opencode; see agents/README.md
 ```
 
-Any project can use a different one later, with `ocbox --set-agent`.
+Any project can use a different one later, with `roke --set-agent`.
 
 The image installs every agent by default. To make it smaller, keep only
-the ones you use in `OCBOX_AGENTS` (see [Agents](../agents/README.md)).
+the ones you use in `ROKE_AGENTS` (see [Agents](../agents/README.md)).
 
 Then build the image and start the agent in a project:
 
 ```fish
 cd ~/src/my-project
-ocbox --build
+roke --build
 ```
 
 The first time, log in from inside the agent, as its README explains
@@ -128,24 +128,24 @@ box's own volume, not in your real `$HOME`, and works for every project.
 
 If you keep your configuration in a private repository (see
 [Configuration](configuration.md#keeping-it-in-a-private-repository)), pass
-its URL to `install.sh`. It clones the repository into `~/.config/ocbox` and
+its URL to `install.sh`. It clones the repository into `~/.config/roke` and
 adds any missing file from the examples:
 
 ```fish
-git clone https://github.com/bameda/opencode-box.git ~/src/opencode-box
-~/src/opencode-box/install.sh git@github.com:<you>/ocbox-config.git
+git clone https://github.com/bameda/roke.git ~/src/roke
+~/src/roke/install.sh git@github.com:<you>/roke-config.git
 ```
 
 Your secrets are not in that repository, so recreate
-`~/.config/ocbox/secrets.env` by hand if you use it, or log in again with
+`~/.config/roke/secrets.env` by hand if you use it, or log in again with
 logging in again from the agent.
 
 ## Updating
 
 ```fish
-cd ~/src/opencode-box
+cd ~/src/roke
 git pull
-ocbox --build
+roke --build
 ```
 
 Your configuration is not touched. Releases with incompatible changes are
@@ -153,11 +153,11 @@ marked with `!` in the commit history (for example
 `feat(postgres)!: ...`): read their description, which explains what to
 change.
 
-`ocbox --build` rebuilds the image only where something changed. Agents
+`roke --build` rebuilds the image only where something changed. Agents
 installed from a channel (`latest`, `stable`) are not updated by it, since
-Docker reuses the cached layer: run `ocbox --rebuild` to fetch their newest
-release, or pin versions with `OCBOX_AGENT_VERSIONS` in `ocbox.env` and run
-`ocbox --build` after changing them. See [Agents](../agents/README.md).
+Docker reuses the cached layer: run `roke --rebuild` to fetch their newest
+release, or pin versions with `ROKE_AGENT_VERSIONS` in `roke.env` and run
+`roke --build` after changing them. See [Agents](../agents/README.md).
 
 ## Rootless Docker
 
@@ -167,25 +167,25 @@ Docker no longer means having root on the host.
 
 The container's root maps to your host user, and every other UID to a
 subordinate one. To keep the files the agent creates owned by you, add to
-`~/.config/ocbox/ocbox.env`:
+`~/.config/roke/roke.env`:
 
 ```dotenv
-OCBOX_HOST_UID=0
-OCBOX_HOST_GID=0
+ROKE_HOST_UID=0
+ROKE_HOST_GID=0
 ```
 
-Then run `ocbox --rebuild`. There is still no `sudo` in the box, and its
+Then run `roke --rebuild`. There is still no `sudo` in the box, and its
 root is not root on your machine.
 
 ## Uninstalling
 
 ```fish
-cd ~/src/my-project && ocbox --purge      # for each project: services and data
-docker volume rm ocbox-home               # the box's home: login, caches, tools
-docker image rm ocbox:latest
-rm ~/.local/bin/ocbox
-rm -rf ~/src/opencode-box
+cd ~/src/my-project && roke --purge       # for each project: services and data
+docker volume rm roke-home                # the box's home: login, caches, tools
+docker image rm roke:latest
+rm ~/.local/bin/roke
+rm -rf ~/src/roke
 ```
 
-`~/.config/ocbox` is left in place, so remove it too if you no longer need
+`~/.config/roke` is left in place, so remove it too if you no longer need
 your configuration.

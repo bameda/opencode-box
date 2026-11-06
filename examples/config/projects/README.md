@@ -2,7 +2,7 @@
 
 One directory per project, named after the **project's directory**: for
 `~/src/my-app`, `projects/my-app/`. To add a project, copy one of the
-[example projects](https://github.com/bameda/opencode-box/tree/main/examples/projects)
+[example projects](https://github.com/bameda/roke/tree/main/examples/projects)
 and adapt it, or create the directory with only the files you need. All of
 them are optional:
 
@@ -17,14 +17,14 @@ projects/my-app/
 ```
 
 In compose files, refer to files in the project's directory with
-`${OCBOX_PROJECT_CONFIG}`; relative paths resolve against the opencode-box
+`${ROKE_PROJECT_CONFIG}`; relative paths resolve against the roke
 repository.
 
 These files live in your configuration, not in the project itself, on
-purpose: a compose file can mount any host path, so if `ocbox` read one from
+purpose: a compose file can mount any host path, so if `roke` read one from
 the project, the agent could write one and escape the container. For the
 same reason, only `AGENTS.md` is visible inside the box; the rest of the
 directory, secrets included, is not.
 
 Full documentation:
-[per-project settings](https://github.com/bameda/opencode-box/blob/main/docs/configuration.md#per-project-settings).
+[per-project settings](https://github.com/bameda/roke/blob/main/docs/configuration.md#per-project-settings).

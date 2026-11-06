@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=postgres` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s postgres`.
+**Enable**: `ROKE_SERVICES=postgres` in `~/.config/roke/projects/<name>/project.env`, or `roke -s postgres`.
 
 PostgreSQL relational database. Requires PostgreSQL 18 or newer.
 
@@ -48,7 +48,7 @@ dropdb --force "$PGDATABASE" && createdb "$PGDATABASE"   # empty the DB
 services:
   postgres:
     volumes:
-      - ${OCBOX_PROJECT_CONFIG}/initdb:/docker-entrypoint-initdb.d:ro
+      - ${ROKE_PROJECT_CONFIG}/initdb:/docker-entrypoint-initdb.d:ro
 ```
 
 **PostGIS or other images.** Swap the image in the project's
@@ -65,11 +65,11 @@ re-run your migrations and seeds. To keep the data, dump it first:
 
 ```fish
 cd ~/src/my-project
-ocbox -s postgres -- pg_dumpall -f .pg-upgrade.sql      # with the old version
-# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in ocbox.env, then:
-ocbox --build -s postgres -- psql -d postgres -f .pg-upgrade.sql
+roke -s postgres -- pg_dumpall -f .pg-upgrade.sql       # with the old version
+# set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in roke.env, then:
+roke --build -s postgres -- psql -d postgres -f .pg-upgrade.sql
 rm .pg-upgrade.sql
 ```
 
 Errors about the role or database already existing are expected. The old
-major's files stay in the volume until you run `ocbox --purge`.
+major's files stay in the volume until you run `roke --purge`.

@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=nats` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s nats`.
+**Enable**: `ROKE_SERVICES=nats` in `~/.config/roke/projects/<name>/project.env`, or `roke -s nats`.
 
 [NATS](https://nats.io/) messaging server, with
 [JetStream](https://docs.nats.io/nats-concepts/jetstream) enabled for

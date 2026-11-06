@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=ssh-target` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s ssh-target`.
+**Enable**: `ROKE_SERVICES=ssh-target` in `~/.config/roke/projects/<name>/project.env`, or `roke -s ssh-target`.
 
 A disposable Debian machine for **testing Ansible playbooks** (or any SSH
 automation) without touching real infrastructure.
@@ -37,7 +37,7 @@ of this ready to copy.
 In `projects/<name>/project.env`:
 
 ```dotenv
-OCBOX_SERVICES=ssh-target
+ROKE_SERVICES=ssh-target
 ```
 
 In the project's `mise.toml`, so ansible is installed in the box:
@@ -56,13 +56,13 @@ And a test inventory in the project, for example `inventories/test/hosts.ini`:
 ssh-target
 ```
 
-The first `ocbox` builds the target's image; after that it starts in a
+The first `roke` builds the target's image; after that it starts in a
 couple of seconds.
 
 ## Usage
 
 Ask the agent to test the playbook against the test inventory, or do it
-yourself from `ocbox --shell`:
+yourself from `roke --shell`:
 
 ```bash
 ansible -i inventories/test all -m ping
@@ -72,7 +72,7 @@ ssh -i "$SSH_TARGET_KEY" ansible@ssh-target    # look around by hand
 ```
 
 The second run is the idempotence check: a well-written playbook must report
-no changes. To start again from a clean machine, run `ocbox --down`: the
+no changes. To start again from a clean machine, run `roke --down`: the
 target's filesystem is not persisted.
 
 Once it works, apply it to your real infrastructure **from the host**, first
@@ -82,7 +82,7 @@ the box.
 ## Several targets or another distribution
 
 To test against Ubuntu or another Debian release, set the base image in
-`projects/<name>/project.env` (it must use apt) and rebuild with `ocbox --build`:
+`projects/<name>/project.env` (it must use apt) and rebuild with `roke --build`:
 
 ```dotenv
 SSH_TARGET_BASE_IMAGE=ubuntu:24.04

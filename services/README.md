@@ -3,7 +3,7 @@
 The catalog of auxiliary services: databases, caches, mail, storage, queues
 and test infrastructure. Each one lives in its own directory under
 `services/`, with a `compose.yaml` that defines it and a `README.md` that
-explains how to use it. `ocbox --list` shows what is available.
+explains how to use it. `roke --list` shows what is available.
 
 ## Catalog
 
@@ -30,26 +30,26 @@ explains how to use it. `ocbox --list` shows what is available.
 ## How services work
 
 Paths such as `projects/<name>/project.env` refer to your configuration
-directory, `~/.config/ocbox` (see [Configuration](../docs/configuration.md)).
+directory, `~/.config/roke` (see [Configuration](../docs/configuration.md)).
 
 **Enable** services per project in `projects/<name>/project.env` (or one-off
-with `ocbox -s`):
+with `roke -s`):
 
 ```dotenv
-OCBOX_SERVICES=postgres,redis,mailpit
+ROKE_SERVICES=postgres,redis,mailpit
 ```
 
 **Each service runs in its own container**, from its official image, and is
 reachable from the box by its name (`postgres`, `redis`...). Its connection
 details are set as environment variables in the box, so your
 app and the agent find them without configuration. Run `env` in
-`ocbox --shell` to see them all.
+`roke --shell` to see them all.
 
 **Credentials** default to `dev`/`dev`: everything is local and never exposed
 beyond your machine.
 
 **Settings** (versions, credentials, ports) are changed through variables:
-in `ocbox.env` for every project, or in `projects/<name>/project.env` for
+in `roke.env` for every project, or in `projects/<name>/project.env` for
 one. Each service's README lists them with their defaults.
 
 **Data** is per project: two projects using `postgres` get separate
@@ -57,8 +57,8 @@ databases. Services keep running when you exit the agent.
 
 | Command | Effect |
 |---|---|
-| `ocbox --down` | Stops the project's services. Data in volumes is kept. |
-| `ocbox --purge` | Stops them and deletes all their data. |
+| `roke --down` | Stops the project's services. Data in volumes is kept. |
+| `roke --purge` | Stops them and deletes all their data. |
 
 **From your host.** Services with a web UI publish it on `127.0.0.1` (see
 each section). Databases are not published by default; to connect a desktop
@@ -83,26 +83,26 @@ Where you put the copy decides who can use it:
 
 | Location | Available to |
 |---|---|
-| `~/.config/ocbox/projects/<project>/services/<name>/` | that project only |
-| `~/.config/ocbox/services/<name>/` | all your projects |
-| `services/<name>/` in this repository | everyone using opencode-box (send a pull request) |
+| `~/.config/roke/projects/<project>/services/<name>/` | that project only |
+| `~/.config/roke/services/<name>/` | all your projects |
+| `services/<name>/` in this repository | everyone using roke (send a pull request) |
 
 They are looked up in that order and the first one found wins, so a
 project's service can replace one of yours, and yours can replace one from
-the catalog. `ocbox --list` marks them as `[project]` or `[yours]`.
+the catalog. `roke --list` marks them as `[project]` or `[yours]`.
 
 The rules are few:
 
 1. The service has the same name as its directory; that is its hostname.
-2. It must be in the `depends_on` of `box`, which is what makes `ocbox`
+2. It must be in the `depends_on` of `box`, which is what makes `roke`
    start it (with `service_healthy` if it has a healthcheck).
 3. Connection variables go in the `environment` of `box`.
 4. Volumes without `name:` are per project. Ports are published on
    `127.0.0.1` through a variable, so they can be changed.
-5. The first comment line is the description shown by `ocbox --list`.
-6. Relative paths resolve against the opencode-box repository. To refer to
-   files in your configuration, use `${OCBOX_CONFIG_DIR}` or, for the
-   project's directory, `${OCBOX_PROJECT_CONFIG}`.
+5. The first comment line is the description shown by `roke --list`.
+6. Relative paths resolve against the roke repository. To refer to
+   files in your configuration, use `${ROKE_CONFIG_DIR}` or, for the
+   project's directory, `${ROKE_PROJECT_CONFIG}`.
 7. Document it in its `README.md`, following the structure of the existing
    ones. In the catalog, also add a row to the table above.
 

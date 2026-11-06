@@ -33,7 +33,7 @@ The dev server must listen on `0.0.0.0` to be reachable at
 
 ## Check it
 
-From `ocbox --shell`:
+From `roke --shell`:
 
 ```bash
 createdb app_test        # once: the database for the tests

@@ -8,7 +8,7 @@ directory can have, to copy from:
   service variables.
 - **`compose.yaml`**: a catalog service tweaked for this project (PostGIS
   instead of PostgreSQL), and how to mount files from the project's
-  directory with `${OCBOX_PROJECT_CONFIG}`.
+  directory with `${ROKE_PROJECT_CONFIG}`.
 - **`AGENTS.md`**: private instructions for the agent.
 - **`services/elasticsearch/`**: a service only this project uses, with the
   same layout as the catalog's.

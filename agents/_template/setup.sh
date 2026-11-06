@@ -5,7 +5,7 @@
 AGENT_COMMAND=(myagent)
 
 # Link your configuration where the agent reads it:
-# ocbox_link_config "$AGENT_CONFIG" "$HOME/.config/myagent"
+# roke_link_config "$AGENT_CONFIG" "$HOME/.config/myagent"
 
 # Put the combined instructions where the agent reads them:
 # cp "$AGENT_INSTRUCTIONS" "$HOME/.config/myagent/AGENTS.md"
@@ -14,5 +14,5 @@ AGENT_COMMAND=(myagent)
 # if ((SERENA_ENABLED)); then
 #   serena_command agent
 #   ... write an MCP configuration using "${SERENA_CMD[@]}" ...
-#   AGENT_ARGS=(--mcp-config "$OCBOX_RUNTIME/mcp.json")
+#   AGENT_ARGS=(--mcp-config "$ROKE_RUNTIME/mcp.json")
 # fi

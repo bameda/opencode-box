@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=mailpit` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s mailpit`.
+**Enable**: `ROKE_SERVICES=mailpit` in `~/.config/roke/projects/<name>/project.env`, or `roke -s mailpit`.
 
 Mailpit catches every email your app sends, so nothing reaches real
 recipients, and shows it in a web inbox.
@@ -38,7 +38,7 @@ m['Subject'] = 'Test'; m.set_content('Hello from the box')
 smtplib.SMTP('mailpit', 1025).send_message(m)"
 ```
 
-**Data**: not persisted; the inbox is emptied on `ocbox --down`.
+**Data**: not persisted; the inbox is emptied on `roke --down`.
 
 **Settings**
 

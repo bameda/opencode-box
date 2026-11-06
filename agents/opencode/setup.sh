@@ -9,7 +9,7 @@ AGENT_COMMAND=(opencode)
 # files, such as cli.json. The global AGENTS.md is the instructions file
 # OpenCode 2 reliably loads.
 cfg="$HOME/.config/opencode"
-ocbox_link_config "$AGENT_CONFIG" "$cfg"
+roke_link_config "$AGENT_CONFIG" "$cfg"
 cp "$AGENT_INSTRUCTIONS" "$cfg/AGENTS.md"
 
 # System configuration (/etc/opencode, highest precedence), rebuilt on every
@@ -20,7 +20,7 @@ system_config='{ "$schema": "https://opencode.ai/config.json", "update": "disabl
 if ((SERENA_ENABLED)); then
   serena_command ide
   codemode=false
-  [[ "${OCBOX_SERENA_CODEMODE:-0}" == "1" ]] && codemode=true
+  [[ "${ROKE_SERENA_CODEMODE:-0}" == "1" ]] && codemode=true
   system_config="$(jq -n --argjson base "$system_config" --argjson codemode "$codemode" \
     --args '$base + { mcp: { servers: { serena: {
         type: "local",

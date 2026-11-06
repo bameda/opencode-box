@@ -1,5 +1,5 @@
 # A simulated node: once applied, kwok schedules Pods on it and reports them
-# as Running. Apply it with: kubectl apply -f /run/ocbox/kwok/fake-node.yaml
+# as Running. Apply it with: kubectl apply -f /run/roke/kwok/fake-node.yaml
 apiVersion: v1
 kind: Node
 metadata:

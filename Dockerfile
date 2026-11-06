@@ -5,15 +5,15 @@
 FROM debian:trixie-slim
 
 # Host user's UID/GID, so files the agent creates in the project are owned
-# by you. bin/ocbox passes them automatically.
+# by you. bin/roke passes them automatically.
 ARG HOST_UID=1000
 ARG HOST_GID=1000
 
 # Coding agents to install (directories in agents/), space-separated, and
 # optional versions as agent=version pairs ("opencode=2.2.5 claude=latest");
 # agents without one get their install.sh's default.
-ARG OCBOX_AGENTS="claude opencode"
-ARG OCBOX_AGENT_VERSIONS=""
+ARG ROKE_AGENTS="claude opencode"
+ARG ROKE_AGENT_VERSIONS=""
 
 # PostgreSQL client tools (psql, pg_dump...) from the official PGDG repo.
 # Keep it >= the server's major: pg_dump refuses to dump newer servers.
@@ -101,21 +101,21 @@ RUN set -eux; \
 
 # Coding agents: each agents/<agent>/install.sh runs as root, after the user
 # exists so it can prepare directories the agent's setup.sh writes at start.
-COPY agents/ /tmp/ocbox-agents/
+COPY agents/ /tmp/roke-agents/
 RUN set -eu; \
-    install -d /etc/ocbox; \
-    : > /etc/ocbox/installed-agents; \
-    for agent in ${OCBOX_AGENTS}; do \
-      [ -x "/tmp/ocbox-agents/${agent}/install.sh" ] \
+    install -d /etc/roke; \
+    : > /etc/roke/installed-agents; \
+    for agent in ${ROKE_AGENTS}; do \
+      [ -x "/tmp/roke-agents/${agent}/install.sh" ] \
         || { echo "unknown agent: ${agent}" >&2; exit 1; }; \
-      version="$(printf '%s\n' ${OCBOX_AGENT_VERSIONS} | sed -n "s/^${agent}=//p" | tail -n1)"; \
+      version="$(printf '%s\n' ${ROKE_AGENT_VERSIONS} | sed -n "s/^${agent}=//p" | tail -n1)"; \
       echo "Installing ${agent} (${version:-default})"; \
-      "/tmp/ocbox-agents/${agent}/install.sh" "${version:-default}"; \
-      echo "${agent}" >> /etc/ocbox/installed-agents; \
+      "/tmp/roke-agents/${agent}/install.sh" "${version:-default}"; \
+      echo "${agent}" >> /etc/roke/installed-agents; \
     done; \
-    rm -rf /tmp/ocbox-agents
+    rm -rf /tmp/roke-agents
 
-COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/ocbox-entrypoint
+COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/roke-entrypoint
 
 ENV HOME=/home/dev \
     SHELL=/bin/bash \
@@ -127,5 +127,5 @@ ENV HOME=/home/dev \
 USER dev
 WORKDIR /home/dev
 
-# Without a command, the entrypoint runs the agent selected with OCBOX_AGENT.
-ENTRYPOINT ["/usr/local/bin/ocbox-entrypoint"]
+# Without a command, the entrypoint runs the agent selected with ROKE_AGENT.
+ENTRYPOINT ["/usr/local/bin/roke-entrypoint"]

@@ -1,22 +1,22 @@
 # First steps: adding a project
 
-This guide walks through adding a project to opencode-box, using a concrete
+This guide walks through adding a project to roke, using a concrete
 example: a Node app in `~/src/shop` that uses PostgreSQL and Redis and runs a
 dev server on port 5173.
 
 ## 0. Before you start
 
-You need opencode-box installed and its image built, an agent chosen with
-`OCBOX_AGENT`, and to have logged in from inside the agent once: see
+You need roke installed and its image built, an agent chosen with
+`ROKE_AGENT`, and to have logged in from inside the agent once: see
 [Installation](installation.md). The login is shared by every project.
 
 ## 1. Decide what the project needs
 
 Before configuring anything, answer these questions:
 
-- **Which agent?** The one in `ocbox.env` applies to every project; set
-  `OCBOX_AGENT` in the project's settings to use another one there.
-- **Which services does it use?** Check the catalog with `ocbox --list`.
+- **Which agent?** The one in `roke.env` applies to every project; set
+  `ROKE_AGENT` in the project's settings to use another one there.
+- **Which services does it use?** Check the catalog with `roke --list`.
   The [service catalog](../services/README.md) links to a guide for each one
   explaining how your app connects to it.
 - **Is there a port you want to open in your browser?** For example, the dev
@@ -27,21 +27,21 @@ Before configuring anything, answer these questions:
 
 ## 2. Create its directory in your configuration
 
-Each project has a directory in your configuration, `~/.config/ocbox`, named
+Each project has a directory in your configuration, `~/.config/roke`, named
 after the **project's directory**: for `~/src/shop`, `projects/shop/`. Start
 from the closest [example project](../examples/projects/README.md), here
 the Node.js one, and edit its settings in `project.env`:
 
 ```fish
-cp -r ~/src/opencode-box/examples/projects/node-app ~/.config/ocbox/projects/shop
-cd ~/.config/ocbox
+cp -r ~/src/roke/examples/projects/node-app ~/.config/roke/projects/shop
+cd ~/.config/roke
 $EDITOR projects/shop/project.env
 ```
 
 ```dotenv
-OCBOX_SERVICES=postgres,redis
-OCBOX_PORTS="5173"
-OCBOX_SERENA=1
+ROKE_SERVICES=postgres,redis
+ROKE_PORTS="5173"
+ROKE_SERENA=1
 POSTGRES_DB=shop
 ```
 
@@ -58,7 +58,7 @@ git add projects/shop
 git commit -m "chore: add shop project"
 ```
 
-Either way it stays out of the agent's reach: `ocbox` never mounts your
+Either way it stays out of the agent's reach: `roke` never mounts your
 configuration directory.
 
 ## 3. (Optional) Everything else the project needs
@@ -107,15 +107,15 @@ ask it to do this.
 
 ```fish
 cd ~/src/shop
-ocbox --shell
+roke --shell
 ```
 
-The line `[ocbox] project: ... services: postgres,redis ... serena: yes`
+The line `[roke] project: ... services: postgres,redis ... serena: yes`
 confirms your settings were picked up. Inside the shell, check that
 everything responds:
 
 ```bash
-env | grep -E 'DATABASE_URL|REDIS_URL|OCBOX'
+env | grep -E 'DATABASE_URL|REDIS_URL|ROKE'
 psql -c 'select 1'
 redis-cli -u "$REDIS_URL" ping
 exit
@@ -124,7 +124,7 @@ exit
 ## 7. First session
 
 ```fish
-ocbox
+roke
 ```
 
 Inside, run `/init` so the agent analyses the project and writes its
@@ -143,11 +143,11 @@ commit it or add it to `.gitignore`.
 
 ```fish
 cd ~/src/shop
-ocbox                            # new session
-ocbox -- claude --continue       # resume the last one (or opencode)
+roke                             # new session
+roke -- claude --continue        # resume the last one (or opencode)
 git diff                         # on the host: review what it did
 git commit -am "feat: ..."       # and commit it yourself
-ocbox --down                     # when done, stop PostgreSQL and Redis
+roke --down                      # when done, stop PostgreSQL and Redis
 ```
 
 The database keeps its data between sessions, even after `--down`. See
@@ -157,8 +157,8 @@ The database keeps its data between sessions, even after `--down`. See
 
 ```fish
 cd ~/src/shop
-ocbox --purge                    # stops the services and deletes their data
-rm -r ~/.config/ocbox/projects/shop
+roke --purge                     # stops the services and deletes their data
+rm -r ~/.config/roke/projects/shop
 ```
 
 If you keep your configuration in a repository, commit the removal there

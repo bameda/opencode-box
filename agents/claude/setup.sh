@@ -11,7 +11,7 @@ export DISABLE_UPDATES=1
 # skills/...) is linked into ~/.claude. Claude Code keeps its own state
 # (login, sessions, auto memory) there and in ~/.claude.json, in the box's
 # volume.
-ocbox_link_config "$AGENT_CONFIG" "$HOME/.claude"
+roke_link_config "$AGENT_CONFIG" "$HOME/.claude"
 
 # The box's instructions go to the managed CLAUDE.md, which Claude Code loads
 # before your CLAUDE.md and the project's, and which cannot be excluded.
@@ -20,7 +20,7 @@ cp "$AGENT_INSTRUCTIONS" /etc/claude-code/CLAUDE.md
 # Serena, through a per-start MCP configuration passed on the command line.
 if ((SERENA_ENABLED)); then
   serena_command claude-code
-  mcp_config="$OCBOX_RUNTIME/claude-mcp.json"
+  mcp_config="$ROKE_RUNTIME/claude-mcp.json"
   jq -n --args '{ mcpServers: { serena: {
       type: "stdio", command: $ARGS.positional[0], args: $ARGS.positional[1:]
     } } }' -- "${SERENA_CMD[@]}" > "$mcp_config"

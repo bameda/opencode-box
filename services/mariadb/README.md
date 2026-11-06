@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=mariadb` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s mariadb`.
+**Enable**: `ROKE_SERVICES=mariadb` in `~/.config/roke/projects/<name>/project.env`, or `roke -s mariadb`.
 
 MariaDB, a MySQL-compatible relational database.
 

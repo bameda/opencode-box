@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=valkey` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s valkey`.
+**Enable**: `ROKE_SERVICES=valkey` in `~/.config/roke/projects/<name>/project.env`, or `roke -s valkey`.
 
 Valkey, the open-source fork of Redis. It speaks the same protocol, so Redis
 clients and `redis-cli` work with it unchanged.

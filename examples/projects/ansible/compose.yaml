@@ -1,6 +1,6 @@
 # A second test host, ssh-target-db, for playbooks with several groups. It
 # shares the test key with ssh-target, so "ssh-target" must be in
-# OCBOX_SERVICES. Delete this file if one host is enough.
+# ROKE_SERVICES. Delete this file if one host is enough.
 services:
   box:
     depends_on:

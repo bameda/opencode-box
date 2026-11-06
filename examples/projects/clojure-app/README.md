@@ -41,7 +41,7 @@ next.jdbc and similar, and `REDIS_URL` (or `VALKEY_URL`) for Carmine.
 ## Connect your editor to the REPL in the box
 
 Ask the agent to start the REPL (`clojure -M:nrepl`), or start it yourself
-from `ocbox --shell`. Then connect your editor on the host to
+from `roke --shell`. Then connect your editor on the host to
 `127.0.0.1:7888` (in Calva, *Connect to a running REPL*; in CIDER,
 `cider-connect-clj`). nREPL also writes `.nrepl-port` to the project, which
 most editors pick up automatically.
@@ -51,7 +51,7 @@ there too, with the box's limits.
 
 ## Check it
 
-From `ocbox --shell`:
+From `roke --shell`:
 
 ```bash
 clojure -M:test

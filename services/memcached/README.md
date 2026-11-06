@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=memcached` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s memcached`.
+**Enable**: `ROKE_SERVICES=memcached` in `~/.config/roke/projects/<name>/project.env`, or `roke -s memcached`.
 
 Memcached, a simple key-value cache.
 

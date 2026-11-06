@@ -6,10 +6,10 @@
 services:
   box:
     environment:
-      KUBECONFIG: /run/ocbox/kwok/kubeconfig
+      KUBECONFIG: /run/roke/kwok/kubeconfig
     volumes:
-      - ./services/kwok/kubeconfig:/run/ocbox/kwok/kubeconfig:ro
-      - ./services/kwok/fake-node.yaml:/run/ocbox/kwok/fake-node.yaml:ro
+      - ./services/kwok/kubeconfig:/run/roke/kwok/kubeconfig:ro
+      - ./services/kwok/fake-node.yaml:/run/roke/kwok/fake-node.yaml:ro
     depends_on:
       kwok:
         condition: service_healthy

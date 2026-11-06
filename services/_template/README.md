@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=myservice` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s myservice`.
+**Enable**: `ROKE_SERVICES=myservice` in `~/.config/roke/projects/<name>/project.env`, or `roke -s myservice`.
 
 One or two sentences: what the service is and what a project uses it for.
 
@@ -20,7 +20,7 @@ for.
 **Explore it**
 
 ```bash
-# commands to inspect or reset it from ocbox --shell
+# commands to inspect or reset it from roke --shell
 ```
 
 **From your host**: web UI address, if it publishes one.

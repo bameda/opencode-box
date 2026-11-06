@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ocbox — run a coding agent in a container that can only see the given project,
+# roke — run a coding agent in a container that can only see the given project,
 # plus whatever auxiliary services (DB, cache, mail, proxy...) you ask for.
 set -euo pipefail
 
@@ -7,16 +7,16 @@ BOX_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd -P)"
 SERVICES_DIR="$BOX_DIR/services"
 # Your personal configuration (settings, projects, agent configuration), kept
 # outside this repository.
-CONFIG_DIR="${OCBOX_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/ocbox}"
+CONFIG_DIR="${ROKE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/roke}"
 USER_SERVICES_DIR="$CONFIG_DIR/services"
 PROJECT_SERVICES_DIR=""   # set once the project is known
 
-die()  { printf 'ocbox: %s\n' "$*" >&2; exit 1; }
-info() { printf '[ocbox] %s\n' "$*" >&2; }
+die()  { printf 'roke: %s\n' "$*" >&2; exit 1; }
+info() { printf '[roke] %s\n' "$*" >&2; }
 
 usage() {
   cat <<'USAGE'
-Usage: ocbox [options] [PROJECT_DIR] [-- COMMAND...]
+Usage: roke [options] [PROJECT_DIR] [-- COMMAND...]
 
 Run a coding agent in a container with access to PROJECT_DIR only
 (default: $PWD).
@@ -45,16 +45,16 @@ Options:
   -h, --help             Show this help
 
 Anything after "--" replaces the default command (the agent):
-  ocbox -- claude --continue
-  ocbox -- opencode --continue
-  ocbox -s postgres -- psql
+  roke -- claude --continue
+  roke -- opencode --continue
+  roke -s postgres -- psql
 
-Configuration directory: ~/.config/ocbox (or $OCBOX_CONFIG_DIR), out of the
+Configuration directory: ~/.config/roke (or $ROKE_CONFIG_DIR), out of the
 agent's reach:
-  ocbox.env, secrets.env     global settings (OCBOX_AGENT...) and API keys
+  roke.env, secrets.env     global settings (ROKE_AGENT...) and API keys
   AGENTS.md                  your instructions for every agent
   projects/<dir-name>/       one directory per project, named after it:
-    project.env              OCBOX_SERVICES, OCBOX_PORTS, OCBOX_SERENA...
+    project.env              ROKE_SERVICES, ROKE_PORTS, ROKE_SERENA...
     secrets.env              the project's secrets
     compose.yaml             compose override for the project
     AGENTS.md                private instructions for the agent
@@ -140,7 +140,7 @@ list_services() {
   while read -r s; do
     desc="$(sed -n '1s/^# *//p' "$BOX_DIR/agents/$s/README.md" 2>/dev/null)"
     [[ " ${installed_agents:-} " == *" $s "* ]] || desc="$desc (not installed)"
-    [[ "$s" == "${OCBOX_AGENT:-}" ]] && desc="$desc  <- selected (${agent_source:-})"
+    [[ "$s" == "${ROKE_AGENT:-}" ]] && desc="$desc  <- selected (${agent_source:-})"
     printf '  %-12s %s\n' "$s" "$desc"
   done < <(available_agents)
   echo
@@ -198,11 +198,11 @@ while (($#)); do
 done
 
 [[ -d "$CONFIG_DIR" ]] \
-  || die "configuration directory not found: $CONFIG_DIR (create it with: ocbox --init)"
+  || die "configuration directory not found: $CONFIG_DIR (create it with: roke --init)"
 CONFIG_DIR="$(cd "$CONFIG_DIR" && pwd -P)"
 USER_SERVICES_DIR="$CONFIG_DIR/services"
 case "$CONFIG_DIR/" in "$BOX_DIR"/*)
-  die "the configuration directory must live outside the opencode-box repo" ;;
+  die "the configuration directory must live outside the roke repo" ;;
 esac
 
 # --- Project -------------------------------------------------------------------
@@ -211,7 +211,7 @@ project="${project:-$PWD}"
 PROJECT_DIR="$(cd "$project" && pwd -P)"
 HOME_REAL="$(cd "$HOME" && pwd -P)"
 
-# The project's own configuration: ~/.config/ocbox/projects/<directory name>/
+# The project's own configuration: ~/.config/roke/projects/<directory name>/
 name="$(basename "$PROJECT_DIR")"
 PROJECT_CONFIG="$CONFIG_DIR/projects/$name"
 PROJECT_SERVICES_DIR="$PROJECT_CONFIG/services"
@@ -229,23 +229,23 @@ case "$HOME_REAL/" in "$PROJECT_DIR"/*)
   die "$PROJECT_DIR contains your \$HOME; pick a specific project directory" ;;
 esac
 case "$BOX_DIR/" in "$PROJECT_DIR"/*)
-  die "the project contains the ocbox repo; the agent could modify its own sandbox" ;;
+  die "the project contains the roke repo; the agent could modify its own sandbox" ;;
 esac
 case "$PROJECT_DIR/" in "$BOX_DIR"/*)
-  die "the project is inside the ocbox repo" ;;
+  die "the project is inside the roke repo" ;;
 esac
 case "$CONFIG_DIR/" in "$PROJECT_DIR"/*)
-  die "the project contains your ocbox configuration; the agent could change its own settings" ;;
+  die "the project contains your roke configuration; the agent could change its own settings" ;;
 esac
 case "$PROJECT_DIR/" in "$CONFIG_DIR"/*)
-  die "the project is inside your ocbox configuration directory" ;;
+  die "the project is inside your roke configuration directory" ;;
 esac
 fi
 
 slug="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' \
         | sed -E 's/-+/-/g; s/^-//; s/-$//')"
 hash="$(printf '%s' "$PROJECT_DIR" | sha1sum | cut -c1-8)"
-compose_project="ocbox-${slug:-project}-${hash}"
+compose_project="roke-${slug:-project}-${hash}"
 
 # --- Switching agents -----------------------------------------------------------
 # set_setting FILE KEY VALUE: sets KEY=VALUE in a settings file, replacing an
@@ -269,29 +269,29 @@ check_agent_name() {
   fi
   local installed
   # shellcheck source=/dev/null
-  installed="$(set -a; [[ -f "$CONFIG_DIR/ocbox.env" ]] && source "$CONFIG_DIR/ocbox.env"; echo "${OCBOX_AGENTS:-claude opencode}")"
+  installed="$(set -a; [[ -f "$CONFIG_DIR/roke.env" ]] && source "$CONFIG_DIR/roke.env"; echo "${ROKE_AGENTS:-claude opencode}")"
   [[ " $installed " == *" $1 "* ]] \
-    || info "note: '$1' is not in OCBOX_AGENTS ($installed); add it there and run ocbox --build"
+    || info "note: '$1' is not in ROKE_AGENTS ($installed); add it there and run roke --build"
 }
 
 case "$action" in
   default-agent)
     check_agent_name "$set_value"
-    set_setting "$CONFIG_DIR/ocbox.env" OCBOX_AGENT "$set_value"
-    info "default agent: $set_value (in $CONFIG_DIR/ocbox.env)"
-    if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^OCBOX_AGENT=' "$PROJECT_CONFIG/project.env"; then
-      info "note: this project has its own agent; ocbox --set-agent default to use the default"
+    set_setting "$CONFIG_DIR/roke.env" ROKE_AGENT "$set_value"
+    info "default agent: $set_value (in $CONFIG_DIR/roke.env)"
+    if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^ROKE_AGENT=' "$PROJECT_CONFIG/project.env"; then
+      info "note: this project has its own agent; roke --set-agent default to use the default"
     fi
     exit 0 ;;
   set-agent)
     if [[ "$set_value" == default ]]; then
       if [[ -f "$PROJECT_CONFIG/project.env" ]]; then
-        sed -i '/^OCBOX_AGENT=/d' "$PROJECT_CONFIG/project.env"
+        sed -i '/^ROKE_AGENT=/d' "$PROJECT_CONFIG/project.env"
       fi
       info "$name uses the default agent"
     else
       check_agent_name "$set_value"
-      set_setting "$PROJECT_CONFIG/project.env" OCBOX_AGENT "$set_value"
+      set_setting "$PROJECT_CONFIG/project.env" ROKE_AGENT "$set_value"
       info "agent for $name: $set_value (in $PROJECT_CONFIG/project.env)"
     fi
     exit 0 ;;
@@ -300,9 +300,9 @@ esac
 # --- Settings (from your configuration directory, not from the project) -----
 # Everything is exported, so these files can also override service versions,
 # ports or credentials (POSTGRES_VERSION, MAILPIT_UI_PORT...).
-# Order (the last one wins): global ocbox.env and secrets.env, then the
+# Order (the last one wins): global roke.env and secrets.env, then the
 # project's project.env and secrets.env.
-for f in "$CONFIG_DIR/ocbox.env" "$CONFIG_DIR/secrets.env" \
+for f in "$CONFIG_DIR/roke.env" "$CONFIG_DIR/secrets.env" \
          "$PROJECT_CONFIG/project.env" "$PROJECT_CONFIG/secrets.env"; do
   [[ -f "$f" ]] || continue
   set -a
@@ -310,43 +310,43 @@ for f in "$CONFIG_DIR/ocbox.env" "$CONFIG_DIR/secrets.env" \
   source "$f"
   set +a
 done
-services="${services:-${OCBOX_SERVICES:-}}"
-if ((${#ports[@]} == 0)) && [[ -n "${OCBOX_PORTS:-}" ]]; then
-  read -ra ports <<<"$OCBOX_PORTS"
+services="${services:-${ROKE_SERVICES:-}}"
+if ((${#ports[@]} == 0)) && [[ -n "${ROKE_PORTS:-}" ]]; then
+  read -ra ports <<<"$ROKE_PORTS"
 fi
-git_rw=$(( cli_git_rw || ${OCBOX_GIT_RW:-0} ))
-OCBOX_SERENA="${cli_serena:-${OCBOX_SERENA:-0}}"; export OCBOX_SERENA
-OCBOX_SERENA_DASHBOARD="${OCBOX_SERENA_DASHBOARD:-0}"; export OCBOX_SERENA_DASHBOARD
+git_rw=$(( cli_git_rw || ${ROKE_GIT_RW:-0} ))
+ROKE_SERENA="${cli_serena:-${ROKE_SERENA:-0}}"; export ROKE_SERENA
+ROKE_SERENA_DASHBOARD="${ROKE_SERENA_DASHBOARD:-0}"; export ROKE_SERENA_DASHBOARD
 
 # --- Coding agent ------------------------------------------------------------------
-# OCBOX_AGENTS lists the agents the image is built with; no agent is the
+# ROKE_AGENTS lists the agents the image is built with; no agent is the
 # default, so with several installed one must be chosen.
-installed_agents="${OCBOX_AGENTS:-claude opencode}"
+installed_agents="${ROKE_AGENTS:-claude opencode}"
 agent_source="default"
-if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^OCBOX_AGENT=' "$PROJECT_CONFIG/project.env"; then
+if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^ROKE_AGENT=' "$PROJECT_CONFIG/project.env"; then
   agent_source="this project"
 fi
 [[ -n "$cli_agent" ]] && agent_source="--agent"
-OCBOX_AGENT="${cli_agent:-${OCBOX_AGENT:-}}"
-if [[ -z "$OCBOX_AGENT" ]]; then
+ROKE_AGENT="${cli_agent:-${ROKE_AGENT:-}}"
+if [[ -z "$ROKE_AGENT" ]]; then
   read -ra _installed <<<"$installed_agents"
   if ((${#_installed[@]} == 1)); then
-    OCBOX_AGENT="${_installed[0]}"
+    ROKE_AGENT="${_installed[0]}"
     agent_source="the only one installed"
   elif [[ "$action" == run ]]; then
-    die "choose a coding agent: ocbox --default-agent NAME (installed: $installed_agents)"
+    die "choose a coding agent: roke --default-agent NAME (installed: $installed_agents)"
   else
-    OCBOX_AGENT=none   # not needed to stop or remove services
+    ROKE_AGENT=none   # not needed to stop or remove services
   fi
 fi
 if [[ "$action" == run ]]; then
-  if [[ "$OCBOX_AGENT" == _* || "$OCBOX_AGENT" == */* || ! -f "$BOX_DIR/agents/$OCBOX_AGENT/setup.sh" ]]; then
-    die "unknown agent: '$OCBOX_AGENT' (available: $(available_agents | paste -sd ' '))"
+  if [[ "$ROKE_AGENT" == _* || "$ROKE_AGENT" == */* || ! -f "$BOX_DIR/agents/$ROKE_AGENT/setup.sh" ]]; then
+    die "unknown agent: '$ROKE_AGENT' (available: $(available_agents | paste -sd ' '))"
   fi
-  [[ " $installed_agents " == *" $OCBOX_AGENT "* ]] \
-    || die "the agent '$OCBOX_AGENT' is not in OCBOX_AGENTS ($installed_agents): add it there and run ocbox --build"
+  [[ " $installed_agents " == *" $ROKE_AGENT "* ]] \
+    || die "the agent '$ROKE_AGENT' is not in ROKE_AGENTS ($installed_agents): add it there and run roke --build"
 fi
-export OCBOX_AGENT
+export ROKE_AGENT
 
 if [[ "$action" == list ]]; then
   list_services
@@ -378,15 +378,15 @@ fi
 [[ -f "$PROJECT_CONFIG/compose.yaml" ]] && compose_files+=(-f "$PROJECT_CONFIG/compose.yaml")
 
 export PROJECT_DIR
-OCBOX_CONFIG_DIR="$CONFIG_DIR"; export OCBOX_CONFIG_DIR
-# For paths in the project's compose files: ${OCBOX_PROJECT_CONFIG}/Caddyfile
-OCBOX_PROJECT_CONFIG="$PROJECT_CONFIG"; export OCBOX_PROJECT_CONFIG
+ROKE_CONFIG_DIR="$CONFIG_DIR"; export ROKE_CONFIG_DIR
+# For paths in the project's compose files: ${ROKE_PROJECT_CONFIG}/Caddyfile
+ROKE_PROJECT_CONFIG="$PROJECT_CONFIG"; export ROKE_PROJECT_CONFIG
 # Must exist before Docker mounts it, or Docker creates it owned by root.
-[[ "$OCBOX_AGENT" == none ]] || mkdir -p "$CONFIG_DIR/agents/$OCBOX_AGENT"
-OCBOX_SERVICES="$(IFS=','; echo "${selected[*]}")"; export OCBOX_SERVICES
-# OCBOX_HOST_UID/GID override the container user (e.g. 0 for rootless Docker).
-HOST_UID="${OCBOX_HOST_UID:-$(id -u)}"; export HOST_UID
-HOST_GID="${OCBOX_HOST_GID:-$(id -g)}"; export HOST_GID
+[[ "$ROKE_AGENT" == none ]] || mkdir -p "$CONFIG_DIR/agents/$ROKE_AGENT"
+ROKE_SERVICES="$(IFS=','; echo "${selected[*]}")"; export ROKE_SERVICES
+# ROKE_HOST_UID/GID override the container user (e.g. 0 for rootless Docker).
+HOST_UID="${ROKE_HOST_UID:-$(id -u)}"; export HOST_UID
+HOST_GID="${ROKE_HOST_GID:-$(id -g)}"; export HOST_GID
 
 dc() {
   docker compose --project-directory "$BOX_DIR" -p "$compose_project" \
@@ -398,8 +398,8 @@ case "$action" in
   purge) dc down --remove-orphans --volumes; exit 0 ;;
 esac
 
-docker volume inspect ocbox-home >/dev/null 2>&1 \
-  || docker volume create ocbox-home >/dev/null
+docker volume inspect roke-home >/dev/null 2>&1 \
+  || docker volume create roke-home >/dev/null
 
 case "$build" in
   # Builds the box plus any selected service with its own image (ssh-target).
@@ -419,28 +419,28 @@ for p in "${ports[@]}"; do
 done
 
 # Serena dashboard (optional), published on 127.0.0.1 only.
-if [[ "$OCBOX_SERENA" == "1" && "$OCBOX_SERENA_DASHBOARD" == "1" ]]; then
-  run_args+=(-p "127.0.0.1:${OCBOX_SERENA_DASHBOARD_PORT:-24282}:24282")
+if [[ "$ROKE_SERENA" == "1" && "$ROKE_SERENA_DASHBOARD" == "1" ]]; then
+  run_args+=(-p "127.0.0.1:${ROKE_SERENA_DASHBOARD_PORT:-24282}:24282")
 fi
 
 # Your instructions for every agent.
 if [[ -f "$CONFIG_DIR/AGENTS.md" ]]; then
-  run_args+=(-v "$CONFIG_DIR/AGENTS.md:/run/ocbox/user-AGENTS.md:ro")
+  run_args+=(-v "$CONFIG_DIR/AGENTS.md:/run/roke/user-AGENTS.md:ro")
 fi
 
 # The project's private instructions for the agent: only this file is
 # mounted, never the directory, which may hold secrets.
 if [[ -f "$PROJECT_CONFIG/AGENTS.md" ]]; then
-  run_args+=(-v "$PROJECT_CONFIG/AGENTS.md:/run/ocbox/project-AGENTS.md:ro")
+  run_args+=(-v "$PROJECT_CONFIG/AGENTS.md:/run/roke/project-AGENTS.md:ro")
 fi
 
 # Read-only .git: prevents the agent from planting hooks or .git/config
 # settings (core.fsmonitor, core.hooksPath...) that would run on your host.
 if ((git_rw == 0)) && [[ -d "$PROJECT_DIR/.git" ]]; then
-  run_args+=(-v "$PROJECT_DIR/.git:$PROJECT_DIR/.git:ro" -e OCBOX_GIT_READONLY=1)
+  run_args+=(-v "$PROJECT_DIR/.git:$PROJECT_DIR/.git:ro" -e ROKE_GIT_READONLY=1)
 fi
 
 # Without a command, the entrypoint runs the agent.
 
-info "project: $PROJECT_DIR  ·  agent: $OCBOX_AGENT  ·  services: ${OCBOX_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $OCBOX_SERENA == 1 ]] && echo yes || echo no )"
+info "project: $PROJECT_DIR  ·  agent: $ROKE_AGENT  ·  services: ${ROKE_SERVICES:-none}  ·  .git: $( ((git_rw)) && echo rw || echo ro )  ·  serena: $( [[ $ROKE_SERENA == 1 ]] && echo yes || echo no )"
 dc run "${run_args[@]}" box "${cmd[@]}"

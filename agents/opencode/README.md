@@ -5,8 +5,8 @@
 ## Install and update
 
 Installed from the `@opencode/cli` npm package. The version is
-`OCBOX_AGENT_VERSIONS="opencode=..."`: an npm version or tag, `latest` by
-default. With `latest`, run `ocbox --rebuild` to fetch a newer one.
+`ROKE_AGENT_VERSIONS="opencode=..."`: an npm version or tag, `latest` by
+default. With `latest`, run `roke --rebuild` to fetch a newer one.
 
 The box disables OpenCode's own updates, since the image decides the
 version.
@@ -16,11 +16,11 @@ version.
 Run `/connect` inside OpenCode and follow the steps. The credentials are kept
 in the box's volume (`~/.local/share/opencode/auth.json`), not in your real
 `$HOME`, and work for every project. Alternatively, put the provider's API
-key in `~/.config/ocbox/secrets.env`.
+key in `~/.config/roke/secrets.env`.
 
 ## Your configuration
 
-`~/.config/ocbox/agents/opencode/` is linked into `~/.config/opencode`:
+`~/.config/roke/agents/opencode/` is linked into `~/.config/opencode`:
 `opencode.jsonc` (model, agents, permissions, MCP servers...), plus
 `agents/`, `commands/` and `skills/` if you use them. It is mounted
 read-only, so edit it on your host. The terminal client's own file
@@ -36,7 +36,7 @@ read-only, so edit it on your host. The terminal client's own file
   configuration (`/etc/opencode/opencode.json`, regenerated on every
   start), with Serena's `ide` context. OpenCode 2 groups MCP tools behind its
   Code Mode by default; for Serena it is turned off so its tools show up
-  directly. `OCBOX_SERENA_CODEMODE=1` reverts that.
+  directly. `ROKE_SERENA_CODEMODE=1` reverts that.
 
 ## Notes
 
@@ -44,4 +44,4 @@ read-only, so edit it on your host. The terminal client's own file
   diagnostics. The box's instructions ask it to validate changes with the
   project's lint, typecheck and tests, and [Serena](../../docs/serena.md)
   covers code navigation.
-- Resume the last session with `ocbox -- opencode --continue`.
+- Resume the last session with `roke -- opencode --continue`.

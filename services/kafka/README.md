@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=kafka` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s kafka`.
+**Enable**: `ROKE_SERVICES=kafka` in `~/.config/roke/projects/<name>/project.env`, or `roke -s kafka`.
 
 A Kafka-compatible broker, using [Redpanda](https://www.redpanda.com/): a
 single binary without ZooKeeper or a JVM, which starts in seconds. It

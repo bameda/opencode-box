@@ -13,7 +13,7 @@ mkdir -p "$keys"
 exec 9>"$keys/.lock"
 flock 9
 if [[ ! -f "$keys/id_ed25519" ]]; then
-  ssh-keygen -q -t ed25519 -N '' -C ocbox-ssh-target -f "$keys/id_ed25519"
+  ssh-keygen -q -t ed25519 -N '' -C roke-ssh-target -f "$keys/id_ed25519"
 fi
 # The private key must belong to the box user, or ssh refuses it.
 chown "$owner" "$keys/id_ed25519" "$keys/id_ed25519.pub"

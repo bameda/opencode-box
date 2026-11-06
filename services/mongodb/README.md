@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=mongodb` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s mongodb`.
+**Enable**: `ROKE_SERVICES=mongodb` in `~/.config/roke/projects/<name>/project.env`, or `roke -s mongodb`.
 
 MongoDB document database.
 

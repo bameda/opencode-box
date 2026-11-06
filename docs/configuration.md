@@ -11,14 +11,14 @@
 
 ## The configuration directory
 
-Everything personal lives outside the opencode-box repository, in
-`~/.config/ocbox`. To use another location, set `OCBOX_CONFIG_DIR`. This
+Everything personal lives outside the roke repository, in
+`~/.config/roke`. To use another location, set `ROKE_CONFIG_DIR`. This
 way the repository can be shared and updated with `git pull` without
 conflicts.
 
 ```
-~/.config/ocbox/
-├── ocbox.env           global settings (agent, versions, ports, git identity...)
+~/.config/roke/
+├── roke.env           global settings (agent, versions, ports, git identity...)
 ├── secrets.env         API keys; never committed
 ├── AGENTS.md           your instructions for every agent
 ├── agents/             each agent's own configuration
@@ -29,10 +29,10 @@ conflicts.
 ```
 
 `install.sh` creates it from the repository's `examples/config`. You can
-also run `ocbox --init` at any time to add missing files: it never
+also run `roke --init` at any time to add missing files: it never
 overwrites existing ones.
 
-The agent never sees this directory: `ocbox` refuses to mount a project that
+The agent never sees this directory: `roke` refuses to mount a project that
 contains it or is inside it, so the agent cannot change its own settings.
 
 ## Keeping it in a private repository
@@ -44,36 +44,36 @@ machines.
 **Create it** (once):
 
 ```fish
-cd ~/.config/ocbox
+cd ~/.config/roke
 git init -b main
 git add -A
 git status          # no secrets.env may be listed
-git commit -m "chore: initial ocbox configuration"
+git commit -m "chore: initial roke configuration"
 ```
 
 Create an **empty, private** repository on GitHub (or any git host), then
 push to it:
 
 ```fish
-git remote add origin git@github.com:<you>/ocbox-config.git
+git remote add origin git@github.com:<you>/roke-config.git
 git push -u origin main
 ```
 
 **Day to day**, commit whenever you add a project or change a setting:
 
 ```fish
-cd ~/.config/ocbox
+cd ~/.config/roke
 git add projects/my-app
 git commit -m "chore: add my-app project"
 git push
 ```
 
 **On another machine**, pass the repository's URL to `install.sh` (or to
-`ocbox --init`). It clones it into `~/.config/ocbox` and adds any missing
+`roke --init`). It clones it into `~/.config/roke` and adds any missing
 file from the examples:
 
 ```fish
-~/src/opencode-box/install.sh git@github.com:<you>/ocbox-config.git
+~/src/roke/install.sh git@github.com:<you>/roke-config.git
 ```
 
 **What stays out of it**:
@@ -81,18 +81,18 @@ file from the examples:
 - Every `secrets.env`, the global one and the projects', is listed in the
   directory's `.gitignore`. Recreate them by hand on each machine (or log in
   from inside the agent instead of using an API key).
-- The login, sessions and caches of the box live in the `ocbox-home` Docker
+- The login, sessions and caches of the box live in the `roke-home` Docker
   volume, not here, so they are not synced either.
 
 Keep the repository **private**: it lists your projects and their settings.
 
 ## Global settings and secrets
 
-- **`ocbox.env`**: settings for every project, such as the agent to run,
+- **`roke.env`**: settings for every project, such as the agent to run,
   service versions, ports or your git identity. It is loaded first, so
   per-project settings take precedence. Safe to commit.
 - **`secrets.env`**: API keys and other secrets. It is loaded after
-  `ocbox.env` and has permissions `600`. Not needed if you log in from
+  `roke.env` and has permissions `600`. Not needed if you log in from
   inside the agent.
 
 Both are also passed as environment variables to the box.
@@ -119,9 +119,9 @@ projects/my-app/
   ports...). Command-line options take precedence.
 
   ```dotenv
-  OCBOX_SERVICES=postgres,mailpit
-  OCBOX_PORTS="5173"
-  OCBOX_SERENA=1
+  ROKE_SERVICES=postgres,mailpit
+  ROKE_PORTS="5173"
+  ROKE_SERENA=1
   POSTGRES_DB=myapp
   ```
 
@@ -139,7 +139,7 @@ projects/my-app/
   [your own services](#your-own-services).
 
 The settings files are loaded in this order, and the last one wins:
-`ocbox.env`, `secrets.env`, the project's `project.env`, the project's
+`roke.env`, `secrets.env`, the project's `project.env`, the project's
 `secrets.env`. All of them are also passed to the box as
 environment variables.
 
@@ -149,20 +149,20 @@ Boot, Clojure) and one that uses every piece. To add a project, copy the closest
 what you need:
 
 ```fish
-cp -r ~/src/opencode-box/examples/projects/python-api ~/.config/ocbox/projects/my-app
+cp -r ~/src/roke/examples/projects/python-api ~/.config/roke/projects/my-app
 ```
 
 Two details:
 
 - **Paths.** In compose files, relative paths resolve against the
-  opencode-box repository. To refer to files in the project's directory, use
-  `${OCBOX_PROJECT_CONFIG}`, for example `${OCBOX_PROJECT_CONFIG}/initdb`.
+  roke repository. To refer to files in the project's directory, use
+  `${ROKE_PROJECT_CONFIG}`, for example `${ROKE_PROJECT_CONFIG}/initdb`.
 - **Names.** Two projects with the same directory name share these settings.
   Their data and services are still separate, because those are keyed by the
   full path.
 
 These files live here, and not inside the project, on purpose. A compose
-file can mount any host path, so if `ocbox` read one from the project, the
+file can mount any host path, so if `roke` read one from the project, the
 agent could write one that mounted `/` and escaped the container the next
 time you launched it. For the same reason, only `AGENTS.md` is visible
 inside the box: the rest of the project's directory, secrets included, is
@@ -173,11 +173,11 @@ not.
 Services are looked up in three places, and the first one found wins:
 
 1. the project's `services/` (`projects/<name>/services/<service>/`);
-2. your `services/` (`~/.config/ocbox/services/<service>/`);
-3. the opencode-box [catalog](../services/README.md).
+2. your `services/` (`~/.config/roke/services/<service>/`);
+3. the roke [catalog](../services/README.md).
 
-Your services work exactly like the catalog's: `ocbox -s <name>` and
-`OCBOX_SERVICES` find them, and `ocbox --list` marks them as `[project]` or
+Your services work exactly like the catalog's: `roke -s <name>` and
+`ROKE_SERVICES` find them, and `roke --list` marks them as `[project]` or
 `[yours]`. Put a service in the project when only that project needs it,
 and in yours when you use it in several projects. A service with the same
 name as one further down the list replaces it. See
@@ -223,35 +223,35 @@ clojure = "latest"
 "pipx:ansible" = "latest"
 ```
 
-Tools are kept in the `ocbox-home` volume, so they are downloaded only once.
+Tools are kept in the `roke-home` volume, so they are downloaded only once.
 The agent can add tools itself with `mise use`. To skip the automatic
-install, set `OCBOX_MISE_INSTALL=0`.
+install, set `ROKE_MISE_INSTALL=0`.
 
 If you always need something that mise does not provide, add it to the
-`apt-get install` in the `Dockerfile` and run `ocbox --rebuild`.
+`apt-get install` in the `Dockerfile` and run `roke --rebuild`.
 
 ## Settings reference
 
-The variables ocbox itself reads. Set them in `ocbox.env` (every project) or
+The variables roke itself reads. Set them in `roke.env` (every project) or
 `projects/<name>/project.env` (one project). Each service has its own variables,
 documented in its README in [services](../services/README.md).
 
 | Variable | Default | Description |
 |---|---|---|
-| `OCBOX_AGENT` | — | The coding agent to run (`--agent`); required when several are installed |
-| `OCBOX_SERVICES` | — | Services to start, comma-separated (`-s`) |
-| `OCBOX_PORTS` | — | Ports to publish on 127.0.0.1, space-separated (`-p`) |
-| `OCBOX_GIT_RW` | `0` | `1` mounts `.git` read-write (`--git-rw`) |
-| `OCBOX_SERENA` | `0` | `1` enables Serena (`--serena`) |
-| `OCBOX_SERENA_DASHBOARD` | `0` | `1` publishes Serena's web dashboard |
-| `OCBOX_SERENA_DASHBOARD_PORT` | `24282` | Host port for that dashboard |
-| `OCBOX_SERENA_CODEMODE` | `0` | OpenCode only: `1` exposes Serena's tools through Code Mode |
-| `OCBOX_MISE_INSTALL` | `1` | `0` skips `mise install` on start |
-| `OCBOX_HOST_UID` / `OCBOX_HOST_GID` | your UID/GID | Container user; `0` for rootless Docker |
-| `OCBOX_CONFIG_DIR` | `~/.config/ocbox` | Configuration directory (set it in your shell, not in these files) |
-| `OCBOX_PROJECT_CONFIG` | set by `ocbox` | The project's configuration directory, for paths in compose files |
-| `OCBOX_AGENTS` | `claude opencode` | Agents installed in the image (rebuild after changing) |
-| `OCBOX_AGENT_VERSIONS` | — | Agent versions as `agent=version` pairs (rebuild after changing) |
+| `ROKE_AGENT` | — | The coding agent to run (`--agent`); required when several are installed |
+| `ROKE_SERVICES` | — | Services to start, comma-separated (`-s`) |
+| `ROKE_PORTS` | — | Ports to publish on 127.0.0.1, space-separated (`-p`) |
+| `ROKE_GIT_RW` | `0` | `1` mounts `.git` read-write (`--git-rw`) |
+| `ROKE_SERENA` | `0` | `1` enables Serena (`--serena`) |
+| `ROKE_SERENA_DASHBOARD` | `0` | `1` publishes Serena's web dashboard |
+| `ROKE_SERENA_DASHBOARD_PORT` | `24282` | Host port for that dashboard |
+| `ROKE_SERENA_CODEMODE` | `0` | OpenCode only: `1` exposes Serena's tools through Code Mode |
+| `ROKE_MISE_INSTALL` | `1` | `0` skips `mise install` on start |
+| `ROKE_HOST_UID` / `ROKE_HOST_GID` | your UID/GID | Container user; `0` for rootless Docker |
+| `ROKE_CONFIG_DIR` | `~/.config/roke` | Configuration directory (set it in your shell, not in these files) |
+| `ROKE_PROJECT_CONFIG` | set by `roke` | The project's configuration directory, for paths in compose files |
+| `ROKE_AGENTS` | `claude opencode` | Agents installed in the image (rebuild after changing) |
+| `ROKE_AGENT_VERSIONS` | — | Agent versions as `agent=version` pairs (rebuild after changing) |
 | `POSTGRES_CLIENT_VERSION` | `18` | PostgreSQL client tools in the image (rebuild after changing) |
-| `SERENA_VERSION` | see `ocbox.env` | Serena version in the image (rebuild after changing) |
+| `SERENA_VERSION` | see `roke.env` | Serena version in the image (rebuild after changing) |
 | `INSTALL_SERENA` | `1` | `0` builds the image without Serena |

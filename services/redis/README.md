@@ -4,7 +4,7 @@ Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
 to every service: enabling, data, `--down`/`--purge` and host access.
 
-**Enable**: `OCBOX_SERVICES=redis` in `~/.config/ocbox/projects/<name>/project.env`, or `ocbox -s redis`.
+**Enable**: `ROKE_SERVICES=redis` in `~/.config/roke/projects/<name>/project.env`, or `roke -s redis`.
 
 Redis in-memory store, for caches, sessions, queues and rate limiting.
 
@@ -24,7 +24,7 @@ redis-cli -u "$REDIS_URL" flushall       # empty it
 ```
 
 **Data**: not persisted. It survives between sessions while the container
-runs, and is lost on `ocbox --down`, which is usually what you want for a
+runs, and is lost on `roke --down`, which is usually what you want for a
 cache.
 
 **Settings**
