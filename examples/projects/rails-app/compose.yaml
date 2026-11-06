@@ -1,0 +1,6 @@
+services:
+  opencode:
+    environment:
+      # Rails applies DATABASE_URL to whichever environment runs, tests
+      # included: run tests with DATABASE_URL="$TEST_DATABASE_URL".
+      TEST_DATABASE_URL: postgres://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/app_test

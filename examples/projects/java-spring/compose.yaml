@@ -1,0 +1,10 @@
+services:
+  opencode:
+    environment:
+      # Spring Boot properties as environment variables.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-app}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-dev}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      # There is no Docker in the box: the services above replace it.
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"

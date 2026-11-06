@@ -4,6 +4,10 @@ You are running inside an isolated Docker container, not on the user's machine.
 
 - You only have access to the current project directory. The rest of the
   user's filesystem does not exist here; do not try to look for it.
+- There is no Docker daemon or socket: you cannot build images or start
+  containers, so tools that need them (Testcontainers, `docker compose`,
+  kind...) do not work here. Do not try to install or reach Docker; tell
+  the user what has to run on their machine instead.
 - There is no `sudo`. To install languages or tools use `mise`
   (`mise use node@22`, `mise use java@21`, `mise use clojure`...), which stores
   the configuration in the project's `mise.toml`. For Python packages use a

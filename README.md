@@ -66,7 +66,7 @@ usually enough.
 | [Usage](docs/usage.md) | Every `ocbox` option, ports, git workflow, stopping and resetting |
 | [Configuration](docs/configuration.md) | `~/.config/ocbox`, keeping it in a private repo, per-project settings, opencode, tools, settings reference |
 | [Services](services/README.md) | The service catalog, how to use each one and how to add your own |
-| [Example projects](examples/projects/README.md) | Ready-made configurations: Ansible, Python API, Node.js, Clojure... |
+| [Example projects](examples/projects/README.md) | Ready-made configurations: Ansible, Helm, Python, Node.js, Go, Rust, Rails, Spring Boot, Clojure |
 | [Serena](docs/serena.md) | Semantic code navigation and editing |
 | [Security](docs/security.md) | What the container can and cannot reach |
 | [Troubleshooting](docs/troubleshooting.md) | Common problems, known limitations and maintenance |

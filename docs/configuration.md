@@ -143,8 +143,8 @@ The settings files are loaded in this order, and the last one wins:
 environment variables.
 
 The repository has [example projects](../examples/projects/README.md) for
-common cases (Ansible, a Python API, a Node.js app, a Clojure app) and one
-that uses every piece. To add a project, copy the closest one and keep only
+common cases (Ansible, Helm charts, Python, Node.js, Go, Rust, Rails, Spring
+Boot, Clojure) and one that uses every piece. To add a project, copy the closest one and keep only
 what you need:
 
 ```fish
