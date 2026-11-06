@@ -1,13 +1,13 @@
 # roke
 
+> 🏝️ *Roke is the island of wizards in Ursula K. Le Guin's Earthsea: a place
+> where power is learned and kept, guarded by a wind that lets no one in
+> uninvited.*
+
 Run coding agents, such as [Claude Code](agents/claude/README.md) or
 [OpenCode](agents/opencode/README.md), inside a Docker container that **only
 sees the project you are working on**. Your `$HOME`, SSH keys, dotfiles and
 every other project stay out of the agent's reach.
-
-*Named after Roke, the island of wizards in Ursula K. Le Guin's Earthsea:
-a place where power is learned and kept, guarded by a wind that lets no one
-in uninvited.*
 
 - **Any agent**: choose the agent per project or per run. Agents are
   pluggable, so adding another one is a matter of adding a directory.
