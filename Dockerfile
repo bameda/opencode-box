@@ -12,7 +12,7 @@ ARG HOST_GID=1000
 # Coding agents to install (directories in agents/), space-separated, and
 # optional versions as agent=version pairs ("opencode=2.2.5 claude=latest");
 # agents without one get their install.sh's default.
-ARG ROKE_AGENTS="claude opencode"
+ARG ROKE_AGENTS="claude codex opencode"
 ARG ROKE_AGENT_VERSIONS=""
 
 # PostgreSQL client tools (psql, pg_dump...) from the official PGDG repo.

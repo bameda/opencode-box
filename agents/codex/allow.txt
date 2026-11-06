@@ -1,0 +1,5 @@
+# Codex CLI: the OpenAI API, and the ChatGPT login (auth.openai.com) and
+# backend (chatgpt.com) used when you sign in with a ChatGPT plan.
+api.openai.com
+auth.openai.com
+chatgpt.com

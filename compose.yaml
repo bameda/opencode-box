@@ -28,7 +28,7 @@ services:
       args:
         HOST_UID: ${HOST_UID:-1000}
         HOST_GID: ${HOST_GID:-1000}
-        ROKE_AGENTS: ${ROKE_AGENTS:-claude opencode}
+        ROKE_AGENTS: ${ROKE_AGENTS:-claude codex opencode}
         ROKE_AGENT_VERSIONS: ${ROKE_AGENT_VERSIONS:-}
         POSTGRES_CLIENT_VERSION: ${POSTGRES_CLIENT_VERSION:-18}
         INSTALL_SERENA: ${INSTALL_SERENA:-1}

@@ -283,7 +283,7 @@ check_agent_name() {
   fi
   local installed
   # shellcheck source=/dev/null
-  installed="$(set -a; [[ -f "$CONFIG_DIR/roke.env" ]] && source "$CONFIG_DIR/roke.env"; echo "${ROKE_AGENTS:-claude opencode}")"
+  installed="$(set -a; [[ -f "$CONFIG_DIR/roke.env" ]] && source "$CONFIG_DIR/roke.env"; echo "${ROKE_AGENTS:-claude codex opencode}")"
   [[ " $installed " == *" $1 "* ]] \
     || info "note: '$1' is not in ROKE_AGENTS ($installed); add it there and run roke --build"
 }
@@ -357,7 +357,7 @@ ROKE_SERENA_DASHBOARD="${ROKE_SERENA_DASHBOARD:-0}"; export ROKE_SERENA_DASHBOAR
 # --- Coding agent ------------------------------------------------------------------
 # ROKE_AGENTS lists the agents the image is built with; no agent is the
 # default, so with several installed one must be chosen.
-installed_agents="${ROKE_AGENTS:-claude opencode}"
+installed_agents="${ROKE_AGENTS:-claude codex opencode}"
 agent_source="default agent, roke.env"
 if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^ROKE_AGENT=' "$PROJECT_CONFIG/project.env"; then
   agent_source="this project"

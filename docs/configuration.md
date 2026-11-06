@@ -199,7 +199,7 @@ Two pieces of your configuration go to the agent:
 
 What goes in each agent's directory, and how it logs in, is explained in
 its README: [Claude Code](../agents/claude/README.md),
-[OpenCode](../agents/opencode/README.md).
+[Codex](../agents/codex/README.md), [OpenCode](../agents/opencode/README.md).
 
 ## Languages and tools
 
@@ -253,7 +253,7 @@ documented in its README in [services](../services/README.md).
 | `ROKE_HOST_UID` / `ROKE_HOST_GID` | your UID/GID | Container user; `0` for rootless Docker |
 | `ROKE_CONFIG_DIR` | `~/.config/roke` | Configuration directory (set it in your shell, not in these files) |
 | `ROKE_PROJECT_CONFIG` | set by `roke` | The project's configuration directory, for paths in compose files |
-| `ROKE_AGENTS` | `claude opencode` | Agents installed in the image (rebuild after changing) |
+| `ROKE_AGENTS` | `claude codex opencode` | Agents installed in the image (rebuild after changing) |
 | `ROKE_AGENT_VERSIONS` | — | Agent versions as `agent=version` pairs (rebuild after changing) |
 | `POSTGRES_CLIENT_VERSION` | `18` | PostgreSQL client tools in the image (rebuild after changing) |
 | `SERENA_VERSION` | see `roke.env` | Serena version in the image (rebuild after changing) |

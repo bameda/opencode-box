@@ -4,10 +4,11 @@
 > where power is learned and kept, guarded by a wind that lets no one in
 > uninvited.*
 
-Run coding agents, such as [Claude Code](agents/claude/README.md) or
-[OpenCode](agents/opencode/README.md), inside a Docker container that **only
-sees the project you are working on**. Your `$HOME`, SSH keys, dotfiles and
-every other project stay out of the agent's reach.
+Run coding agents, such as [Claude Code](agents/claude/README.md),
+[Codex](agents/codex/README.md) or [OpenCode](agents/opencode/README.md),
+inside a Docker container that **only sees the project you are working on**.
+Your `$HOME`, SSH keys, dotfiles and every other project stay out of the
+agent's reach.
 
 - **Any agent**: choose the agent per project or per run. Agents are
   pluggable, so adding another one is a matter of adding a directory.
@@ -38,8 +39,8 @@ every other project stay out of the agent's reach.
    ~/src/roke/install.sh
    ```
 
-3. Choose your default agent: `roke --default-agent claude` or
-   `roke --default-agent opencode`.
+3. Choose your default agent: `roke --default-agent claude`, `codex` or
+   `opencode`.
 4. Start it in a project, building the image the first time:
 
    ```fish

@@ -10,6 +10,7 @@ one to another.
 | Agent | Command | Docs |
 |---|---|---|
 | Claude Code | `claude` | [claude](claude/README.md) |
+| Codex CLI | `codex` | [codex](codex/README.md) |
 | OpenCode 2 | `opencode` | [opencode](opencode/README.md) |
 
 Everything else is the same whichever agent runs: the isolation, the
@@ -21,7 +22,7 @@ the project settings.
 ```dotenv
 # ~/.config/roke/roke.env
 ROKE_AGENT=claude                              # the agent to run
-ROKE_AGENTS="claude opencode"                  # agents in the image (rebuild after changing)
+ROKE_AGENTS="claude codex opencode"                  # agents in the image (rebuild after changing)
 ROKE_AGENT_VERSIONS="opencode=2.2.5"           # optional versions (rebuild after changing)
 ```
 
@@ -57,8 +58,9 @@ be in the image: if it is not, add it to `ROKE_AGENTS` and run
 - the project, its services and their data, its tools (mise) and Serena;
 - the box's instructions, your `AGENTS.md` and the project's private one,
   which every agent receives;
-- the project's own instructions, if they are in an `AGENTS.md`: OpenCode
-  reads it, and so does Claude Code when the project has no `CLAUDE.md`.
+- the project's own instructions, if they are in an `AGENTS.md`: Codex and
+  OpenCode read it, and so does Claude Code when the project has no
+  `CLAUDE.md`.
   Prefer `AGENTS.md` in projects where you use several agents.
 
 **What does not:**
@@ -80,7 +82,8 @@ this order:
 1. the box's own instructions, [`AGENTS.md`](AGENTS.md) in this directory:
    the container, the services, the read-only `.git`...;
 2. the agent's own, `agents/<agent>/AGENTS.md`, if it has one;
-3. yours, `~/.config/roke/AGENTS.md`, for every agent;
+3. yours, `~/.config/roke/AGENTS.md`, for every agent, followed by the
+   `AGENTS.md` in `~/.config/roke/agents/<agent>/`, if any, for this agent;
 4. the project's private ones, `~/.config/roke/projects/<name>/AGENTS.md`.
 
 Each agent's `setup.sh` puts the result where that agent reads it. The

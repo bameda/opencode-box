@@ -130,12 +130,12 @@ roke
 
 Inside, run `/init` so the agent analyses the project and writes its
 instructions file, with conventions, build and test commands and structure:
-`CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode. Review it and commit
-it from the host.
+`CLAUDE.md` for Claude Code, `AGENTS.md` for Codex and OpenCode. Review it
+and commit it from the host.
 
 If the project's team uses different agents, keep a single `AGENTS.md`:
-OpenCode reads it, and so does Claude Code when the project has no
-`CLAUDE.md`.
+Codex and OpenCode read it, and so does Claude Code when the project has
+no `CLAUDE.md`.
 
 If you enabled Serena, a `.serena/` directory will appear. Decide whether to
 commit it or add it to `.gitignore`.

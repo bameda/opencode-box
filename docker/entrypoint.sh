@@ -103,7 +103,8 @@ roke_link_config() {
   for entry in "$src"/* "$src"/.[!.]*; do
     [[ -e "$entry" ]] || continue
     name="$(basename "$entry")"
-    case "$name" in .git|.gitignore|README.md) continue ;; esac
+    # AGENTS.md is added to the combined instructions instead (see below).
+    case "$name" in .git|.gitignore|README.md|AGENTS.md) continue ;; esac
     if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
       log "WARNING: $dest/$name exists in the project's home volume and hides yours; remove it with roke --shell."
       continue
@@ -121,11 +122,13 @@ grep -qxF "$agent" /etc/roke/installed-agents \
   || die "the agent '$agent' is not installed in the image: add it to ROKE_AGENTS and run roke --build"
 
 # The agent's instructions: the box's common ones, the agent's own, then
-# yours and the project's private ones, if any.
+# yours (for every agent, then for this agent only) and the project's
+# private ones, if any.
 AGENT_INSTRUCTIONS="$ROKE_RUNTIME/instructions.md"
 {
   cat /opt/roke/agents/AGENTS.md
-  for extra in "$agent_dir/AGENTS.md" /run/roke/user-AGENTS.md /run/roke/project-AGENTS.md; do
+  for extra in "$agent_dir/AGENTS.md" /run/roke/user-AGENTS.md \
+               /run/roke/agent-config/AGENTS.md /run/roke/project-AGENTS.md; do
     if [[ -f "$extra" ]]; then
       printf '\n'
       cat "$extra"

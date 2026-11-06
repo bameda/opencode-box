@@ -104,7 +104,7 @@ git clone https://github.com/bameda/roke.git ~/src/roke
 Choose your default agent (it is written to `~/.config/roke/roke.env`):
 
 ```fish
-roke --default-agent claude       # or opencode; see agents/README.md
+roke --default-agent claude       # or codex, or opencode; see agents/README.md
 ```
 
 Any project can use a different one later, with `roke --set-agent`.
@@ -121,6 +121,7 @@ roke --build
 
 The first time, log in from inside the agent, as its README explains
 ([Claude Code](../agents/claude/README.md#log-in),
+[Codex](../agents/codex/README.md#log-in),
 [OpenCode](../agents/opencode/README.md#log-in)). The login is stored in the
 project's own home volume, not in your real `$HOME`, so you log in once
 per project. An API key in `~/.config/roke/secrets.env` works for every
