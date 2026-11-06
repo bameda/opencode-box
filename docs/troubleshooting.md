@@ -21,8 +21,8 @@ Run `roke --init`, or `./install.sh` from the repository, to create
 The project's configuration directory must be named after the project's
 directory: for `~/src/my-app`, `~/.config/roke/projects/my-app/`, with its
 settings in `project.env`. The line `[roke] project: ...` printed on start
-shows the services and options that were applied, and `roke --list` marks
-the project's own services as `[project]`.
+shows the services and options that were applied, and `roke --settings`
+shows every setting of the project and where it comes from.
 
 ### Something cannot connect (a download, an API, a database...)
 

@@ -64,6 +64,7 @@ roke -s postgres,mailpit         # with a database and a test mail server
 roke -p 5173                     # publish the dev server on 127.0.0.1:5173
 roke --shell                     # bash inside the box
 roke --list                      # available agents and services
+roke --settings                  # this project's settings and allowed destinations
 roke --down                      # stop the project's services (keeps data)
 roke --help                      # every option
 ```

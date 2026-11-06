@@ -1,6 +1,7 @@
 # Usage
 
 - [Command line](#command-line)
+- [Checking the settings](#checking-the-settings)
 - [Choosing the agent](#choosing-the-agent)
 - [Projects and their services](#projects-and-their-services)
 - [Opening the app in your browser](#opening-the-app-in-your-browser)
@@ -23,6 +24,7 @@ so they start with dashes: `roke --build`, not `roke build`.
 | `--default-agent NAME` | The default agent, for projects without their own |
 | `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
 | `-l`, `--list` | List the available agents and services |
+| `--settings` | Show the project's settings and its allowed network destinations |
 | `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
 | `--git-rw` | Mount `.git` read-write, so the agent can commit |
 | `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
@@ -49,6 +51,29 @@ Options given on the command line take precedence over the project's
 [settings](configuration.md#per-project-settings). Use them to try something
 once; for a project you work on every day, put them in
 `projects/<name>/project.env` and just run `roke`.
+
+## Checking the settings
+
+`roke --settings` shows what applies to the current project and where each
+value comes from: the agent, the network mode, the services, the ports, the
+settings files found, and the allowed network destinations, layer by layer.
+
+```text
+Project   /home/me/src/shop
+Settings  /home/me/.config/roke: roke.env secrets.env projects/shop/project.env
+Agent     claude (default agent, roke.env)
+Network   restricted (built-in default)
+Services  postgres, mailpit
+Ports     5173
+Serena    on  ·  .git: read-only
+
+Allowed destinations (restricted mode), by layer:
+  base       docker/gateway/allow.txt
+             github.com githubusercontent.com ghcr.io ...
+  agent      agents/claude/allow.txt
+             api.anthropic.com claude.ai platform.claude.com
+  ...
+```
 
 ## Choosing the agent
 

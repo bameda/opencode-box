@@ -99,6 +99,9 @@ Each entry is one of:
 | `203.0.113.10` | that address, on any port |
 | `10.20.0.0/16:22` | that range, on that port only |
 
+`roke --settings` shows the resulting list for the current project, layer
+by layer, so you can see where each entry comes from.
+
 The quickest way to add one to the current project:
 
 ```fish

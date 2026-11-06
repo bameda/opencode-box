@@ -29,6 +29,7 @@ Options:
   -s, --services LIST    Comma-separated services from the catalog.
                          E.g. -s postgres,redis,mailpit   (see --list)
   -l, --list             List the agents and the services available to the project
+      --settings         Show the project's settings and allowed destinations
       --network MODE     restricted (default) or open, this time
       --allow ENTRY      Allow a destination for this project: domain, IP or
                          CIDR, with an optional :port (db.example.com:5432)
@@ -181,6 +182,7 @@ while (($#)); do
                    action=default-agent; set_value="${2:?missing agent name}"; shift 2 ;;
     -s|--services) services="${2:?missing service list}"; shift 2 ;;
     -l|--list)     action=list; shift ;;
+    --settings)    action=settings; shift ;;
     --init)
       if [[ -n "${2:-}" && "$2" != -* ]]; then init_config "$2"; else init_config; fi
       exit 0 ;;
@@ -229,7 +231,7 @@ if [[ "$action" == run || "$action" == down || "$action" == purge ]]; then
   docker compose version >/dev/null 2>&1 || die "the 'docker compose' plugin (v2) is missing"
 fi
 
-if [[ "$action" != list && "$action" != default-agent ]]; then
+if [[ "$action" != list && "$action" != settings && "$action" != default-agent ]]; then
 # Guards against accidentally mounting more than intended.
 [[ "$PROJECT_DIR" != "/" ]] || die "refusing to mount the whole /"
 [[ "$PROJECT_DIR" != "$HOME_REAL" ]] || die "refusing to mount your whole \$HOME"
@@ -352,7 +354,7 @@ ROKE_SERENA_DASHBOARD="${ROKE_SERENA_DASHBOARD:-0}"; export ROKE_SERENA_DASHBOAR
 # ROKE_AGENTS lists the agents the image is built with; no agent is the
 # default, so with several installed one must be chosen.
 installed_agents="${ROKE_AGENTS:-claude opencode}"
-agent_source="default"
+agent_source="default agent, roke.env"
 if [[ -f "$PROJECT_CONFIG/project.env" ]] && grep -q '^ROKE_AGENT=' "$PROJECT_CONFIG/project.env"; then
   agent_source="this project"
 fi
@@ -408,6 +410,10 @@ fi
 [[ -f "$PROJECT_CONFIG/compose.yaml" ]] && compose_files+=(-f "$PROJECT_CONFIG/compose.yaml")
 
 # --- Network ---------------------------------------------------------------------
+network_source="built-in default"
+grep -q '^ROKE_NETWORK=' "$CONFIG_DIR/roke.env" 2>/dev/null && network_source="roke.env"
+grep -q '^ROKE_NETWORK=' "$PROJECT_CONFIG/project.env" 2>/dev/null && network_source="this project"
+[[ -n "$cli_network" ]] && network_source="--network"
 ROKE_NETWORK="${cli_network:-${ROKE_NETWORK:-restricted}}"
 [[ "$ROKE_NETWORK" == restricted || "$ROKE_NETWORK" == open ]] \
   || die "network mode must be restricted or open, not '$ROKE_NETWORK'"
@@ -426,6 +432,57 @@ ROKE_NETWORK_ALLOW_ALL="$(
   } | sed 's/#.*//' | tr -s ' \t' '\n' | sed '/^$/d' | sort -u | paste -sd ' '
 )"
 export ROKE_NETWORK_ALLOW_ALL
+
+if [[ "$action" == settings ]]; then
+  # entries FILE...: the allowed destinations listed in the files, one line.
+  entries() { cat "$@" 2>/dev/null | sed 's/#.*//' | tr -s ' \t' '\n' | sed '/^$/d' | paste -sd ' '; }
+  show() {  # show LABEL SOURCE ENTRIES
+    printf '  %-10s %s\n' "$1" "$2"
+    if [[ -n "$3" ]]; then fold -s -w 66 <<<"$3" | sed 's/ *$//; s/^/             /'; else echo "             (none)"; fi
+  }
+  service_labels=()
+  ((${#selected[@]})) || service_labels=(none)
+  for s in "${selected[@]}"; do
+    case "$(service_file "$s")" in
+      "$PROJECT_SERVICES_DIR"/*) service_labels+=("$s [project]") ;;
+      "$USER_SERVICES_DIR"/*)    service_labels+=("$s [yours]") ;;
+      *)                         service_labels+=("$s") ;;
+    esac
+  done
+  service_allow=""
+  for s in "${selected[@]}"; do
+    f="$(dirname "$(service_file "$s")")/allow.txt"
+    [[ -f "$f" ]] && service_allow+="$(entries "$f") "
+  done
+  loaded=()
+  for f in "$CONFIG_DIR/roke.env" "$CONFIG_DIR/secrets.env" "$PROJECT_CONFIG/project.env" "$PROJECT_CONFIG/secrets.env" "$PROJECT_CONFIG/compose.yaml" "$PROJECT_CONFIG/AGENTS.md"; do
+    [[ -f "$f" ]] && loaded+=("${f#"$CONFIG_DIR"/}")
+  done
+  echo "Project   $PROJECT_DIR"
+  echo "Settings  $CONFIG_DIR: ${loaded[*]:-(no files)}"
+  if [[ "$ROKE_AGENT" == none ]]; then
+    echo "Agent     none chosen (roke --default-agent NAME)"
+  else
+    echo "Agent     $ROKE_AGENT ($agent_source)"
+  fi
+  echo "Network   $ROKE_NETWORK ($network_source)"
+  services_text="$(printf '%s, ' "${service_labels[@]}")"
+  echo "Services  ${services_text%, }"
+  echo "Ports     ${ports[*]:-none}"
+  echo "Serena    $( [[ $ROKE_SERENA == 1 ]] && echo on || echo off )  ·  .git: $( ((git_rw)) && echo read-write || echo read-only )"
+  echo
+  if [[ "$ROKE_NETWORK" == open ]]; then
+    echo "Allowed destinations: everything (open mode). The lists below apply in restricted mode."
+  else
+    echo "Allowed destinations (restricted mode), by layer:"
+  fi
+  show base      "docker/gateway/allow.txt" "$(entries "$BOX_DIR/docker/gateway/allow.txt")"
+  [[ "$ROKE_AGENT" != none ]] && show agent "agents/$ROKE_AGENT/allow.txt" "$(entries "$BOX_DIR/agents/$ROKE_AGENT/allow.txt")"
+  show services  "services/<name>/allow.txt" "${service_allow% }"
+  show yours     "ROKE_NETWORK_ALLOW in roke.env" "$(tr -s ' ' '\n' <<<"$global_allow" | sed '/^$/d' | paste -sd ' ')"
+  show project   "ROKE_NETWORK_ALLOW in project.env (roke --allow)" "$(tr -s ' ' '\n' <<<"$project_allow" | sed '/^$/d' | paste -sd ' ')"
+  exit 0
+fi
 
 # The box shares the gateway's network, so its ports are published on the
 # gateway, through a compose file generated for this run.
