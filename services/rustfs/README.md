@@ -9,6 +9,8 @@ to every service: enabling, data, `--down`/`--purge` and host access.
 [RustFS](https://rustfs.com/), S3-compatible object storage with a web
 console, for uploads and files your app would store in S3. It replaces
 MinIO, whose open-source edition was archived in 2026.
+[`seaweedfs`](../seaweedfs/README.md) is an alternative: both give the box
+the same variables, so enable one or the other in a project, not both.
 
 **Inside the box**
 

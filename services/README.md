@@ -17,6 +17,7 @@ explains how to use it. `roke --list` shows what is available.
 | [`memcached`](memcached/README.md) | Key-value cache | `memcached:11211`, `MEMCACHED_SERVERS` | |
 | [`mailpit`](mailpit/README.md) | Catches outgoing email | `mailpit:1025`, `SMTP_HOST`, `SMTP_PORT` | inbox at `127.0.0.1:8025` |
 | [`rustfs`](rustfs/README.md) | S3-compatible storage | `rustfs:9000`, `S3_ENDPOINT`, `AWS_*` | console at `127.0.0.1:9001` |
+| [`seaweedfs`](seaweedfs/README.md) | S3-compatible storage (alternative to `rustfs`) | `seaweedfs:8333`, `S3_ENDPOINT`, `AWS_*` | file browser at `127.0.0.1:8888` |
 | [`rabbitmq`](rabbitmq/README.md) | Message broker | `rabbitmq:5672`, `AMQP_URL` | UI at `127.0.0.1:15672` |
 | [`kafka`](kafka/README.md) | Kafka-compatible broker (Redpanda) | `kafka:9092`, `KAFKA_BOOTSTRAP_SERVERS` | |
 | [`nats`](nats/README.md) | Messaging with JetStream | `nats:4222`, `NATS_URL` | |
