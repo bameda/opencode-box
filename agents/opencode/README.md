@@ -14,7 +14,7 @@ version.
 ## Log in
 
 Run `/connect` inside OpenCode and follow the steps. The credentials are kept
-in the box's volume (`~/.local/share/opencode/auth.json`), not in your real
+in the project's home volume (`~/.local/share/opencode/auth.json`), not in your real
 `$HOME`, and work for every project. Alternatively, put the provider's API
 key in `~/.config/roke/secrets.env`.
 
@@ -24,7 +24,7 @@ key in `~/.config/roke/secrets.env`.
 `opencode.jsonc` (model, agents, permissions, MCP servers...), plus
 `agents/`, `commands/` and `skills/` if you use them. It is mounted
 read-only, so edit it on your host. The terminal client's own file
-(`cli.json`) stays in the box's volume.
+(`cli.json`) stays in the project's home volume.
 
 ## Instructions and Serena
 

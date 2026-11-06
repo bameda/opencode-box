@@ -29,7 +29,8 @@ how it is registered there.
 ## Details
 
 - **Language servers.** Serena downloads many of them by itself and keeps
-  them in `~/.serena`, in the box's volume, so only the first run is slow.
+  them in `~/.serena`, in the project's home volume, so only the first run
+  of each project is slow.
   Some need the language's runtime: for Java or Clojure, declare `java` and
   `clojure` in the project's `mise.toml`. See Serena's
   [language support](https://oraios.github.io/serena/01-about/020_programming-languages.html).

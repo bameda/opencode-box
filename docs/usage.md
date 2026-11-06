@@ -68,8 +68,8 @@ roke --set-agent opencode        # this project's own (project.env)
 roke --set-agent default         # this project uses the default again
 ```
 
-All agents share the box's home volume, so you can switch between them
-freely: each keeps its own login and sessions. See
+All the agents of a project share its home volume, so you can switch
+between them freely: each keeps its own login and sessions there. See
 [switching between agents](../agents/README.md#switching-between-agents) for
 what carries over and what does not.
 
@@ -83,11 +83,15 @@ When you exit the agent, the project's services **keep running**, so the
 next session starts instantly with the same data. Stop them when you are
 done:
 
-| Command | Services | Data (databases, buckets, queues...) |
+| Command | Services | Data (databases, buckets, queues...) and the box's home |
 |---|---|---|
 | exit the agent | keep running | kept |
 | `roke --down` | stopped and removed | kept |
 | `roke --purge` | stopped and removed | **deleted** |
+
+The box's home is the project's own volume with the agents' logins and
+sessions and the tools installed with mise, so after `--purge` you log in
+again and tools are downloaded again.
 
 Some services do not keep data at all (Redis, Mailpit...); each
 [service's README](../services/README.md) says what it keeps.

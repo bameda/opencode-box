@@ -1,7 +1,7 @@
 services:
   box:
     environment:
-      # Build in the box's volume, apart from the project's target/: the box
-      # and the host use different toolchains and would keep invalidating
-      # each other's builds. ${PROJECT_DIR} keeps it separate per project.
-      CARGO_TARGET_DIR: /home/dev/.cache/cargo-target${PROJECT_DIR}
+      # Build in the box's home, apart from the project's target/: the box and
+      # the host use different toolchains and would keep invalidating each
+      # other's builds.
+      CARGO_TARGET_DIR: /home/dev/.cache/cargo-target

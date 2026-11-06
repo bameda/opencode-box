@@ -81,7 +81,7 @@ file from the examples:
 - Every `secrets.env`, the global one and the projects', is listed in the
   directory's `.gitignore`. Recreate them by hand on each machine (or log in
   from inside the agent instead of using an API key).
-- The login, sessions and caches of the box live in the `roke-home` Docker
+- The agents' logins, sessions and caches live in each project's home
   volume, not here, so they are not synced either.
 
 Keep the repository **private**: it lists your projects and their settings.
@@ -195,7 +195,7 @@ Two pieces of your configuration go to the agent:
   agents, commands, skills...). Only the selected agent's directory is
   mounted, read-only, and linked where that agent reads it, so edit it on
   your host, not from inside the agent. The files the agent writes itself
-  (login, sessions, UI state) stay in the box's volume.
+  (login, sessions, UI state) stay in the project's home volume.
 
 What goes in each agent's directory, and how it logs in, is explained in
 its README: [Claude Code](../agents/claude/README.md),
@@ -223,7 +223,8 @@ clojure = "latest"
 "pipx:ansible" = "latest"
 ```
 
-Tools are kept in the `roke-home` volume, so they are downloaded only once.
+Tools are kept in the project's home volume, so they are downloaded once
+per project.
 The agent can add tools itself with `mise use`. To skip the automatic
 install, set `ROKE_MISE_INSTALL=0`.
 

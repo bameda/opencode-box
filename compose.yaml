@@ -45,8 +45,9 @@ services:
     volumes:
       # The only writable host path: the project (at the same path).
       - ${PROJECT_DIR}:${PROJECT_DIR}
-      # The box's own $HOME (auth, sessions, caches, mise...).
-      - roke-home:/home/dev
+      # The box's own $HOME, one per project and shared with nothing else:
+      # agent logins and sessions, tools installed with mise, caches...
+      - home:/home/dev
       # Your configuration for the selected agent (read-only); its setup.sh
       # links it where the agent reads it.
       - ${ROKE_CONFIG_DIR}/agents/${ROKE_AGENT}:/run/roke/agent-config:ro
@@ -60,8 +61,6 @@ services:
     pids_limit: 4096
 
 volumes:
-  # Shared across projects; created by bin/roke. External so that
-  # "roke --purge" never deletes your login or caches.
-  roke-home:
-    name: roke-home
-    external: true
+  # Per project (the compose project's name is its prefix). "roke --purge"
+  # deletes it along with the project's other data.
+  home:

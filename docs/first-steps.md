@@ -8,7 +8,8 @@ dev server on port 5173.
 
 You need roke installed and its image built, an agent chosen with
 `ROKE_AGENT`, and to have logged in from inside the agent once: see
-[Installation](installation.md). The login is shared by every project.
+[Installation](installation.md). Each project has its own home, so you log
+in once in each one (or use an API key in `secrets.env` for all of them).
 
 ## 1. Decide what the project needs
 

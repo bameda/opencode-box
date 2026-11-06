@@ -105,7 +105,7 @@ roke_link_config() {
     name="$(basename "$entry")"
     case "$name" in .git|.gitignore|README.md) continue ;; esac
     if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-      log "WARNING: $dest/$name exists in the box's volume and hides yours; remove it with roke --shell."
+      log "WARNING: $dest/$name exists in the project's home volume and hides yours; remove it with roke --shell."
       continue
     fi
     ln -sfn "$entry" "$dest/$name"

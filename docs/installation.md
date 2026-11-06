@@ -122,7 +122,9 @@ roke --build
 The first time, log in from inside the agent, as its README explains
 ([Claude Code](../agents/claude/README.md#log-in),
 [OpenCode](../agents/opencode/README.md#log-in)). The login is stored in the
-box's own volume, not in your real `$HOME`, and works for every project.
+project's own home volume, not in your real `$HOME`, so you log in once
+per project. An API key in `~/.config/roke/secrets.env` works for every
+project instead.
 
 ### On another machine, with your configuration repository
 
@@ -181,7 +183,6 @@ root is not root on your machine.
 
 ```fish
 cd ~/src/my-project && roke --purge       # for each project: services and data
-docker volume rm roke-home                # the box's home: login, caches, tools
 docker image rm roke:latest
 rm ~/.local/bin/roke
 rm -rf ~/src/roke

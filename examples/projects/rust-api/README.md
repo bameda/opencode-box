@@ -28,7 +28,7 @@ Two things work differently from a usual setup:
   `.sqlx/` directory: builds without a database (CI, or your host) then use
   it with `SQLX_OFFLINE=true`.
 - **The box builds in its own directory.** `compose.yaml` points
-  `CARGO_TARGET_DIR` to the box's volume. If the box and your host shared
+  `CARGO_TARGET_DIR` to the project's home volume. If the box and your host shared
   `target/`, each would invalidate the other's builds whenever you switched,
   since they use different toolchains. It also keeps build artifacts, which
   grow to gigabytes, out of the project.

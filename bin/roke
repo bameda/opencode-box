@@ -398,8 +398,6 @@ case "$action" in
   purge) dc down --remove-orphans --volumes; exit 0 ;;
 esac
 
-docker volume inspect roke-home >/dev/null 2>&1 \
-  || docker volume create roke-home >/dev/null
 
 case "$build" in
   # Builds the box plus any selected service with its own image (ssh-target).

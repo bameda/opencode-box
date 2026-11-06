@@ -3,6 +3,7 @@
 roke limits what the agent can touch on your machine. It is not a
 full sandbox: read what it protects and what it does not.
 
+- [The agent is not trusted](#the-agent-is-not-trusted)
 - [What the container sees](#what-the-container-sees)
 - [How it is locked down](#how-it-is-locked-down)
 - [What it does NOT protect](#what-it-does-not-protect)
@@ -13,7 +14,7 @@ full sandbox: read what it protects and what it does not.
 |---|---|---|
 | `<project path>` (same as on the host) | the project | read-write |
 | `<project>/.git` | the project | **read-only** (unless `--git-rw`) |
-| `/home/dev` | the `roke-home` volume | read-write; the box's own home |
+| `/home/dev` | the project's own `home` volume | read-write; the box's home |
 | `/run/roke/agent-config` | `~/.config/roke/agents/<agent>` | read-only |
 | `/run/roke/user-AGENTS.md` | `~/.config/roke/AGENTS.md`, if any | read-only |
 | `/run/roke/project-AGENTS.md` | the project's `AGENTS.md` in your configuration, if any | read-only |
@@ -22,9 +23,23 @@ full sandbox: read what it protects and what it does not.
 Nothing else from your host is mounted: not your `$HOME`, not your SSH keys,
 not your other projects, not your roke settings or secrets.
 
-The `roke-home` volume is shared by all projects and agents. It holds each
-agent's login and sessions, tools installed with mise and caches (npm,
-maven, cargo...).
+Each project has its own home volume, shared with nothing else: not with
+other projects, not with your host. It holds the agents' logins and
+sessions, the tools installed with mise and the caches (npm, maven,
+cargo...). An agent working on one project therefore cannot read another
+project's sessions, nor leave anything behind (a shell profile, an MCP
+server in the agent's state, a poisoned cache) that another project would
+pick up. `roke --purge` deletes it along with the project's other data.
+
+## The agent is not trusted
+
+roke assumes the agent may misbehave, through a bug, a prompt injection in
+something it reads, or a compromised dependency, and does not rely on the
+agent's own safeguards. Several agents ship their own sandbox or permission
+prompts; inside the box they are at most an extra layer, and the limits
+described here hold whether they work or not. Everything that keeps the
+agent away from your machine is enforced by Docker, from outside the
+container, with files the agent cannot modify.
 
 ## How it is locked down
 
@@ -58,9 +73,6 @@ maven, cargo...).
   diff first.
 - **The `docker` group.** Being in it is equivalent to being root on the
   host. [Rootless Docker](installation.md#rootless-docker) avoids that.
-- **Separation between projects.** The box's home is shared, so an agent
-  could leave something there (a `.bashrc`, a cache) that affects another
-  project's session.
 - **Secrets you give it.** API keys in `secrets.env` and the agents' logins
   are available inside the box, so the agent can read them. Use keys with
   spending limits where your provider offers them.

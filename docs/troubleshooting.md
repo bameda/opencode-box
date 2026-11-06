@@ -47,7 +47,7 @@ default one with `roke --default-agent NAME` (or a project's own with
 The agent you chose is not in the image. Add it to `ROKE_AGENTS` in
 `roke.env` and run `roke --build`.
 
-### `WARNING: <path> exists in the box's volume and hides yours`
+### `WARNING: <path> exists in the project's home volume and hides yours`
 
 A file in the agent's configuration directory inside the box, left from an
 older setup or created by the agent, takes precedence over the same file in
@@ -56,8 +56,10 @@ your configuration. Remove it: `roke --shell`, then `rm <path>`.
 ### Permission errors on files in the box's home
 
 Usually after changing UID or switching to rootless Docker. Reset the
-box's home with `docker volume rm roke-home` (you will need to log in
-again, and caches and tools are downloaded again).
+project with `roke --purge`: it deletes the box's home, so you will need to
+log in again and tools are downloaded again, but also the project's
+databases and other service data. To reset only the home, find its volume
+with `docker volume ls | grep _home` and remove it with `docker volume rm`.
 
 ## Known limitations
 
@@ -74,7 +76,6 @@ again, and caches and tools are downloaded again).
 
 ```fish
 roke --rebuild                         # update the image and the agents
-docker volume ls | grep roke           # the box's home and each project's data
-docker volume rm roke-home             # reset the box's home: login, caches, tools
+docker volume ls | grep roke           # each project's home and data
 cd ~/src/my-app && roke --purge        # delete one project's services and data
 ```

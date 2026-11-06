@@ -30,7 +30,7 @@ yamllint = "latest"
 `chart-testing` (`ct lint`) needs `yamllint` and `yamale`, hence the last
 two. For unit tests, install the
 [helm-unittest](https://github.com/helm-unittest/helm-unittest) plugin as
-its README explains; plugins are kept in the box's volume.
+its README explains; plugins are kept in the project's home volume.
 
 ## Check it
 

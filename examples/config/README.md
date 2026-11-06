@@ -21,7 +21,7 @@ points) and is meant to be its own private git repository.
 - **Agents**: the selected agent's directory is mounted read-only in the
   box and linked where the agent reads its configuration, so change it here,
   not from inside the agent. The agent's own state (login, sessions, files
-  its UI writes) stays in the box's volume.
+  its UI writes) stays in the project's home volume.
 - **Services**: a `services/<name>/compose.yaml` here is available to
   `roke -s <name>`, and replaces a catalog service with the same name. To
   refer to files in this directory from a compose file, use

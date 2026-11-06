@@ -20,7 +20,7 @@ node = "22"        # only if the app builds JavaScript with Node
 ```
 
 mise compiles Ruby from source, so the first start takes a few minutes;
-after that it is cached in the box's volume, along with your gems.
+after that it is cached in the project's home volume, along with your gems.
 
 **Careful with the test database.** Rails uses `DATABASE_URL` for whichever
 environment is running, tests included. Since the box always sets it,

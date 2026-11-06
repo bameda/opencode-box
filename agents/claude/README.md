@@ -21,7 +21,7 @@ version.
 
 Run `claude` and follow the login prompts: it shows a URL to open in your
 browser, on your host, and asks you to paste the code back into the
-terminal. The credentials are kept in the box's volume (`~/.claude/` and
+terminal. The credentials are kept in the project's home volume (`~/.claude/` and
 `~/.claude.json`), not in your real `$HOME`, and work for every project.
 Claude Code needs a Pro, Max, Team, Enterprise or Console account.
 Alternatively, put `ANTHROPIC_API_KEY` in `~/.config/roke/secrets.env`;
@@ -33,7 +33,7 @@ Claude Code asks once whether to use it.
 `CLAUDE.md` (instructions for Claude Code only), plus `agents/`, `commands/`,
 `skills/` and `rules/` if you use them. It is mounted read-only, so edit it
 on your host. Claude Code's own state (sessions, auto memory, the login)
-stays in the box's volume.
+stays in the project's home volume.
 
 ## Instructions and Serena
 

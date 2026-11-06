@@ -20,7 +20,7 @@ java = "temurin-21"
 ```
 
 Build with the project's wrapper (`./mvnw` or `./gradlew`). Maven's and
-Gradle's caches are kept in the box's volume, so dependencies are
+Gradle's caches are kept in the project's home volume, so dependencies are
 downloaded only once.
 
 Spring Boot reads `SPRING_DATASOURCE_URL`, `SPRING_KAFKA_BOOTSTRAP_SERVERS`
