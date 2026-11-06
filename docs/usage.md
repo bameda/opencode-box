@@ -15,35 +15,69 @@ roke [options] [PROJECT_DIR] [-- COMMAND...]
 ```
 
 `PROJECT_DIR` defaults to the current directory. All actions are options,
-so they start with dashes: `roke --build`, not `roke build`.
+so they start with dashes: `roke --build`, not `roke build`. `roke --help`
+lists them grouped like this:
+
+**Session**
 
 | Option | Description |
 |---|---|
-| `-a`, `--agent NAME` | The coding agent to run this time; defaults to `ROKE_AGENT` |
-| `--set-agent NAME` | The current project's own agent; `default` to use the default again |
-| `--default-agent NAME` | The default agent, for projects without their own |
-| `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
-| `-l`, `--list` | List the available agents and services |
-| `--settings` | Show the project's settings and its allowed network destinations |
-| `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
-| `--git-rw` | Mount `.git` read-write, so the agent can commit |
-| `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
-| `--network MODE` | `restricted` (default) or `open`, for this run; see [Network](network.md) |
-| `--allow ENTRY` | Allow a network destination for the project, from its next start |
-| `--blocked` | Show what the project tried to reach and was denied |
+| `-c`, `--continue` | Resume the agent's last session in this project |
 | `--shell` | Open bash in the box instead of the agent |
-| `--build` | Rebuild the images (pulling newer base images) before starting |
-| `--rebuild` | Same, without cache: also updates agents installed from a channel |
-| `--down` | Stop and remove the project's services; their data is kept |
-| `--purge` | Like `--down`, and also delete the project's data |
-| `--init [GIT_URL]` | Create the [configuration directory](configuration.md), optionally cloning it |
-| `-h`, `--help` | Show the help |
+| `-- COMMAND...` | Run `COMMAND` in the box instead of the agent |
 
-Anything after `--` replaces the default command, which is the agent:
+**Agent** (see [choosing the agent](#choosing-the-agent))
+
+| Option | Description |
+|---|---|
+| `-a`, `--agent NAME` | Use `NAME` this time |
+| `--set-agent NAME` | Use `NAME` in this project from now on; `default` goes back to the default agent |
+| `--default-agent NAME` | Use `NAME` in every project without an agent of its own |
+
+**Services and ports**, for this run (`ROKE_SERVICES` and `ROKE_PORTS` keep them)
+
+| Option | Description |
+|---|---|
+| `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
+| `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
+
+**Network** (see [Network](network.md))
+
+| Option | Description |
+|---|---|
+| `--network MODE` | `restricted` or `open`, this time (default: `restricted`) |
+| `--allow ENTRY` | Allow a destination in this project from now on |
+| `--blocked` | Show what the project tried to reach and was denied |
+
+**Access**, for this run (`ROKE_GIT_RW` and `ROKE_SERENA` keep them)
+
+| Option | Description |
+|---|---|
+| `--git-rw` | Let the agent write to `.git`, so it can commit |
+| `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
+
+**Information**
+
+| Option | Description |
+|---|---|
+| `-l`, `--list` | The available agents and services |
+| `--settings` | This project's settings and allowed destinations |
+| `-h`, `--help` | The help |
+
+**Maintenance**
+
+| Option | Description |
+|---|---|
+| `--build` | Rebuild the images before starting |
+| `--rebuild` | Rebuild them without cache: also updates the agents |
+| `--down` | Stop the project's services, keeping their data |
+| `--purge` | Stop them and delete all the project's data |
+| `--init [GIT_URL]` | Create the [configuration directory](configuration.md), cloning it if a URL is given |
+
+Examples:
 
 ```fish
-roke -- claude --continue         # resume Claude Code's last session
-roke -- opencode --continue       # resume OpenCode's last session
+roke -c                           # resume the agent's last session
 roke -s postgres -- psql          # a single command in the box
 ```
 

@@ -44,4 +44,4 @@ read-only, so edit it on your host. The terminal client's own file
   diagnostics. The box's instructions ask it to validate changes with the
   project's lint, typecheck and tests, and [Serena](../../docs/serena.md)
   covers code navigation.
-- Resume the last session with `roke -- opencode --continue`.
+- Resume the last session with `roke --continue` (`-c`).

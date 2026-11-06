@@ -116,5 +116,6 @@ and must set:
 |---|---|
 | `AGENT_COMMAND` | Array: the command that starts the agent, for example `(claude)` |
 | `AGENT_ARGS` | Optional array: arguments added whenever the agent runs, for example an MCP configuration file |
+| `AGENT_CONTINUE` | Optional array: arguments that resume the last session, for `roke --continue`; for example `(--continue)` |
 
 Then add it to `ROKE_AGENTS` and run `roke --build`.

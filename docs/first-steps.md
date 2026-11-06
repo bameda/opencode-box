@@ -145,7 +145,7 @@ commit it or add it to `.gitignore`.
 ```fish
 cd ~/src/shop
 roke                             # new session
-roke -- claude --continue        # resume the last one (or opencode)
+roke -c                          # resume the last one
 git diff                         # on the host: review what it did
 git commit -am "feat: ..."       # and commit it yourself
 roke --down                      # when done, stop PostgreSQL and Redis

@@ -53,4 +53,4 @@ stays in the project's home volume.
   inside the box, which runs without Linux capabilities. The box itself is
   the sandbox: the agent cannot reach anything on your machine beyond the
   project, so its permission prompts guard the project, not your system.
-- Resume the last session with `roke -- claude --continue`.
+- Resume the last session with `roke --continue` (`-c`).

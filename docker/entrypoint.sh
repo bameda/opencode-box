@@ -137,13 +137,22 @@ AGENT_INSTRUCTIONS="$ROKE_RUNTIME/instructions.md"
 AGENT_CONFIG=/run/roke/agent-config
 AGENT_COMMAND=()
 AGENT_ARGS=()
+AGENT_CONTINUE=()
 # shellcheck source=/dev/null
 source "$agent_dir/setup.sh"
 ((${#AGENT_COMMAND[@]})) || die "agents/$agent/setup.sh did not set AGENT_COMMAND"
 
 # No command: run the agent. When the agent is run explicitly (for example
-# "roke -- claude --continue"), its extra arguments are added too.
-(($#)) || set -- "${AGENT_COMMAND[@]}"
+# "roke -- claude --print ..."), its extra arguments are added too.
+# With ROKE_CONTINUE=1 (roke --continue), resume the last session instead.
+if (($# == 0)); then
+  set -- "${AGENT_COMMAND[@]}"
+  if [[ "${ROKE_CONTINUE:-0}" == "1" ]]; then
+    ((${#AGENT_CONTINUE[@]})) \
+      || die "agents/$agent does not say how to resume a session (AGENT_CONTINUE in its setup.sh)"
+    set -- "$@" "${AGENT_CONTINUE[@]}"
+  fi
+fi
 if ((${#AGENT_ARGS[@]})) && [[ "$1" == "${AGENT_COMMAND[0]}" ]]; then
   shift
   set -- "${AGENT_COMMAND[0]}" "${AGENT_ARGS[@]}" "$@"

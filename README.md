@@ -59,7 +59,7 @@ services and tools.
 roke                             # the agent, in the current project
 roke --agent opencode            # another agent, this time
 roke --set-agent opencode        # this project's own agent, from now on
-roke -- claude --continue        # resume Claude Code's last session
+roke -c                          # resume the agent's last session
 roke -s postgres,mailpit         # with a database and a test mail server
 roke -p 5173                     # publish the dev server on 127.0.0.1:5173
 roke --shell                     # bash inside the box

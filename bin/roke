@@ -18,54 +18,56 @@ usage() {
   cat <<'USAGE'
 Usage: roke [options] [PROJECT_DIR] [-- COMMAND...]
 
-Run a coding agent in a container with access to PROJECT_DIR only
-(default: $PWD).
+Run a coding agent in a container that can only see PROJECT_DIR (default:
+the current directory).
 
-Options:
-  -a, --agent NAME       Coding agent to run this time (see --list)
-      --set-agent NAME   Agent for this project; "default" to use the default
-      --default-agent NAME
-                         Default agent, for projects without one of their own
-  -s, --services LIST    Comma-separated services from the catalog.
-                         E.g. -s postgres,redis,mailpit   (see --list)
-  -l, --list             List the agents and the services available to the project
-      --settings         Show the project's settings and allowed destinations
-      --network MODE     restricted (default) or open, this time
-      --allow ENTRY      Allow a destination for this project: domain, IP or
-                         CIDR, with an optional :port (db.example.com:5432)
-      --blocked          Show what the project tried to reach and was denied
-  -p, --port PORT        Publish a port of the box on
-                         127.0.0.1 (repeatable). E.g. -p 3000
-      --git-rw           Mount .git read-write (read-only by default)
-      --serena           Enable Serena (semantic code navigation/editing MCP)
-      --no-serena        Disable it even if the project enables it
+Session
+  -c, --continue         Resume the agent's last session in this project
       --shell            Open bash in the box instead of the agent
-      --build            Rebuild the images (with --pull) before starting
-      --rebuild          Same, without cache (updates agents on 'latest'/'stable')
-      --down             Stop and remove the project's services (keeps data)
-      --purge            Like --down, and also delete the project's volumes
-      --init [GIT_URL]   Create the configuration directory: clone it from your
-                         private repo if GIT_URL is given, then add any missing
-                         file from the examples (never overwrites anything)
-  -h, --help             Show this help
+  -- COMMAND...          Run COMMAND in the box instead of the agent
 
-Anything after "--" replaces the default command (the agent):
-  roke -- claude --continue
-  roke -- opencode --continue
-  roke -s postgres -- psql
+Agent
+  -a, --agent NAME       Use NAME this time
+      --set-agent NAME   Use NAME in this project from now on ("default" to
+                         go back to the default agent)
+      --default-agent NAME
+                         Use NAME in every project without an agent of its own
 
-Configuration directory: ~/.config/roke (or $ROKE_CONFIG_DIR), out of the
-agent's reach:
-  roke.env, secrets.env     global settings (ROKE_AGENT...) and API keys
-  AGENTS.md                  your instructions for every agent
-  projects/<dir-name>/       one directory per project, named after it:
-    project.env              ROKE_SERVICES, ROKE_PORTS, ROKE_SERENA...
-    secrets.env              the project's secrets
-    compose.yaml             compose override for the project
-    AGENTS.md                private instructions for the agent
-    services/<name>/         services only the project uses
-  services/<name>/           your own services (same layout as the catalog)
-  agents/<agent>/            each agent's own configuration
+Services and ports (this time; ROKE_SERVICES and ROKE_PORTS to keep them)
+  -s, --services LIST    Services to start, comma-separated: -s postgres,redis
+  -p, --port PORT        Publish a port of the box on 127.0.0.1 (repeatable)
+
+Network
+      --network MODE     restricted or open, this time (default: restricted)
+      --allow ENTRY      Allow a destination in this project from now on:
+                         domain, IP or CIDR, with an optional :port
+      --blocked          Show what the project tried to reach and was denied
+
+Access (this time; ROKE_GIT_RW and ROKE_SERENA to keep them)
+      --git-rw           Let the agent write to .git (commits); read-only by default
+      --serena           Enable Serena (semantic code navigation and editing)
+      --no-serena        Disable it, even if the project enables it
+
+Information
+  -l, --list             The available agents and services
+      --settings         This project's settings and allowed destinations
+  -h, --help             This help
+
+Maintenance
+      --build            Rebuild the images before starting
+      --rebuild          Rebuild them without cache (also updates the agents)
+      --down             Stop the project's services, keeping their data
+      --purge            Stop them and delete all the project's data
+      --init [GIT_URL]   Create ~/.config/roke, cloning GIT_URL if given; never
+                         overwrites existing files
+
+Examples
+  roke                           start the agent in the current project
+  roke -c                        resume its last session
+  roke -s postgres -- psql       psql against the project's database
+
+Settings live in ~/.config/roke (or $ROKE_CONFIG_DIR): roke.env for every
+project and projects/<dir-name>/ for each one. See docs/configuration.md.
 USAGE
 }
 
@@ -168,6 +170,7 @@ cli_git_rw=0
 cli_serena=""
 cli_agent=""
 cli_network=""
+cli_continue=0
 set_value=""
 action=run
 build=""
@@ -193,6 +196,7 @@ while (($#)); do
     --git-rw)      cli_git_rw=1; shift ;;
     --serena)      cli_serena=1; shift ;;
     --no-serena)   cli_serena=0; shift ;;
+    -c|--continue) cli_continue=1; shift ;;
     --shell)       cmd=(bash); shift ;;
     --build)       build=pull; shift ;;
     --rebuild)     build=nocache; shift ;;
@@ -540,6 +544,10 @@ case "$build" in
 esac
 
 run_args=(--rm)
+if ((cli_continue)); then
+  ((${#cmd[@]} == 0)) || die "--continue resumes the agent: it cannot be combined with --shell or -- COMMAND"
+  run_args+=(-e ROKE_CONTINUE=1)
+fi
 [[ -t 0 && -t 1 ]] || run_args+=(-T)
 
 
