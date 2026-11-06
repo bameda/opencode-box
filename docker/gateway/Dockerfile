@@ -3,10 +3,14 @@
 # (which shares its network namespace) and publishes ports on the host.
 FROM debian:trixie-slim
 
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Debian's dnsmasq-base creates the dnsmasq user; other bases may not.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       nftables dnsmasq-base socat iproute2 \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd --system --no-create-home --shell /usr/sbin/nologin dnsmasq
+    && { id dnsmasq >/dev/null 2>&1 \
+         || useradd --system --no-create-home --shell /usr/sbin/nologin dnsmasq; }
 
 COPY --chmod=0755 gateway.sh /usr/local/bin/roke-gateway
 
