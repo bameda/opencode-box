@@ -7,8 +7,9 @@ dotfiles and every other project stay out of the agent's reach.
 - **Isolated**: the project is the only host directory the agent can write
   to. Its `.git` is read-only, and the container runs without `sudo`,
   without capabilities and without access to Docker.
-- **Services on demand**: PostgreSQL, Redis, Mailpit, MinIO and more, each
-  in its own container, with separate data for every project.
+- **Services on demand**: databases, caches, queues, test email, tracing,
+  API mocks, a simulated Kubernetes API and more, each in its own
+  container, with separate data for every project.
 - **Per-project tools**: languages and tools are installed with
   [mise](https://mise.jdx.dev) from the project's `mise.toml`.
 - **Semantic code navigation**, optionally, with

@@ -1,0 +1,36 @@
+# Kafka API (Redpanda) · kafka:9092 · KAFKA_BOOTSTRAP_SERVERS, SCHEMA_REGISTRY_URL
+services:
+  opencode:
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BROKERS: kafka:9092
+      SCHEMA_REGISTRY_URL: http://kafka:8081
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  kafka:
+    image: docker.redpanda.com/redpandadata/redpanda:${REDPANDA_VERSION:-v26.2.2}
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=${KAFKA_MEMORY:-1G}
+      - --kafka-addr=internal://0.0.0.0:9092
+      - --advertise-kafka-addr=internal://kafka:9092
+      - --schema-registry-addr=internal://0.0.0.0:8081
+      - --default-log-level=warn
+    volumes:
+      - kafka-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  kafka-data:

@@ -1,0 +1,27 @@
+# OCI registry · registry:5000 · OCI_REGISTRY · also on 127.0.0.1:5000
+services:
+  opencode:
+    environment:
+      OCI_REGISTRY: registry:5000
+    depends_on:
+      registry:
+        condition: service_healthy
+
+  registry:
+    image: registry:${REGISTRY_VERSION:-3}
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-data:/var/lib/registry
+    ports:
+      - "127.0.0.1:${REGISTRY_PORT:-5000}:5000"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5000/v2/"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  registry-data:

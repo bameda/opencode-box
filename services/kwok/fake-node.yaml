@@ -1,0 +1,25 @@
+# A simulated node: once applied, kwok schedules Pods on it and reports them
+# as Running. Apply it with: kubectl apply -f /run/ocbox/kwok/fake-node.yaml
+apiVersion: v1
+kind: Node
+metadata:
+  name: kwok-node-0
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    kubernetes.io/hostname: kwok-node-0
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/role: agent
+    node-role.kubernetes.io/agent: ""
+    type: kwok
+status:
+  allocatable:
+    cpu: "32"
+    memory: 256Gi
+    pods: "110"
+  capacity:
+    cpu: "32"
+    memory: 256Gi
+    pods: "110"

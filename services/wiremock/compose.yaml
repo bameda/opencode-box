@@ -1,0 +1,14 @@
+# WireMock (mock external HTTP APIs) · http://wiremock:8080 · WIREMOCK_URL
+services:
+  opencode:
+    environment:
+      WIREMOCK_URL: http://wiremock:8080
+    depends_on:
+      wiremock:
+        condition: service_started
+
+  wiremock:
+    image: wiremock/wiremock:${WIREMOCK_VERSION:-3.13.2}
+    command: ["--global-response-templating", "--disable-banner"]
+    security_opt:
+      - no-new-privileges:true
