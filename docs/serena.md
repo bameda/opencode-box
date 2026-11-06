@@ -41,5 +41,5 @@ how it is registered there.
   set `ROKE_SERENA_DASHBOARD=1` and open
   `http://127.0.0.1:24282/dashboard/` (the port can be changed with
   `ROKE_SERENA_DASHBOARD_PORT`).
-- **Version.** Set `SERENA_VERSION` in `roke.env` and run `roke --build`.
+- **Version.** Set `SERENA_VERSION` in `roke.env` and run `roke build`.
   With `INSTALL_SERENA=0`, the image is built without Serena.

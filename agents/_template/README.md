@@ -1,6 +1,6 @@
 # Agent name (`myagent`)
 
-One sentence on what the agent is; this first line is shown by `roke --list`.
+One sentence on what the agent is; this first line is shown by `roke agent`.
 
 ## Install and update
 

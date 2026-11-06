@@ -31,7 +31,7 @@ Then the frontend is at `http://127.0.0.1:5173`, the API at
 
 ## Check it
 
-From `roke --shell`:
+From `roke shell`:
 
 ```bash
 pnpm install

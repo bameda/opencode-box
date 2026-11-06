@@ -19,8 +19,8 @@ agent's reach.
   API mocks, a simulated Kubernetes API and more, each in its own
   container, with separate data for every project.
 - **Restricted network**: by default, the agent only reaches the
-  destinations you allow, with any protocol; `roke --blocked` shows what was
-  denied and `roke --allow` opens it.
+  destinations you allow, with any protocol; `roke network blocked` shows what was
+  denied and `roke network add` opens it.
 - **Per-project tools**: languages and tools are installed with
   [mise](https://mise.jdx.dev) from the project's `mise.toml`.
 - **Semantic code navigation**, optionally, with
@@ -38,13 +38,13 @@ agent's reach.
    curl -fsSL https://raw.githubusercontent.com/bameda/roke/main/install.sh | bash
    ```
 
-3. Choose your default agent: `roke --default-agent claude`, `codex` or
+3. Choose your default agent: `roke agent use claude --global`, `codex` or
    `opencode`.
 4. Start it in a project, building the image the first time:
 
    ```fish
    cd ~/src/my-project
-   roke --build
+   roke build
    ```
 
    The first time, log in from inside the agent; see its
@@ -56,18 +56,17 @@ services and tools.
 ## Everyday use
 
 ```fish
-roke                             # the agent, in the current project
-roke --agent opencode            # another agent, this time
-roke --set-agent opencode        # this project's own agent, from now on
-roke -c                          # resume the agent's last session
-roke -s postgres,mailpit         # with a database and a test mail server
-roke -p 5173                     # publish the dev server on 127.0.0.1:5173
-roke --shell                     # bash inside the box
-roke --list                      # available agents and services
-roke --settings                  # this project's settings and allowed destinations
-roke --urls                      # where the app and the services are: URLs, ports, variables
-roke --down                      # stop the project's services (keeps data)
-roke --help                      # every option
+roke                       # start the agent in the current project
+roke continue              # resume its last session
+roke -s postgres -p 5173   # this time with a database and the dev server's port
+roke shell                 # bash inside the box
+roke exec psql             # a single command inside the box
+roke urls                  # where the app and the services are
+roke service add postgres  # add a service to the project, for good
+roke agent use opencode    # use another agent in the project, for good
+roke network blocked       # what the network denied
+roke down                  # stop the project's containers (keeps data)
+roke help                  # every command
 ```
 
 Each project keeps its services, ports and other options in its own

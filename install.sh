@@ -72,10 +72,10 @@ roke_install() {
   # completed with any missing file (existing ones are never touched).
   local config="${ROKE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/roke}"
   if [[ -n "${ROKE_CONFIG_REPO:-}" && ! -e "$config" ]]; then
-    "$dir/bin/roke" --init "$ROKE_CONFIG_REPO"
+    "$dir/bin/roke" init "$ROKE_CONFIG_REPO"
   else
     [[ -n "${ROKE_CONFIG_REPO:-}" ]] && say "$config already exists; not cloning $ROKE_CONFIG_REPO"
-    "$dir/bin/roke" --init
+    "$dir/bin/roke" init
   fi
 
   # Checks that do not stop the install.
@@ -92,7 +92,7 @@ roke_install() {
        warn "  zsh:   echo 'export PATH=\"$bin_dir:\$PATH\"' >> ~/.zshrc" ;;
   esac
 
-  say "done. Next: roke --default-agent claude|codex|opencode, then roke --build in a project"
+  say "done. Next: roke agent use claude|codex|opencode --global, then roke build in a project"
 }
 
 roke_install "$@"

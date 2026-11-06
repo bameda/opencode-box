@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=myservice` in `~/.config/roke/projects/<name>/project.env`, or `roke -s myservice`.
 
@@ -20,7 +20,7 @@ for.
 **Explore it**
 
 ```bash
-# commands to inspect or reset it from roke --shell
+# commands to inspect or reset it from roke shell
 ```
 
 **From your host**: web UI address, if it publishes one.

@@ -17,7 +17,7 @@ Before configuring anything, answer these questions:
 
 - **Which agent?** The one in `roke.env` applies to every project; set
   `ROKE_AGENT` in the project's settings to use another one there.
-- **Which services does it use?** Check the catalog with `roke --list`.
+- **Which services does it use?** Check the catalog with `roke service`.
   The [service catalog](../services/README.md) links to a guide for each one
   explaining how your app connects to it.
 - **Is there a port you want to open in your browser?** For example, the dev
@@ -108,7 +108,7 @@ ask it to do this.
 
 ```fish
 cd ~/src/shop
-roke --shell
+roke shell
 ```
 
 The line `[roke] project: ... services: postgres,redis ... serena: yes`
@@ -144,21 +144,21 @@ commit it or add it to `.gitignore`.
 
 ```fish
 cd ~/src/shop
-roke                             # new session
-roke -c                          # resume the last one
-git diff                         # on the host: review what it did
-git commit -am "feat: ..."       # and commit it yourself
-roke --down                      # when done, stop PostgreSQL and Redis
+roke                        # new session
+roke continue               # resume the last one
+git diff                    # on the host: review what it did
+git commit -am "feat: ..."  # and commit it yourself
+roke down                   # when done, stop PostgreSQL and Redis
 ```
 
-The database keeps its data between sessions, even after `--down`. See
+The database keeps its data between sessions, even after `roke down`. See
 [Usage](usage.md) for every option.
 
 ## 9. Removing a project
 
 ```fish
 cd ~/src/shop
-roke --purge                     # stops the services and deletes their data
+roke purge                     # stops the services and deletes their data
 rm -r ~/.config/roke/projects/shop
 ```
 

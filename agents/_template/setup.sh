@@ -3,7 +3,7 @@
 # user; see agents/README.md for the variables and helpers available.
 
 AGENT_COMMAND=(myagent)
-# Arguments that resume the last session (roke --continue), if the agent can.
+# Arguments that resume the last session (roke continue), if the agent can.
 AGENT_CONTINUE=(--continue)
 
 # Link your configuration where the agent reads it:

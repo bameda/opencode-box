@@ -21,9 +21,9 @@ the project settings.
 
 ```dotenv
 # ~/.config/roke/roke.env
-ROKE_AGENT=claude                              # the agent to run
-ROKE_AGENTS="claude codex opencode"                  # agents in the image (rebuild after changing)
-ROKE_AGENT_VERSIONS="opencode=2.2.5"           # optional versions (rebuild after changing)
+ROKE_AGENT=claude                     # the agent to run
+ROKE_AGENTS="claude codex opencode"   # agents in the image (rebuild after changing)
+ROKE_AGENT_VERSIONS="opencode=2.2.5"  # optional versions (rebuild after changing)
 ```
 
 - **`ROKE_AGENT`** is required when the image has more than one agent. A
@@ -41,17 +41,17 @@ projects can use different agents with the same configuration. Switching
 takes one command:
 
 ```fish
-roke --default-agent claude      # the default, for projects without their own
-roke --set-agent opencode        # this project's own agent
-roke --set-agent default         # this project uses the default again
-roke --agent opencode            # this run only
-roke --list                      # which agent runs here, and why
+roke agent use claude --global  # the default, for projects without their own
+roke agent use opencode         # this project's own agent
+roke agent reset                # this project uses the default again
+roke --agent opencode           # this run only
+roke agent                      # the agents, and which one runs here and why
 ```
 
-`--default-agent` writes `ROKE_AGENT` in `roke.env`, and `--set-agent` in
+`roke agent use --global` writes `ROKE_AGENT` in `roke.env`, and `roke agent use` in
 the project's `project.env`; you can also edit them by hand. The agent must
 be in the image: if it is not, add it to `ROKE_AGENTS` and run
-`roke --build`.
+`roke build`.
 
 **What carries over when you switch:**
 
@@ -100,7 +100,7 @@ Copy [`_template/`](_template/) to `agents/<name>/` and fill in its files:
 | `setup.sh` | on every start, as the box's user, sourced by the entrypoint | Links your configuration, places the instructions, registers Serena, and sets `AGENT_COMMAND` |
 | `AGENTS.md` | — | Optional: instructions for this agent only |
 | `allow.txt` | — | Destinations the agent needs in restricted network mode: its API, its login (see [Network](../docs/network.md)) |
-| `README.md` | — | How to use it; its first line is shown by `roke --list` |
+| `README.md` | — | How to use it; its first line is shown by `roke agent` |
 
 `setup.sh` receives these variables and helpers:
 
@@ -119,6 +119,6 @@ and must set:
 |---|---|
 | `AGENT_COMMAND` | Array: the command that starts the agent, for example `(claude)` |
 | `AGENT_ARGS` | Optional array: arguments added whenever the agent runs, for example an MCP configuration file |
-| `AGENT_CONTINUE` | Optional array: arguments that resume the last session, for `roke --continue`; for example `(--continue)` |
+| `AGENT_CONTINUE` | Optional array: arguments that resume the last session, for `roke continue`; for example `(--continue)` |
 
-Then add it to `ROKE_AGENTS` and run `roke --build`.
+Then add it to `ROKE_AGENTS` and run `roke build`.

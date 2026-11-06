@@ -3,7 +3,7 @@
 # entrypoint as the box user; see agents/README.md for the contract.
 
 AGENT_COMMAND=(codex)
-# Arguments that resume the last session (roke --continue).
+# Arguments that resume the last session (roke continue).
 AGENT_CONTINUE=(resume --last)
 
 # Your configuration (config.toml, prompts/, skills/...) is linked into

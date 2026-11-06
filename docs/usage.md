@@ -12,86 +12,96 @@
 ## Command line
 
 ```text
-roke [options] [PROJECT_DIR] [-- COMMAND...]
+roke [-C DIR] [COMMAND] [OPTIONS]
 ```
 
-`PROJECT_DIR` defaults to the current directory. All actions are options,
-so they start with dashes: `roke --build`, not `roke build`. `roke --help`
-lists them grouped like this:
+roke works on the project in the current directory, or in `DIR` with
+`-C DIR`. Commands follow three rules, so you can guess the ones you do not
+remember:
 
-**Session**
+1. **What you do with the project's box is a verb:** `roke shell`,
+   `roke down`, `roke build`.
+2. **What you manage is a noun and a verb:** `roke service add`,
+   `roke agent use`, `roke network add`. The noun alone lists it:
+   `roke service`.
+3. **Changes apply to the current project; `--global`, to every project.**
 
-| Option | Description |
+`roke help` lists every command, and `roke help COMMAND` one of them.
+
+**The project's box**
+
+| Command | Description |
 |---|---|
-| `-c`, `--continue` | Resume the agent's last session in this project |
-| `--shell` | Open bash in the box instead of the agent |
-| `-- COMMAND...` | Run `COMMAND` in the box instead of the agent |
+| `roke` or `roke run` | Start the agent |
+| `roke continue` | Resume the agent's last session |
+| `roke shell` | Open bash in the box |
+| `roke exec CMD...` | Run a command in the box |
+| `roke urls` | Where the app and the services are |
+| `roke settings` | Every setting of the project and where it comes from |
+| `roke build [--no-cache]` | Build the images; `--no-cache` also updates the agents |
+| `roke down [--all]` | Stop the project's containers, or every project's; their data is kept |
+| `roke purge` | Stop them and delete all the project's data |
 
-**Agent** (see [choosing the agent](#choosing-the-agent))
+**Agents** (see [choosing the agent](#choosing-the-agent))
 
-| Option | Description |
+| Command | Description |
 |---|---|
-| `-a`, `--agent NAME` | Use `NAME` this time |
-| `--set-agent NAME` | Use `NAME` in this project from now on; `default` goes back to the default agent |
-| `--default-agent NAME` | Use `NAME` in every project without an agent of its own |
+| `roke agent` | The agents, and the one this project uses |
+| `roke agent use NAME` | Use `NAME` in this project; with `--global`, by default in every project |
+| `roke agent reset` | This project uses the default agent again |
 
-**Services and ports**, for this run (`ROKE_SERVICES` and `ROKE_PORTS` keep them)
+**Services** (see [Services](../services/README.md))
 
-| Option | Description |
+| Command | Description |
 |---|---|
-| `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
-| `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
+| `roke service` | The services, marking the ones this project uses |
+| `roke service add NAME...` | Add services to this project |
+| `roke service rm NAME...` | Remove them from it; their data is kept until `roke purge` |
 
 **Network** (see [Network](network.md))
 
+| Command | Description |
+|---|---|
+| `roke network` | The network mode and the allowed destinations, by layer |
+| `roke network add DEST` | Allow a destination in this project; with `--global`, in every project |
+| `roke network rm DEST` | Stop allowing it; with `--global`, in every project |
+| `roke network blocked` | What the project tried to reach and was denied |
+
+**roke itself**
+
+| Command | Description |
+|---|---|
+| `roke init [GIT_URL]` | Create the [configuration directory](configuration.md), cloning it if a URL is given |
+| `roke update` | Update roke; then `roke build` rebuilds the images |
+| `roke help [COMMAND]` | The help |
+
+**Options** for `run`, `continue`, `shell` and `exec`, for this time only
+(`-s` and `-p` also apply to `roke urls`):
+
 | Option | Description |
 |---|---|
-| `--network MODE` | `restricted` or `open`, this time (default: `restricted`) |
-| `--allow ENTRY` | Allow a destination in this project from now on |
-| `--blocked` | Show what the project tried to reach and was denied |
-
-**Access**, for this run (`ROKE_GIT_RW` and `ROKE_SERENA` keep them)
-
-| Option | Description |
-|---|---|
+| `-a`, `--agent NAME` | Use another agent |
+| `-s`, `--services LIST` | Start these services instead, comma-separated |
+| `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
+| `--network MODE` | `restricted` or `open` |
 | `--git-rw` | Let the agent write to `.git`, so it can commit |
-| `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
+| `--serena`, `--no-serena` | Enable or disable [Serena](serena.md) |
 
-**Information**
-
-| Option | Description |
-|---|---|
-| `-l`, `--list` | The available agents and services |
-| `--settings` | This project's settings and allowed destinations |
-| `--urls` | How to reach the project's services and ports, from your browser and from inside the box |
-| `-h`, `--help` | The help |
-
-**Maintenance**
-
-| Option | Description |
-|---|---|
-| `--build` | Rebuild the images before starting |
-| `--rebuild` | Rebuild them without cache: also updates the agents |
-| `--down` | Stop the project's services, keeping their data |
-| `--purge` | Stop them and delete all the project's data |
-| `--init [GIT_URL]` | Create the [configuration directory](configuration.md), cloning it if a URL is given |
-| `--update` | Update roke itself; then `--build` rebuilds the images |
+To keep an option for a project, use its setting instead: `roke service add`
+for `-s`, and `ROKE_PORTS`, `ROKE_NETWORK`, `ROKE_GIT_RW` or `ROKE_SERENA` in
+its `project.env`.
 
 Examples:
 
 ```fish
-roke -c                           # resume the agent's last session
-roke -s postgres -- psql          # a single command in the box
+roke continue               # resume the agent's last session
+roke exec -s postgres psql  # a single command, with a service
+roke -C ~/src/shop urls     # another project, from anywhere
 ```
-
-Options given on the command line take precedence over the project's
-[settings](configuration.md#per-project-settings). Use them to try something
-once; for a project you work on every day, put them in
-`projects/<name>/project.env` and just run `roke`.
 
 ## Checking the settings
 
-`roke --settings` shows what applies to the current project and where each
+`roke settings` shows what applies to the current project and where each
 value comes from: the agent, the network mode, the services, the ports, the
 settings files found, and the allowed network destinations, layer by layer.
 
@@ -106,15 +116,19 @@ Serena    on  ·  .git: read-only
 
 Allowed destinations (restricted mode), by layer:
   base       docker/gateway/allow.txt
-             github.com githubusercontent.com ghcr.io ...
-  agent      agents/claude/allow.txt
-             api.anthropic.com claude.ai platform.claude.com
+             github.com githubusercontent.com ghcr.io jdx.dev nodejs.org
+             static.rust-lang.org go.dev dl.google.com golang.org
+             proxy.golang.org sum.golang.org adoptium.net cache.ruby-lang.org
+             python.org registry.npmjs.org yarnpkg.com pypi.org
   ...
 ```
 
+`roke network` shows only the network part, and `roke agent` and
+`roke service` what is available and what the project uses.
+
 ## Finding the services and ports
 
-`roke --urls` shows where everything is in the current project, with the
+`roke urls` shows where everything is in the current project, with the
 values that actually apply (your ports, your database name...):
 
 ```text
@@ -135,8 +149,8 @@ Reach from inside the box
 ```
 
 It reads the project's resolved configuration, so it needs Docker and the
-box's image (`roke --build`), but not the project running. Options such as
-`-s` and `-p` apply, so `roke --urls -s redis` shows what that run would
+box's image (`roke build`), but not the project running. Options such as
+`-s` and `-p` apply, so `roke urls -s redis` shows what that run would
 look like.
 
 ## Choosing the agent
@@ -149,15 +163,15 @@ precedence:
 3. `ROKE_AGENT` in `roke.env`.
 
 If none is set and the image has a single agent, that one runs.
-`roke --list` shows which agent will run in the current project and where
+`roke agent` shows which agent will run in the current project and where
 that choice comes from.
 
 To change the agent without editing files:
 
 ```fish
-roke --default-agent claude      # the default (roke.env)
-roke --set-agent opencode        # this project's own (project.env)
-roke --set-agent default         # this project uses the default again
+roke agent use claude --global  # the default (roke.env)
+roke agent use opencode         # this project's own (project.env)
+roke agent reset                # this project uses the default again
 ```
 
 All the agents of a project share its home volume, so you can switch
@@ -178,11 +192,11 @@ done:
 | Command | Services | Data (databases, buckets, queues...) and the box's home |
 |---|---|---|
 | exit the agent | keep running | kept |
-| `roke --down` | stopped and removed | kept |
-| `roke --purge` | stopped and removed | **deleted** |
+| `roke down` | stopped and removed | kept |
+| `roke purge` | stopped and removed | **deleted** |
 
 The box's home is the project's own volume with the agents' logins and
-sessions and the tools installed with mise, so after `--purge` you log in
+sessions and the tools installed with mise, so after `roke purge` you log in
 again and tools are downloaded again.
 
 Some services do not keep data at all (Redis, Mailpit...); each
@@ -208,8 +222,8 @@ do not add their ports to `-p`. See the [service catalog](../services/README.md)
 ## Running other commands
 
 ```fish
-roke --shell                      # interactive bash in the box
-roke -- psql                      # one command, then exit
+roke shell      # interactive bash in the box
+roke exec psql  # one command, then exit
 ```
 
 The shell has the same environment as the agent: the project's tools, the

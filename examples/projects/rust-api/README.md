@@ -38,7 +38,7 @@ The API must listen on `0.0.0.0:8080` to be reachable at
 
 ## Check it
 
-From `roke --shell`:
+From `roke shell`:
 
 ```bash
 sqlx database create && sqlx migrate run

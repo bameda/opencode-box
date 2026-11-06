@@ -29,7 +29,7 @@ conflicts.
 ```
 
 `install.sh` creates it from the repository's `examples/config`. You can
-also run `roke --init` at any time to add missing files: it never
+also run `roke init` at any time to add missing files: it never
 overwrites existing ones.
 
 The agent never sees this directory: `roke` refuses to mount a project that
@@ -69,7 +69,7 @@ git push
 ```
 
 **On another machine**, pass the repository's URL to the installer (or to
-`roke --init`). It clones it into `~/.config/roke` and adds any missing
+`roke init`). It clones it into `~/.config/roke` and adds any missing
 file from the examples:
 
 ```fish
@@ -178,7 +178,7 @@ Services are looked up in three places, and the first one found wins:
 3. the roke [catalog](../services/README.md).
 
 Your services work exactly like the catalog's: `roke -s <name>` and
-`ROKE_SERVICES` find them, and `roke --list` marks them as `[project]` or
+`ROKE_SERVICES` find them, and `roke service` marks them as `[project]` or
 `[yours]`. Put a service in the project when only that project needs it,
 and in yours when you use it in several projects. A service with the same
 name as one further down the list replaces it. See
@@ -230,7 +230,7 @@ The agent can add tools itself with `mise use`. To skip the automatic
 install, set `ROKE_MISE_INSTALL=0`.
 
 If you always need something that mise does not provide, add it to the
-`apt-get install` in the `Dockerfile` and run `roke --rebuild`.
+`apt-get install` in the `Dockerfile` and run `roke build --no-cache`.
 
 ## Settings reference
 
@@ -243,7 +243,7 @@ documented in its README in [services](../services/README.md).
 | `ROKE_AGENT` | — | The coding agent to run (`--agent`); required when several are installed |
 | `ROKE_SERVICES` | — | Services to start, comma-separated (`-s`) |
 | `ROKE_NETWORK` | `restricted` | `restricted` or `open` (`--network`); see [Network](network.md) |
-| `ROKE_NETWORK_ALLOW` | — | Allowed destinations, space-separated; the project's add to the global ones (`--allow`) |
+| `ROKE_NETWORK_ALLOW` | — | Allowed destinations, space-separated; the project's add to the global ones (`roke network add`) |
 | `ROKE_PORTS` | — | Ports to publish on 127.0.0.1, space-separated (`-p`) |
 | `ROKE_GIT_RW` | `0` | `1` mounts `.git` read-write (`--git-rw`) |
 | `ROKE_SERENA` | `0` | `1` enables Serena (`--serena`) |

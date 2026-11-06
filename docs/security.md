@@ -29,7 +29,7 @@ sessions, the tools installed with mise and the caches (npm, maven,
 cargo...). An agent working on one project therefore cannot read another
 project's sessions, nor leave anything behind (a shell profile, an MCP
 server in the agent's state, a poisoned cache) that another project would
-pick up. `roke --purge` deletes it along with the project's other data.
+pick up. `roke purge` deletes it along with the project's other data.
 
 ## The agent is not trusted
 

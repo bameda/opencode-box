@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=mariadb` in `~/.config/roke/projects/<name>/project.env`, or `roke -s mariadb`.
 
@@ -22,10 +22,10 @@ connect without arguments.
 **Explore it**
 
 ```bash
-mariadb                                # interactive shell (also: mysql)
+mariadb                                   # interactive shell (also: mysql)
 mariadb -e 'SHOW TABLES'
-mariadb-dump "$MYSQL_DATABASE" > .db.sql      # backup
-mariadb < .db.sql                              # restore
+mariadb-dump "$MYSQL_DATABASE" > .db.sql  # backup
+mariadb < .db.sql                         # restore
 ```
 
 The `dev` user only has access to its own database. To create another one

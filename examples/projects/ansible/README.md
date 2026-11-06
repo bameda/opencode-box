@@ -37,7 +37,7 @@ ssh-target-db
 
 ## Check it
 
-From `roke --shell`:
+From `roke shell`:
 
 ```bash
 ansible -i inventories/test all -m ping

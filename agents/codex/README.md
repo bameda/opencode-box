@@ -6,7 +6,7 @@
 
 Installed from the `@openai/codex` npm package. The version is
 `ROKE_AGENT_VERSIONS="codex=..."`: an npm version or tag, `latest` by
-default. With `latest`, run `roke --rebuild` to fetch a newer one.
+default. With `latest`, run `roke build --no-cache` to fetch a newer one.
 
 The box turns off Codex's update check on startup
 (`check_for_update_on_startup`), since the image decides the version.
@@ -16,14 +16,14 @@ The box turns off Codex's update check on startup
 The box has no browser, so use the device-code flow: run
 
 ```fish
-roke -- codex login --device-auth
+roke exec codex login --device-auth
 ```
 
 and follow it: it shows a URL and a code to enter in your browser, on your
 host. The credentials are kept in `~/.codex/auth.json`, in the project's
 home volume, so you log in once per project. Alternatively, put
 `OPENAI_API_KEY` in `~/.config/roke/secrets.env` and log in with it from
-`roke --shell`: `printenv OPENAI_API_KEY | codex login --with-api-key`.
+`roke shell`: `printenv OPENAI_API_KEY | codex login --with-api-key`.
 
 ## Your configuration
 
@@ -52,5 +52,5 @@ holds instructions for Codex only, added to the combined instructions.
   If Codex reports that its sandbox cannot start, set
   `sandbox_mode = "danger-full-access"` in your `config.toml`: inside the box,
   that means full access to the project only.
-- Resume the last session with `roke --continue` (`-c`), which runs
+- Resume the last session with `roke continue`, which runs
   `codex resume --last`.

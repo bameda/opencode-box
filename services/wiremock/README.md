@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=wiremock` in `~/.config/roke/projects/<name>/project.env`, or `roke -s wiremock`.
 
@@ -18,7 +18,7 @@ instead of the real API and define the responses.
 | `WIREMOCK_URL` | `http://wiremock:8080` |
 
 **Define responses** through its admin API, from your tests or from
-`roke --shell`:
+`roke shell`:
 
 ```bash
 curl -s -X POST "$WIREMOCK_URL/__admin/mappings" -d '{
@@ -27,8 +27,8 @@ curl -s -X POST "$WIREMOCK_URL/__admin/mappings" -d '{
                 "headers": { "Content-Type": "application/json" } }
 }'
 curl -s "$WIREMOCK_URL/v1/customers/42"
-curl -s "$WIREMOCK_URL/__admin/requests" | jq '.requests | length'   # calls received
-curl -s -X POST "$WIREMOCK_URL/__admin/reset"                      # start over
+curl -s "$WIREMOCK_URL/__admin/requests" | jq '.requests | length'  # calls received
+curl -s -X POST "$WIREMOCK_URL/__admin/reset"                       # start over
 ```
 
 To load mappings from files instead, keep them in the project (for
@@ -43,7 +43,7 @@ services:
       - ${PROJECT_DIR}/wiremock:/home/wiremock:ro
 ```
 
-**Data**: mappings created through the API are lost on `roke --down`.
+**Data**: mappings created through the API are lost on `roke down`.
 
 **Settings**
 

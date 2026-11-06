@@ -106,7 +106,7 @@ roke_link_config() {
     # AGENTS.md is added to the combined instructions instead (see below).
     case "$name" in .git|.gitignore|README.md|AGENTS.md) continue ;; esac
     if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-      log "WARNING: $dest/$name exists in the project's home volume and hides yours; remove it with roke --shell."
+      log "WARNING: $dest/$name exists in the project's home volume and hides yours; remove it with roke shell."
       continue
     fi
     ln -sfn "$entry" "$dest/$name"
@@ -119,7 +119,7 @@ agent="${ROKE_AGENT:-}"
 agent_dir="/opt/roke/agents/$agent"
 [[ -f "$agent_dir/setup.sh" ]] || die "unknown agent: $agent"
 grep -qxF "$agent" /etc/roke/installed-agents \
-  || die "the agent '$agent' is not installed in the image: add it to ROKE_AGENTS and run roke --build"
+  || die "the agent '$agent' is not installed in the image: add it to ROKE_AGENTS and run roke build"
 
 # The agent's instructions: the box's common ones, the agent's own, then
 # yours (for every agent, then for this agent only) and the project's
@@ -146,8 +146,8 @@ source "$agent_dir/setup.sh"
 ((${#AGENT_COMMAND[@]})) || die "agents/$agent/setup.sh did not set AGENT_COMMAND"
 
 # No command: run the agent. When the agent is run explicitly (for example
-# "roke -- claude --print ..."), its extra arguments are added too.
-# With ROKE_CONTINUE=1 (roke --continue), resume the last session instead.
+# "roke exec claude --print ..."), its extra arguments are added too.
+# With ROKE_CONTINUE=1 (roke continue), resume the last session instead.
 if (($# == 0)); then
   set -- "${AGENT_COMMAND[@]}"
   if [[ "${ROKE_CONTINUE:-0}" == "1" ]]; then

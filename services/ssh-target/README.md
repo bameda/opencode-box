@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=ssh-target` in `~/.config/roke/projects/<name>/project.env`, or `roke -s ssh-target`.
 
@@ -62,17 +62,17 @@ couple of seconds.
 ## Usage
 
 Ask the agent to test the playbook against the test inventory, or do it
-yourself from `roke --shell`:
+yourself from `roke shell`:
 
 ```bash
 ansible -i inventories/test all -m ping
 ansible-playbook -i inventories/test site.yml
-ansible-playbook -i inventories/test site.yml   # 2nd run: changed=0
+ansible-playbook -i inventories/test site.yml  # 2nd run: changed=0
 ssh -i "$SSH_TARGET_KEY" ansible@ssh-target    # look around by hand
 ```
 
 The second run is the idempotence check: a well-written playbook must report
-no changes. To start again from a clean machine, run `roke --down`: the
+no changes. To start again from a clean machine, run `roke down`: the
 target's filesystem is not persisted.
 
 Once it works, apply it to your real infrastructure **from the host**, first
@@ -82,7 +82,7 @@ the box.
 ## Several targets or another distribution
 
 To test against Ubuntu or another Debian release, set the base image in
-`projects/<name>/project.env` (it must use apt) and rebuild with `roke --build`:
+`projects/<name>/project.env` (it must use apt) and rebuild with `roke build`:
 
 ```dotenv
 SSH_TARGET_BASE_IMAGE=ubuntu:24.04

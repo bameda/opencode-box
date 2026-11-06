@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=kwok` in `~/.config/roke/projects/<name>/project.env`, or `roke -s kwok`.
 
@@ -45,7 +45,7 @@ kubectl apply -f /run/roke/kwok/fake-node.yaml
 Do not use `helm install --wait` before adding a node: it would wait
 forever. `helm test` is not meaningful either, since test Pods never run.
 
-**Data**: not persisted. The cluster starts empty after `roke --down`.
+**Data**: not persisted. The cluster starts empty after `roke down`.
 
 **Settings**
 

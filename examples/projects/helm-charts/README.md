@@ -34,7 +34,7 @@ its README explains; plugins are kept in the project's home volume.
 
 ## Check it
 
-From `roke --shell`, for a chart in `charts/mychart`:
+From `roke shell`, for a chart in `charts/mychart`:
 
 ```bash
 helm lint charts/mychart

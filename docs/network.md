@@ -56,8 +56,8 @@ flowchart LR
 ## Restricted and open mode
 
 ```dotenv
-ROKE_NETWORK=restricted     # the default
-ROKE_NETWORK=open           # no limits on the box's traffic
+ROKE_NETWORK=restricted  # the default
+ROKE_NETWORK=open        # no limits on the box's traffic
 ```
 
 Set it in `roke.env` for every project, or in a project's `project.env`.
@@ -99,17 +99,17 @@ Each entry is one of:
 | `203.0.113.10` | that address, on any port |
 | `10.20.0.0/16:22` | that range, on that port only |
 
-`roke --settings` shows the resulting list for the current project, layer
+`roke settings` shows the resulting list for the current project, layer
 by layer, so you can see where each entry comes from.
 
 The quickest way to add one to the current project:
 
 ```fish
-roke --allow db.staging.example.com:5432
-roke --allow api.example.com
+roke network add db.staging.example.com:5432
+roke network add api.example.com
 ```
 
-`--allow` writes `ROKE_NETWORK_ALLOW` in the project's `project.env`. It
+`roke network add` writes `ROKE_NETWORK_ALLOW` in the project's `project.env`. It
 applies from the next start of the project. For every project, edit
 `ROKE_NETWORK_ALLOW` in `roke.env`:
 
@@ -119,7 +119,7 @@ ROKE_NETWORK_ALLOW="api.example.com git.corp.example.com:22"
 
 ## When something cannot connect
 
-Run `roke --blocked` in the project, while it is running or right after:
+Run `roke network blocked` in the project, while it is running or right after:
 
 ```text
 Domains the project looked up and were not allowed:
@@ -129,7 +129,7 @@ Addresses the project tried to connect to and were not allowed (last hour):
   203.0.113.7  tcp port 5432
 ```
 
-Then allow what you need with `roke --allow`, and start the project again.
+Then allow what you need with `roke network add`, and start the project again.
 If a project needs to reach many changing destinations, consider
 `ROKE_NETWORK=open` in its `project.env`.
 

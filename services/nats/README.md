@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=nats` in `~/.config/roke/projects/<name>/project.env`, or `roke -s nats`.
 
@@ -25,9 +25,9 @@ project's `mise.toml` (`"aqua:nats-io/natscli" = "latest"`). It reads
 `NATS_URL` by itself:
 
 ```bash
-nats sub 'orders.>'                 # watch messages
+nats sub 'orders.>'  # watch messages
 nats pub orders.created '{"id":1}'
-nats stream ls                      # JetStream streams
+nats stream ls       # JetStream streams
 curl -s "$NATS_MONITOR_URL/varz" | jq '.connections'
 ```
 

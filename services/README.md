@@ -3,7 +3,7 @@
 The catalog of auxiliary services: databases, caches, mail, storage, queues
 and test infrastructure. Each one lives in its own directory under
 `services/`, with a `compose.yaml` that defines it and a `README.md` that
-explains how to use it. `roke --list` shows what is available.
+explains how to use it. `roke service` shows what is available.
 
 ## Catalog
 
@@ -46,9 +46,9 @@ ROKE_SERVICES=postgres,redis,mailpit
 reachable from the box by its name (`postgres`, `redis`...). Its connection
 details are set as environment variables in the box, so your
 app and the agent find them without configuration. Run `env` in
-`roke --shell` to see them all.
+`roke shell` to see them all.
 
-**`roke --urls`** shows, for the current project, the address and the
+**`roke urls`** shows, for the current project, the address and the
 variables of each service it uses, and the URLs of their web UIs on your
 host, with your own settings applied.
 
@@ -64,8 +64,8 @@ databases. Services keep running when you exit the agent.
 
 | Command | Effect |
 |---|---|
-| `roke --down` | Stops the project's services. Data in volumes is kept. |
-| `roke --purge` | Stops them and deletes all their data. |
+| `roke down` | Stops the project's services. Data in volumes is kept. |
+| `roke purge` | Stops them and deletes all their data. |
 
 **No internet.** Services are on the project's internal network, with no
 route out, so the agent cannot use one of them to send data out. They can
@@ -108,7 +108,7 @@ Where you put the copy decides who can use it:
 
 They are looked up in that order and the first one found wins, so a
 project's service can replace one of yours, and yours can replace one from
-the catalog. `roke --list` marks them as `[project]` or `[yours]`.
+the catalog. `roke service` marks them as `[project]` or `[yours]`.
 
 The rules are few:
 
@@ -120,7 +120,7 @@ The rules are few:
    ask the gateway to forward it, as in
    [publishing a service's port](#publishing-a-services-port), with the host
    port in a variable so it can be changed.
-5. The first comment line is the description shown by `roke --list`.
+5. The first comment line is the description shown by `roke service`.
 6. Relative paths resolve against the roke repository. To refer to
    files in your configuration, use `${ROKE_CONFIG_DIR}` or, for the
    project's directory, `${ROKE_PROJECT_CONFIG}`.

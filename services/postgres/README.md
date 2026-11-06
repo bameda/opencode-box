@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=postgres` in `~/.config/roke/projects/<name>/project.env`, or `roke -s postgres`.
 
@@ -21,13 +21,13 @@ make the client tools connect without arguments.
 **Explore it**
 
 ```bash
-psql                                   # interactive shell on the project DB
-psql -c '\dt'                          # list tables
-createdb app_test                      # extra database, e.g. for tests
+psql                                                    # interactive shell on the project DB
+psql -c '\dt'                                           # list tables
+createdb app_test                                       # extra database, e.g. for tests
 psql -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm'
-pg_dump -Fc -f .db.dump                # backup
+pg_dump -Fc -f .db.dump                                 # backup
 pg_restore --clean -d "$PGDATABASE" .db.dump
-dropdb --force "$PGDATABASE" && createdb "$PGDATABASE"   # empty the DB
+dropdb --force "$PGDATABASE" && createdb "$PGDATABASE"  # empty the DB
 ```
 
 **Data**: persisted in the project's `pgdata` volume.
@@ -65,11 +65,11 @@ re-run your migrations and seeds. To keep the data, dump it first:
 
 ```fish
 cd ~/src/my-project
-roke -s postgres -- pg_dumpall -f .pg-upgrade.sql       # with the old version
+roke exec -s postgres pg_dumpall -f .pg-upgrade.sql       # with the old version
 # set POSTGRES_VERSION=19 and POSTGRES_CLIENT_VERSION=19 in roke.env, then:
-roke --build -s postgres -- psql -d postgres -f .pg-upgrade.sql
+roke build -s postgres -- psql -d postgres -f .pg-upgrade.sql
 rm .pg-upgrade.sql
 ```
 
 Errors about the role or database already existing are expected. The old
-major's files stay in the volume until you run `roke --purge`.
+major's files stay in the volume until you run `roke purge`.

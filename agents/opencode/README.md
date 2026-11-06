@@ -6,7 +6,7 @@
 
 Installed from the `@opencode/cli` npm package. The version is
 `ROKE_AGENT_VERSIONS="opencode=..."`: an npm version or tag, `latest` by
-default. With `latest`, run `roke --rebuild` to fetch a newer one.
+default. With `latest`, run `roke build --no-cache` to fetch a newer one.
 
 The box disables OpenCode's own updates, since the image decides the
 version.
@@ -44,4 +44,4 @@ read-only, so edit it on your host. The terminal client's own file
   diagnostics. The box's instructions ask it to validate changes with the
   project's lint, typecheck and tests, and [Serena](../../docs/serena.md)
   covers code navigation.
-- Resume the last session with `roke --continue` (`-c`).
+- Resume the last session with `roke continue`.

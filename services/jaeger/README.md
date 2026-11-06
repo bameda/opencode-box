@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=jaeger` in `~/.config/roke/projects/<name>/project.env`, or `roke -s jaeger`.
 
@@ -34,7 +34,7 @@ curl -s "$JAEGER_QUERY_URL/api/services" | jq
 curl -s "$JAEGER_QUERY_URL/api/traces?service=my-app&limit=5" | jq '.data[].spans | length'
 ```
 
-**Data**: kept in memory, so it is lost on `roke --down`.
+**Data**: kept in memory, so it is lost on `roke down`.
 
 **Settings**
 

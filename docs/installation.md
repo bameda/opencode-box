@@ -126,7 +126,7 @@ To work on roke itself, clone the repository wherever you want and run
 Then choose your default agent:
 
 ```fish
-roke --default-agent claude      # or codex, or opencode; see agents/README.md
+roke agent use claude --global      # or codex, or opencode; see agents/README.md
 ```
 
 The image installs every agent by default. To make it smaller, keep only
@@ -136,7 +136,7 @@ Then build the image and start the agent in a project:
 
 ```fish
 cd ~/src/my-project
-roke --build
+roke build
 ```
 
 The first time, log in from inside the agent, as its README explains
@@ -166,21 +166,21 @@ the agent.
 ## Updating
 
 ```fish
-roke --update
-roke --build          # in each project, to rebuild its images
+roke update
+roke build          # in each project, to rebuild its images
 ```
 
-`roke --update` pulls the latest version of roke; running the installer
+`roke update` pulls the latest version of roke; running the installer
 again does the same. Your configuration is not touched. Releases with
 incompatible changes are marked with `!` in the commit history (for example
 `feat(postgres)!: ...`): read their description, which explains what to
 change.
 
-`roke --build` rebuilds the images only where something changed. Agents
+`roke build` rebuilds the images only where something changed. Agents
 installed from a channel (`latest`, `stable`) are not updated by it, since
-Docker reuses the cached layer: run `roke --rebuild` to fetch their newest
+Docker reuses the cached layer: run `roke build --no-cache` to fetch their newest
 release, or pin versions with `ROKE_AGENT_VERSIONS` in `roke.env` and run
-`roke --build` after changing them. See [Agents](../agents/README.md).
+`roke build` after changing them. See [Agents](../agents/README.md).
 
 ## Rootless Docker
 
@@ -197,13 +197,13 @@ ROKE_HOST_UID=0
 ROKE_HOST_GID=0
 ```
 
-Then run `roke --rebuild`. There is still no `sudo` in the box, and its
+Then run `roke build --no-cache`. There is still no `sudo` in the box, and its
 root is not root on your machine.
 
 ## Uninstalling
 
 ```fish
-cd ~/src/my-project && roke --purge       # for each project: services and data
+cd ~/src/my-project && roke purge       # for each project: services and data
 docker image rm roke:latest
 rm ~/.local/bin/roke
 rm -rf ~/.local/share/roke

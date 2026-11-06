@@ -41,9 +41,9 @@ no Docker inside, on purpose, so:
 
 ## Check it
 
-From `roke --shell`:
+From `roke shell`:
 
 ```bash
-./mvnw test                      # or ./gradlew test
-./mvnw spring-boot:run           # then http://127.0.0.1:8080
+./mvnw test             # or ./gradlew test
+./mvnw spring-boot:run  # then http://127.0.0.1:8080
 ```

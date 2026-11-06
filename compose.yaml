@@ -93,6 +93,6 @@ networks:
   egress: {}
 
 volumes:
-  # Per project (the compose project's name is its prefix). "roke --purge"
+  # Per project (the compose project's name is its prefix). "roke purge"
   # deletes it along with the project's other data.
   home:

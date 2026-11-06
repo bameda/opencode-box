@@ -28,7 +28,7 @@ are downloaded and packages compiled only once.
 
 ## Check it
 
-From `roke --shell`:
+From `roke shell`:
 
 ```bash
 go build ./...

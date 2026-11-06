@@ -2,7 +2,7 @@
 
 Part of the [service catalog](../README.md). See
 [How services work](../README.md#how-services-work) for what is common
-to every service: enabling, data, `--down`/`--purge` and host access.
+to every service: enabling, data, `roke down`/`roke purge` and host access.
 
 **Enable**: `ROKE_SERVICES=mailpit` in `~/.config/roke/projects/<name>/project.env`, or `roke -s mailpit`.
 
@@ -38,7 +38,7 @@ m['Subject'] = 'Test'; m.set_content('Hello from the box')
 smtplib.SMTP('mailpit', 1025).send_message(m)"
 ```
 
-**Data**: not persisted; the inbox is emptied on `roke --down`.
+**Data**: not persisted; the inbox is emptied on `roke down`.
 
 **Settings**
 
