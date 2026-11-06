@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 #
-# Working image for OpenCode 2. It only sees what gets mounted into it
-# (the project, its own $HOME in a volume and your opencode configuration).
+# Working image for coding agents. It only sees what gets mounted into it
+# (the project, its own $HOME in a volume and your agent configuration).
 FROM debian:trixie-slim
 
 # Host user's UID/GID, so files the agent creates in the project are owned
@@ -9,9 +9,11 @@ FROM debian:trixie-slim
 ARG HOST_UID=1000
 ARG HOST_GID=1000
 
-# OpenCode 2 (npm package @opencode/cli). Pin a version for reproducible
-# builds: changing it invalidates this layer's cache.
-ARG OPENCODE_VERSION=latest
+# Coding agents to install (directories in agents/), space-separated, and
+# optional versions as agent=version pairs ("opencode=2.2.5 claude=latest");
+# agents without one get their install.sh's default.
+ARG OCBOX_AGENTS="claude opencode"
+ARG OCBOX_AGENT_VERSIONS=""
 
 # PostgreSQL client tools (psql, pg_dump...) from the official PGDG repo.
 # Keep it >= the server's major: pg_dump refuses to dump newer servers.
@@ -85,14 +87,7 @@ RUN if [ "${INSTALL_SERENA}" = "1" ]; then \
       serena --help >/dev/null; \
     fi
 
-# OpenCode 2. The npm postinstall picks the native binary for the platform.
-RUN npm install -g "@opencode/cli@${OPENCODE_VERSION}" \
-    && opencode --version \
-    && npm cache clean --force
-
 # Unprivileged user with the same UID/GID as on the host. No sudo.
-# /etc/opencode is OpenCode's system config (highest precedence); the
-# entrypoint regenerates it on every start.
 RUN set -eux; \
     if ! getent group "${HOST_GID}" >/dev/null; then groupadd -g "${HOST_GID}" dev; fi; \
     if getent passwd "${HOST_UID}" >/dev/null; then \
@@ -100,10 +95,25 @@ RUN set -eux; \
     fi; \
     useradd -m -u "${HOST_UID}" -g "${HOST_GID}" -s /bin/bash -d /home/dev dev; \
     install -d -o "${HOST_UID}" -g "${HOST_GID}" \
-      /home/dev/.config/opencode \
+      /home/dev/.config \
       /home/dev/.local/bin /home/dev/.local/share /home/dev/.local/state \
-      /home/dev/.cache /home/dev/.serena \
-      /etc/opencode
+      /home/dev/.cache /home/dev/.serena
+
+# Coding agents: each agents/<agent>/install.sh runs as root, after the user
+# exists so it can prepare directories the agent's setup.sh writes at start.
+COPY agents/ /tmp/ocbox-agents/
+RUN set -eu; \
+    install -d /etc/ocbox; \
+    : > /etc/ocbox/installed-agents; \
+    for agent in ${OCBOX_AGENTS}; do \
+      [ -x "/tmp/ocbox-agents/${agent}/install.sh" ] \
+        || { echo "unknown agent: ${agent}" >&2; exit 1; }; \
+      version="$(printf '%s\n' ${OCBOX_AGENT_VERSIONS} | sed -n "s/^${agent}=//p" | tail -n1)"; \
+      echo "Installing ${agent} (${version:-default})"; \
+      "/tmp/ocbox-agents/${agent}/install.sh" "${version:-default}"; \
+      echo "${agent}" >> /etc/ocbox/installed-agents; \
+    done; \
+    rm -rf /tmp/ocbox-agents
 
 COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/ocbox-entrypoint
 
@@ -117,5 +127,5 @@ ENV HOME=/home/dev \
 USER dev
 WORKDIR /home/dev
 
+# Without a command, the entrypoint runs the agent selected with OCBOX_AGENT.
 ENTRYPOINT ["/usr/local/bin/ocbox-entrypoint"]
-CMD ["opencode"]

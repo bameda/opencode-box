@@ -93,7 +93,7 @@ For several hosts (for example, a web and a db group), add more targets in
 
 ```yaml
 services:
-  opencode:
+  box:
     depends_on:
       ssh-target-2:
         condition: service_healthy

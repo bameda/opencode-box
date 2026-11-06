@@ -101,16 +101,28 @@ git clone https://github.com/bameda/opencode-box.git ~/src/opencode-box
   examples. It never overwrites existing files. See
   [Configuration](configuration.md).
 
-Then build the image and start opencode in a project:
+Choose your default agent (it is written to `~/.config/ocbox/ocbox.env`):
+
+```fish
+ocbox --default-agent claude      # or opencode; see agents/README.md
+```
+
+Any project can use a different one later, with `ocbox --set-agent`.
+
+The image installs every agent by default. To make it smaller, keep only
+the ones you use in `OCBOX_AGENTS` (see [Agents](../agents/README.md)).
+
+Then build the image and start the agent in a project:
 
 ```fish
 cd ~/src/my-project
 ocbox --build
 ```
 
-The first time, run `/connect` inside opencode to log in to your model
-provider. The login is stored in the box's own volume, not in your real
-`$HOME`.
+The first time, log in from inside the agent, as its README explains
+([Claude Code](../agents/claude/README.md#log-in),
+[OpenCode](../agents/opencode/README.md#log-in)). The login is stored in the
+box's own volume, not in your real `$HOME`, and works for every project.
 
 ### On another machine, with your configuration repository
 
@@ -126,7 +138,7 @@ git clone https://github.com/bameda/opencode-box.git ~/src/opencode-box
 
 Your secrets are not in that repository, so recreate
 `~/.config/ocbox/secrets.env` by hand if you use it, or log in again with
-`/connect`.
+logging in again from the agent.
 
 ## Updating
 
@@ -141,9 +153,11 @@ marked with `!` in the commit history (for example
 `feat(postgres)!: ...`): read their description, which explains what to
 change.
 
-`ocbox --build` rebuilds the image only where something changed. With
-`OPENCODE_VERSION=latest` (the default), use `ocbox --rebuild` to fetch a
-newer OpenCode, or pin a version in `ocbox.env` and run `ocbox --build`.
+`ocbox --build` rebuilds the image only where something changed. Agents
+installed from a channel (`latest`, `stable`) are not updated by it, since
+Docker reuses the cached layer: run `ocbox --rebuild` to fetch their newest
+release, or pin versions with `OCBOX_AGENT_VERSIONS` in `ocbox.env` and run
+`ocbox --build` after changing them. See [Agents](../agents/README.md).
 
 ## Rootless Docker
 

@@ -1,4 +1,4 @@
-# Base: just the OpenCode 2 container. Services (databases, caches, mail,
+# Base: just the box where the coding agent runs. Services (databases, caches, mail,
 # proxy...) are added from services/<name>/compose.yaml with "ocbox -s".
 # Don't run this directly: use bin/ocbox.
 
@@ -10,7 +10,8 @@ services:
       args:
         HOST_UID: ${HOST_UID:-1000}
         HOST_GID: ${HOST_GID:-1000}
-        OPENCODE_VERSION: ${OPENCODE_VERSION:-latest}
+        OCBOX_AGENTS: ${OCBOX_AGENTS:-claude opencode}
+        OCBOX_AGENT_VERSIONS: ${OCBOX_AGENT_VERSIONS:-}
         POSTGRES_CLIENT_VERSION: ${POSTGRES_CLIENT_VERSION:-18}
         INSTALL_SERENA: ${INSTALL_SERENA:-1}
         SERENA_VERSION: ${SERENA_VERSION:-2.1.0}
@@ -30,6 +31,8 @@ services:
       - path: ${OCBOX_PROJECT_CONFIG}/secrets.env
         required: false
     environment:
+      # The coding agent to run; chosen by bin/ocbox.
+      OCBOX_AGENT: ${OCBOX_AGENT:?Start the container with bin/ocbox}
       TERM: ${TERM:-xterm-256color}
       COLORTERM: ${COLORTERM:-truecolor}
       MISE_TRUSTED_CONFIG_PATHS: ${PROJECT_DIR}
@@ -44,10 +47,12 @@ services:
       - ${PROJECT_DIR}:${PROJECT_DIR}
       # The box's own $HOME (auth, sessions, caches, mise...).
       - ocbox-home:/home/dev
-      # Your opencode configuration (read-only); the entrypoint links it into
-      # ~/.config/opencode and merges your AGENTS.md with the box's own.
-      - ${OCBOX_CONFIG_DIR}/opencode:/run/ocbox/opencode:ro
-      - ./docker/AGENTS.md:/opt/ocbox/AGENTS.md:ro
+      # Your configuration for the selected agent (read-only); its setup.sh
+      # links it where the agent reads it.
+      - ${OCBOX_CONFIG_DIR}/agents/${OCBOX_AGENT}:/run/ocbox/agent-config:ro
+      # The agents' install and setup scripts and the box's instructions,
+      # mounted so that updates arrive with git pull, without a rebuild.
+      - ./agents:/opt/ocbox/agents:ro
     security_opt:
       - no-new-privileges:true
     cap_drop:

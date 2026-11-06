@@ -6,14 +6,16 @@ dev server on port 5173.
 
 ## 0. Before you start
 
-You need opencode-box installed and its image built, and to have logged in
-with `/connect` once: see [Installation](installation.md). The login is
-shared by every project.
+You need opencode-box installed and its image built, an agent chosen with
+`OCBOX_AGENT`, and to have logged in from inside the agent once: see
+[Installation](installation.md). The login is shared by every project.
 
 ## 1. Decide what the project needs
 
-Before configuring anything, answer four questions:
+Before configuring anything, answer these questions:
 
+- **Which agent?** The one in `ocbox.env` applies to every project; set
+  `OCBOX_AGENT` in the project's settings to use another one there.
 - **Which services does it use?** Check the catalog with `ocbox --list`.
   The [service catalog](../services/README.md) links to a guide for each one
   explaining how your app connects to it.
@@ -119,15 +121,20 @@ redis-cli -u "$REDIS_URL" ping
 exit
 ```
 
-## 7. First opencode session
+## 7. First session
 
 ```fish
 ocbox
 ```
 
-Inside, run `/init` so the agent analyses the project and generates its own
-`AGENTS.md`, with conventions, build and test commands and structure. Review
-it and commit it from the host.
+Inside, run `/init` so the agent analyses the project and writes its
+instructions file, with conventions, build and test commands and structure:
+`CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode. Review it and commit
+it from the host.
+
+If the project's team uses different agents, keep a single `AGENTS.md`:
+OpenCode reads it, and so does Claude Code when the project has no
+`CLAUDE.md`.
 
 If you enabled Serena, a `.serena/` directory will appear. Decide whether to
 commit it or add it to `.gitignore`.
@@ -137,7 +144,7 @@ commit it or add it to `.gitignore`.
 ```fish
 cd ~/src/shop
 ocbox                            # new session
-ocbox -- opencode --continue     # resume the last one
+ocbox -- claude --continue       # resume the last one (or opencode)
 git diff                         # on the host: review what it did
 git commit -am "feat: ..."       # and commit it yourself
 ocbox --down                     # when done, stop PostgreSQL and Redis

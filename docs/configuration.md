@@ -5,7 +5,7 @@
 - [Global settings and secrets](#global-settings-and-secrets)
 - [Per-project settings](#per-project-settings)
 - [Your own services](#your-own-services)
-- [opencode configuration](#opencode-configuration)
+- [Agent configuration](#agent-configuration)
 - [Languages and tools](#languages-and-tools)
 - [Settings reference](#settings-reference)
 
@@ -18,13 +18,14 @@ conflicts.
 
 ```
 ~/.config/ocbox/
-├── ocbox.env           global settings (versions, ports, git identity...)
+├── ocbox.env           global settings (agent, versions, ports, git identity...)
 ├── secrets.env         API keys; never committed
+├── AGENTS.md           your instructions for every agent
+├── agents/             each agent's own configuration
+│   ├── claude/
+│   └── opencode/
 ├── projects/           one directory per project (see below)
-├── services/           optional: your own services
-└── opencode/           opencode's global configuration
-    ├── opencode.jsonc
-    └── AGENTS.md       your personal instructions for the agent
+└── services/           optional: your own services
 ```
 
 `install.sh` creates it from the repository's `examples/config`. You can
@@ -79,7 +80,7 @@ file from the examples:
 
 - Every `secrets.env`, the global one and the projects', is listed in the
   directory's `.gitignore`. Recreate them by hand on each machine (or log in
-  with `/connect` instead of using an API key).
+  from inside the agent instead of using an API key).
 - The login, sessions and caches of the box live in the `ocbox-home` Docker
   volume, not here, so they are not synced either.
 
@@ -87,12 +88,12 @@ Keep the repository **private**: it lists your projects and their settings.
 
 ## Global settings and secrets
 
-- **`ocbox.env`**: settings for every project, such as the OpenCode version,
+- **`ocbox.env`**: settings for every project, such as the agent to run,
   service versions, ports or your git identity. It is loaded first, so
   per-project settings take precedence. Safe to commit.
 - **`secrets.env`**: API keys and other secrets. It is loaded after
-  `ocbox.env` and has permissions `600`. Not needed if you log in with
-  `/connect`.
+  `ocbox.env` and has permissions `600`. Not needed if you log in from
+  inside the agent.
 
 Both are also passed as environment variables to the box.
 Each one documents its own options in comments.
@@ -182,29 +183,23 @@ and in yours when you use it in several projects. A service with the same
 name as one further down the list replaces it. See
 [adding your own service](../services/README.md#adding-your-own-service).
 
-## opencode configuration
+## Agent configuration
 
-The `opencode/` directory holds opencode's global configuration:
-`opencode.jsonc` (model, agents, permissions, MCP servers...), plus
-`agents/`, `commands/` and `skills/` if you use them.
+Two pieces of your configuration go to the agent:
 
-- It is **mounted read-only** in the box and linked into
-  `~/.config/opencode`, so edit it on your host, not from inside opencode.
-  The files the TUI writes itself (such as `cli.json`) stay in the box's
-  volume.
-- The agent's **`AGENTS.md`** is built on every start from two parts: the
-  box's own instructions, followed by your `opencode/AGENTS.md`. The box's
-  instructions live in the repository (`docker/AGENTS.md`) and tell the agent
-  it is in a container, that `.git` is read-only and how to find the
-  services. Improvements to them arrive with `git pull` without touching
-  yours.
-- **Automatic updates** are disabled (`"update": "disable"`): the image
-  decides the OpenCode version. See [Updating](installation.md#updating).
+- **`AGENTS.md`**, at the top of the configuration directory: your
+  instructions for every agent. On every start they are added after the
+  box's own instructions and before the project's private ones; see
+  [instructions for the agent](../agents/README.md#instructions-for-the-agent).
+- **`agents/<agent>/`**: each agent's own configuration (settings, custom
+  agents, commands, skills...). Only the selected agent's directory is
+  mounted, read-only, and linked where that agent reads it, so edit it on
+  your host, not from inside the agent. The files the agent writes itself
+  (login, sessions, UI state) stay in the box's volume.
 
-The image installs OpenCode 2, from the `@opencode/cli` npm package.
-OpenCode 2 does not run language servers, so the box's instructions ask the
-agent to validate changes with the project's lint, typecheck and tests;
-[Serena](serena.md) fills that gap for code navigation.
+What goes in each agent's directory, and how it logs in, is explained in
+its README: [Claude Code](../agents/claude/README.md),
+[OpenCode](../agents/opencode/README.md).
 
 ## Languages and tools
 
@@ -243,18 +238,20 @@ documented in its README in [services](../services/README.md).
 
 | Variable | Default | Description |
 |---|---|---|
+| `OCBOX_AGENT` | — | The coding agent to run (`--agent`); required when several are installed |
 | `OCBOX_SERVICES` | — | Services to start, comma-separated (`-s`) |
 | `OCBOX_PORTS` | — | Ports to publish on 127.0.0.1, space-separated (`-p`) |
 | `OCBOX_GIT_RW` | `0` | `1` mounts `.git` read-write (`--git-rw`) |
 | `OCBOX_SERENA` | `0` | `1` enables Serena (`--serena`) |
 | `OCBOX_SERENA_DASHBOARD` | `0` | `1` publishes Serena's web dashboard |
 | `OCBOX_SERENA_DASHBOARD_PORT` | `24282` | Host port for that dashboard |
-| `OCBOX_SERENA_CODEMODE` | `0` | `1` exposes Serena's tools through Code Mode |
+| `OCBOX_SERENA_CODEMODE` | `0` | OpenCode only: `1` exposes Serena's tools through Code Mode |
 | `OCBOX_MISE_INSTALL` | `1` | `0` skips `mise install` on start |
 | `OCBOX_HOST_UID` / `OCBOX_HOST_GID` | your UID/GID | Container user; `0` for rootless Docker |
 | `OCBOX_CONFIG_DIR` | `~/.config/ocbox` | Configuration directory (set it in your shell, not in these files) |
 | `OCBOX_PROJECT_CONFIG` | set by `ocbox` | The project's configuration directory, for paths in compose files |
-| `OPENCODE_VERSION` | `latest` | `@opencode/cli` version in the image (rebuild after changing) |
+| `OCBOX_AGENTS` | `claude opencode` | Agents installed in the image (rebuild after changing) |
+| `OCBOX_AGENT_VERSIONS` | — | Agent versions as `agent=version` pairs (rebuild after changing) |
 | `POSTGRES_CLIENT_VERSION` | `18` | PostgreSQL client tools in the image (rebuild after changing) |
 | `SERENA_VERSION` | see `ocbox.env` | Serena version in the image (rebuild after changing) |
 | `INSTALL_SERENA` | `1` | `0` builds the image without Serena |

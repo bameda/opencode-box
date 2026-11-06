@@ -1,0 +1,28 @@
+# shellcheck shell=bash disable=SC2034  # AGENT_* are read by the entrypoint
+# Claude Code: prepares its configuration on every start. Sourced by the
+# entrypoint as the box user; see agents/README.md for the contract.
+
+AGENT_COMMAND=(claude)
+
+# The image decides the version.
+export DISABLE_UPDATES=1
+
+# Your configuration (settings.json, CLAUDE.md, agents/, commands/,
+# skills/...) is linked into ~/.claude. Claude Code keeps its own state
+# (login, sessions, auto memory) there and in ~/.claude.json, in the box's
+# volume.
+ocbox_link_config "$AGENT_CONFIG" "$HOME/.claude"
+
+# The box's instructions go to the managed CLAUDE.md, which Claude Code loads
+# before your CLAUDE.md and the project's, and which cannot be excluded.
+cp "$AGENT_INSTRUCTIONS" /etc/claude-code/CLAUDE.md
+
+# Serena, through a per-start MCP configuration passed on the command line.
+if ((SERENA_ENABLED)); then
+  serena_command claude-code
+  mcp_config="$OCBOX_RUNTIME/claude-mcp.json"
+  jq -n --args '{ mcpServers: { serena: {
+      type: "stdio", command: $ARGS.positional[0], args: $ARGS.positional[1:]
+    } } }' -- "${SERENA_CMD[@]}" > "$mcp_config"
+  AGENT_ARGS=(--mcp-config "$mcp_config")
+fi

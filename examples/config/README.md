@@ -1,34 +1,36 @@
 # My ocbox configuration
 
 Personal configuration for [opencode-box](https://github.com/bameda/opencode-box):
-the settings of each project, global settings and my opencode configuration.
-It lives in `~/.config/ocbox` (or wherever `OCBOX_CONFIG_DIR` points) and is
-meant to be its own private git repository.
+global settings, the settings of each project and the configuration of each
+coding agent. It lives in `~/.config/ocbox` (or wherever `OCBOX_CONFIG_DIR`
+points) and is meant to be its own private git repository.
 
 ```
 ~/.config/ocbox/
-├── ocbox.env           global settings (versions, ports, git identity...)
+├── ocbox.env           global settings: agent, versions, ports, git identity...
 ├── secrets.env         API keys; never committed
+├── AGENTS.md           personal instructions for every agent
+├── agents/             each agent's own configuration
+│   ├── claude/         settings.json, CLAUDE.md, agents/, commands/, skills/...
+│   └── opencode/       opencode.jsonc, agents/, commands/, skills/...
 ├── projects/           one directory per project, named after the project's
 │                       directory (see projects/README.md)
-├── services/           optional: your own services, same layout as the catalog
-└── opencode/           opencode's global configuration
-    ├── opencode.jsonc  model, agents, permissions, MCPs...
-    └── AGENTS.md       personal instructions for the agent
+└── services/           optional: your own services, same layout as the catalog
 ```
 
-- **Projects**: see `projects/README.md`.
+- **Agents**: the selected agent's directory is mounted read-only in the
+  box and linked where the agent reads its configuration, so change it here,
+  not from inside the agent. The agent's own state (login, sessions, files
+  its UI writes) stays in the box's volume.
 - **Services**: a `services/<name>/compose.yaml` here is available to
   `ocbox -s <name>`, and replaces a catalog service with the same name. To
   refer to files in this directory from a compose file, use
   `${OCBOX_CONFIG_DIR}` (relative paths resolve against the opencode-box
-  repo).
-- **opencode**: mounted read-only in the box, so change it here, not from
-  inside opencode. Files the TUI writes (like `cli.json`) stay in the box's
-  own volume.
+  repository).
 
-The agent cannot read or modify this directory: `ocbox` refuses to mount a
-project that contains it or is inside it.
+The agent cannot read or modify this directory, apart from the files above
+that are mounted read-only: `ocbox` refuses to mount a project that contains
+it or is inside it.
 
 Full documentation:
 [Configuration](https://github.com/bameda/opencode-box/blob/main/docs/configuration.md).

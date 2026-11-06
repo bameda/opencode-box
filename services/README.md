@@ -53,7 +53,7 @@ in `ocbox.env` for every project, or in `projects/<name>/project.env` for
 one. Each service's README lists them with their defaults.
 
 **Data** is per project: two projects using `postgres` get separate
-databases. Services keep running when you exit opencode.
+databases. Services keep running when you exit the agent.
 
 | Command | Effect |
 |---|---|

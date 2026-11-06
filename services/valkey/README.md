@@ -19,7 +19,7 @@ If your app expects `REDIS_URL`, map it in `projects/<name>/compose.yaml`:
 
 ```yaml
 services:
-  opencode:
+  box:
     environment:
       REDIS_URL: redis://valkey:6379/0
 ```

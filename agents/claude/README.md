@@ -1,0 +1,56 @@
+# Claude Code (`claude`)
+
+[Claude Code](https://code.claude.com/docs/en/overview), Anthropic's coding agent.
+
+## Install and update
+
+Installed from Anthropic's signed apt repository, whose key is checked
+against its published fingerprint. The version is
+`OCBOX_AGENT_VERSIONS="claude=..."`:
+
+- `stable` (default): about a week behind, skipping releases with major
+  regressions;
+- `latest`: every release as soon as it ships;
+- an exact package version from the latest channel.
+
+Run `ocbox --rebuild` to fetch a newer release of the channel. Claude Code's
+own updates are disabled (`DISABLE_UPDATES`), since the image decides the
+version.
+
+## Log in
+
+Run `claude` and follow the login prompts: it shows a URL to open in your
+browser, on your host, and asks you to paste the code back into the
+terminal. The credentials are kept in the box's volume (`~/.claude/` and
+`~/.claude.json`), not in your real `$HOME`, and work for every project.
+Claude Code needs a Pro, Max, Team, Enterprise or Console account.
+Alternatively, put `ANTHROPIC_API_KEY` in `~/.config/ocbox/secrets.env`;
+Claude Code asks once whether to use it.
+
+## Your configuration
+
+`~/.config/ocbox/agents/claude/` is linked into `~/.claude`: `settings.json`,
+`CLAUDE.md` (instructions for Claude Code only), plus `agents/`, `commands/`,
+`skills/` and `rules/` if you use them. It is mounted read-only, so edit it
+on your host. Claude Code's own state (sessions, auto memory, the login)
+stays in the box's volume.
+
+## Instructions and Serena
+
+- **Instructions**: the combined instructions (see
+  [agents](../README.md#instructions-for-the-agent)) become the managed
+  `CLAUDE.md` (`/etc/claude-code/CLAUDE.md`), which Claude Code loads before
+  your `~/.claude/CLAUDE.md` and the project's, and which cannot be
+  excluded. In the project, Claude Code reads its `CLAUDE.md`, or its
+  `AGENTS.md` when there is no `CLAUDE.md`.
+- **Serena**: passed on every start as an MCP configuration file
+  (`--mcp-config`), with Serena's `claude-code` context. MCP servers you
+  configure yourself keep working alongside it.
+
+## Notes
+
+- **Sandboxing.** Claude Code's own sandbox for shell commands may not work
+  inside the box, which runs without Linux capabilities. The box itself is
+  the sandbox: the agent cannot reach anything on your machine beyond the
+  project, so its permission prompts guard the project, not your system.
+- Resume the last session with `ocbox -- claude --continue`.

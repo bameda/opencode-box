@@ -1,9 +1,12 @@
 # opencode-box
 
-Run [OpenCode 2](https://opencode.ai/v2/docs/) inside a Docker container that
-**only sees the project you are working on**. Your `$HOME`, SSH keys,
-dotfiles and every other project stay out of the agent's reach.
+Run coding agents, such as [Claude Code](agents/claude/README.md) or
+[OpenCode](agents/opencode/README.md), inside a Docker container that **only
+sees the project you are working on**. Your `$HOME`, SSH keys, dotfiles and
+every other project stay out of the agent's reach.
 
+- **Any agent**: choose the agent per project or per run. Agents are
+  pluggable, so adding another one is a matter of adding a directory.
 - **Isolated**: the project is the only host directory the agent can write
   to. Its `.git` is read-only, and the container runs without `sudo`,
   without capabilities and without access to Docker.
@@ -28,14 +31,17 @@ dotfiles and every other project stay out of the agent's reach.
    ~/src/opencode-box/install.sh
    ```
 
-3. Start it in a project, building the image the first time:
+3. Choose your default agent: `ocbox --default-agent claude` or
+   `ocbox --default-agent opencode`.
+4. Start it in a project, building the image the first time:
 
    ```fish
    cd ~/src/my-project
    ocbox --build
    ```
 
-   Inside opencode, run `/connect` once to log in to your model provider.
+   The first time, log in from inside the agent; see its
+   [README](agents/README.md).
 
 Then follow [First steps](docs/first-steps.md) to set up a project with its
 services and tools.
@@ -43,12 +49,14 @@ services and tools.
 ## Everyday use
 
 ```fish
-ocbox                            # opencode in the current project
-ocbox -- opencode --continue     # resume the last session
+ocbox                            # the agent, in the current project
+ocbox --agent opencode           # another agent, this time
+ocbox --set-agent opencode       # this project's own agent, from now on
+ocbox -- claude --continue       # resume Claude Code's last session
 ocbox -s postgres,mailpit        # with a database and a test mail server
 ocbox -p 5173                    # publish the dev server on 127.0.0.1:5173
 ocbox --shell                    # bash inside the box
-ocbox --list                     # available services
+ocbox --list                     # available agents and services
 ocbox --down                     # stop the project's services (keeps data)
 ocbox --help                     # every option
 ```
@@ -64,7 +72,8 @@ usually enough.
 | [Installation](docs/installation.md) | Docker on each distribution, installing and updating opencode-box, rootless Docker |
 | [First steps](docs/first-steps.md) | Step-by-step tutorial: adding a project |
 | [Usage](docs/usage.md) | Every `ocbox` option, ports, git workflow, stopping and resetting |
-| [Configuration](docs/configuration.md) | `~/.config/ocbox`, keeping it in a private repo, per-project settings, opencode, tools, settings reference |
+| [Agents](agents/README.md) | The available agents, choosing one, how each logs in and is configured, adding another |
+| [Configuration](docs/configuration.md) | `~/.config/ocbox`, keeping it in a private repo, per-project settings, tools, settings reference |
 | [Services](services/README.md) | The service catalog, how to use each one and how to add your own |
 | [Example projects](examples/projects/README.md) | Ready-made configurations: Ansible, Helm, Python, Node.js, Go, Rust, Rails, Spring Boot, Clojure |
 | [Serena](docs/serena.md) | Semantic code navigation and editing |

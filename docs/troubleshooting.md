@@ -35,10 +35,23 @@ Another project, or something on your host, is using that port. For
 service UIs, change their port in the project's settings (for example
 `MAILPIT_UI_PORT=18025`); each service's README lists its variables.
 
-### `WARNING: ~/.config/opencode/<file> exists in the box's volume and hides yours`
+### `choose a coding agent`
 
-A file left from an older setup takes precedence over your configuration.
-Remove it: `ocbox --shell`, then `rm ~/.config/opencode/<file>`.
+Several agents are installed in the image and none is selected. Choose the
+default one with `ocbox --default-agent NAME` (or a project's own with
+`--set-agent NAME`), or pass `--agent` for a single run. See
+[Agents](../agents/README.md).
+
+### `the agent '<name>' is not in OCBOX_AGENTS` / `is not installed in the image`
+
+The agent you chose is not in the image. Add it to `OCBOX_AGENTS` in
+`ocbox.env` and run `ocbox --build`.
+
+### `WARNING: <path> exists in the box's volume and hides yours`
+
+A file in the agent's configuration directory inside the box, left from an
+older setup or created by the agent, takes precedence over the same file in
+your configuration. Remove it: `ocbox --shell`, then `rm <path>`.
 
 ### Permission errors on files in the box's home
 
@@ -52,15 +65,15 @@ again, and caches and tools are downloaded again).
   exist in the box. Copy the image into the project and refer to it from
   there.
 - **No SSH keys in the box**: `git push` and `git pull` happen on the host.
-- **No language servers in OpenCode 2**: there are no automatic diagnostics;
-  enable [Serena](serena.md) for code navigation and rely on the project's
-  lint and tests.
+- **Agent-specific limitations** are listed in each
+  [agent's README](../agents/README.md), for example the lack of language
+  servers in OpenCode 2.
 - **No systemd** in the box or in `ssh-target`.
 
 ## Maintenance
 
 ```fish
-ocbox --rebuild                        # update the image and OpenCode
+ocbox --rebuild                        # update the image and the agents
 docker volume ls | grep ocbox          # the box's home and each project's data
 docker volume rm ocbox-home            # reset the box's home: login, caches, tools
 cd ~/src/my-app && ocbox --purge       # delete one project's services and data

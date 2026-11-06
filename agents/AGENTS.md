@@ -26,10 +26,7 @@ You are running inside an isolated Docker container, not on the user's machine.
   project database without arguments.
 - If you need a service that is not in `OCBOX_SERVICES`, do not try to
   install or start it yourself: ask the user to add it.
-- OpenCode 2 does not run language servers: there are no automatic LSP
-  diagnostics. Validate changes with the project's commands (lint, typecheck,
-  build, tests).
-- If `OCBOX_SERENA=1`, you have Serena's tools (prefix `serena_`) to navigate
+- If `OCBOX_SERENA=1`, you have the tools of Serena's MCP server to navigate
   and edit code at the symbol level using language servers. To locate
   definitions, find references, inspect a file's structure or rewrite a
   specific function or method, prefer them over `grep` and reading whole
@@ -44,3 +41,5 @@ You are running inside an isolated Docker container, not on the user's machine.
   systemd, so tasks that manage services through it will fail there.
 - If you start a dev server the user should open in their browser, listen on
   `0.0.0.0` (not `localhost`) and on the port they tell you.
+- There is no browser in the box. If a command needs one (a login, an OAuth
+  flow), give the user the URL to open on their machine.

@@ -1,0 +1,119 @@
+# Coding agents
+
+The coding agents opencode-box can run. Each one lives in its own directory
+under `agents/`, and none is the default: you choose one with `OCBOX_AGENT`
+(in `ocbox.env` or a project's `project.env`) or with `ocbox --agent`.
+
+See [switching between agents](#switching-between-agents) to change from
+one to another.
+
+| Agent | Command | Docs |
+|---|---|---|
+| Claude Code | `claude` | [claude](claude/README.md) |
+| OpenCode 2 | `opencode` | [opencode](opencode/README.md) |
+
+Everything else is the same whichever agent runs: the isolation, the
+services, the tools installed with mise, Serena, the read-only `.git` and
+the project settings.
+
+## Choosing and installing agents
+
+```dotenv
+# ~/.config/ocbox/ocbox.env
+OCBOX_AGENT=claude                              # the agent to run
+OCBOX_AGENTS="claude opencode"                  # agents in the image (rebuild after changing)
+OCBOX_AGENT_VERSIONS="opencode=2.2.5"           # optional versions (rebuild after changing)
+```
+
+- **`OCBOX_AGENT`** is required when the image has more than one agent. A
+  project can use a different one in its `project.env`, and `--agent`
+  overrides both for one run.
+- **`OCBOX_AGENTS`** lists the agents installed in the image, all of them by
+  default. Keep only the ones you use to make the image smaller.
+- **`OCBOX_AGENT_VERSIONS`** pins versions as `agent=version` pairs. Each
+  agent's README explains which values it accepts and its default.
+
+## Switching between agents
+
+There is a default agent, and any project can have its own, so different
+projects can use different agents with the same configuration. Switching
+takes one command:
+
+```fish
+ocbox --default-agent claude     # the default, for projects without their own
+ocbox --set-agent opencode       # this project's own agent
+ocbox --set-agent default        # this project uses the default again
+ocbox --agent opencode           # this run only
+ocbox --list                     # which agent runs here, and why
+```
+
+`--default-agent` writes `OCBOX_AGENT` in `ocbox.env`, and `--set-agent` in
+the project's `project.env`; you can also edit them by hand. The agent must
+be in the image: if it is not, add it to `OCBOX_AGENTS` and run
+`ocbox --build`.
+
+**What carries over when you switch:**
+
+- the project, its services and their data, its tools (mise) and Serena;
+- the box's instructions, your `AGENTS.md` and the project's private one,
+  which every agent receives;
+- the project's own instructions, if they are in an `AGENTS.md`: OpenCode
+  reads it, and so does Claude Code when the project has no `CLAUDE.md`.
+  Prefer `AGENTS.md` in projects where you use several agents.
+
+**What does not:**
+
+- **Sessions and history.** Each agent keeps its own; a conversation started
+  with one cannot be continued with another. Start the new one with a short
+  summary of where you were, or ask the first agent to write one into the
+  project before switching.
+- **Login.** Each agent has its own, made once.
+- **Agent-specific configuration** in `~/.config/ocbox/agents/<agent>/`:
+  model, permissions, your own MCP servers, custom commands and skills use
+  each agent's format, so configure each agent separately.
+
+## Instructions for the agent
+
+On every start, the box builds the agent's instructions from four parts, in
+this order:
+
+1. the box's own instructions, [`AGENTS.md`](AGENTS.md) in this directory:
+   the container, the services, the read-only `.git`...;
+2. the agent's own, `agents/<agent>/AGENTS.md`, if it has one;
+3. yours, `~/.config/ocbox/AGENTS.md`, for every agent;
+4. the project's private ones, `~/.config/ocbox/projects/<name>/AGENTS.md`.
+
+Each agent's `setup.sh` puts the result where that agent reads it. The
+project's own `AGENTS.md` or `CLAUDE.md`, in its repository, is read by the
+agent as usual.
+
+## Adding an agent
+
+Copy [`_template/`](_template/) to `agents/<name>/` and fill in its files:
+
+| File | Runs | Does |
+|---|---|---|
+| `install.sh` | at build time, as root | Installs the agent. Receives the version from `OCBOX_AGENT_VERSIONS`, or `default` |
+| `setup.sh` | on every start, as the box's user, sourced by the entrypoint | Links your configuration, places the instructions, registers Serena, and sets `AGENT_COMMAND` |
+| `AGENTS.md` | — | Optional: instructions for this agent only |
+| `README.md` | — | How to use it; its first line is shown by `ocbox --list` |
+
+`setup.sh` receives these variables and helpers:
+
+| Name | What it is |
+|---|---|
+| `AGENT_CONFIG` | Your configuration for this agent (`~/.config/ocbox/agents/<name>/`), mounted read-only; may be empty |
+| `AGENT_INSTRUCTIONS` | The combined instructions file described above |
+| `SERENA_ENABLED` | `1` when Serena is enabled for the project |
+| `serena_command CONTEXT` | Sets the array `SERENA_CMD` to the command that starts Serena's MCP server for the project |
+| `ocbox_link_config SRC DEST` | Links every entry of `SRC` into `DEST`, keeping `DEST` writable for the agent's own files |
+| `OCBOX_RUNTIME` | A per-container directory for generated files |
+
+and must set:
+
+| Name | What it is |
+|---|---|
+| `AGENT_COMMAND` | Array: the command that starts the agent, for example `(claude)` |
+| `AGENT_ARGS` | Optional array: arguments added whenever the agent runs, for example an MCP configuration file |
+
+Then add it to `OCBOX_AGENTS` and run `ocbox --build`.

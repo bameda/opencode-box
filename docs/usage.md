@@ -1,6 +1,7 @@
 # Usage
 
 - [Command line](#command-line)
+- [Choosing the agent](#choosing-the-agent)
 - [Projects and their services](#projects-and-their-services)
 - [Opening the app in your browser](#opening-the-app-in-your-browser)
 - [Running other commands](#running-other-commands)
@@ -17,23 +18,27 @@ so they start with dashes: `ocbox --build`, not `ocbox build`.
 
 | Option | Description |
 |---|---|
+| `-a`, `--agent NAME` | The coding agent to run this time; defaults to `OCBOX_AGENT` |
+| `--set-agent NAME` | The current project's own agent; `default` to use the default again |
+| `--default-agent NAME` | The default agent, for projects without their own |
 | `-s`, `--services LIST` | Services to start, comma-separated: `-s postgres,redis` |
-| `-l`, `--list` | List the available services |
+| `-l`, `--list` | List the available agents and services |
 | `-p`, `--port PORT` | Publish a port of the box on `127.0.0.1` (repeatable) |
 | `--git-rw` | Mount `.git` read-write, so the agent can commit |
 | `--serena` / `--no-serena` | Enable or disable [Serena](serena.md) |
-| `--shell` | Open bash in the box instead of opencode |
+| `--shell` | Open bash in the box instead of the agent |
 | `--build` | Rebuild the images (pulling newer base images) before starting |
-| `--rebuild` | Same, without cache: also updates OpenCode on `latest` |
+| `--rebuild` | Same, without cache: also updates agents installed from a channel |
 | `--down` | Stop and remove the project's services; their data is kept |
 | `--purge` | Like `--down`, and also delete the project's data |
 | `--init [GIT_URL]` | Create the [configuration directory](configuration.md), optionally cloning it |
 | `-h`, `--help` | Show the help |
 
-Anything after `--` replaces the default command, `opencode`:
+Anything after `--` replaces the default command, which is the agent:
 
 ```fish
-ocbox -- opencode --continue      # resume the last session
+ocbox -- claude --continue        # resume Claude Code's last session
+ocbox -- opencode --continue      # resume OpenCode's last session
 ocbox -s postgres -- psql         # a single command in the box
 ```
 
@@ -42,19 +47,45 @@ Options given on the command line take precedence over the project's
 once; for a project you work on every day, put them in
 `projects/<name>/project.env` and just run `ocbox`.
 
+## Choosing the agent
+
+No agent is the default. The one that runs comes from, in order of
+precedence:
+
+1. `--agent NAME` on the command line;
+2. `OCBOX_AGENT` in the project's `project.env`;
+3. `OCBOX_AGENT` in `ocbox.env`.
+
+If none is set and the image has a single agent, that one runs.
+`ocbox --list` shows which agent will run in the current project and where
+that choice comes from.
+
+To change the agent without editing files:
+
+```fish
+ocbox --default-agent claude     # the default (ocbox.env)
+ocbox --set-agent opencode       # this project's own (project.env)
+ocbox --set-agent default        # this project uses the default again
+```
+
+All agents share the box's home volume, so you can switch between them
+freely: each keeps its own login and sessions. See
+[switching between agents](../agents/README.md#switching-between-agents) for
+what carries over and what does not.
+
 ## Projects and their services
 
 Each project gets its own set of containers, named `ocbox-<name>-<hash>`
 after its path. Two projects using `postgres` therefore get two separate
 databases, and you can have several projects open at once.
 
-When you exit opencode, the project's services **keep running**, so the
+When you exit the agent, the project's services **keep running**, so the
 next session starts instantly with the same data. Stop them when you are
 done:
 
 | Command | Services | Data (databases, buckets, queues...) |
 |---|---|---|
-| exit opencode | keep running | kept |
+| exit the agent | keep running | kept |
 | `ocbox --down` | stopped and removed | kept |
 | `ocbox --purge` | stopped and removed | **deleted** |
 
@@ -85,7 +116,7 @@ ocbox --shell                     # interactive bash in the box
 ocbox -- psql                     # one command, then exit
 ```
 
-The shell has the same environment as opencode: the project's tools, the
+The shell has the same environment as the agent: the project's tools, the
 services' variables (`DATABASE_URL`...) and network access to the services
 by name. It is the place to check things by hand or to run what the agent
 would run.
