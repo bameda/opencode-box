@@ -207,6 +207,9 @@ while (($#)) && [[ "$1" == -C ]]; do
   project="${2:?-C needs a directory}"; shift 2
 done
 
+# roke -h / --help: the whole help (roke COMMAND --help shows its part).
+if [[ "${1:-}" == -h || "${1:-}" == --help ]]; then usage; exit 0; fi
+
 # The command (run when there is none, or when options come first).
 command="run"
 if (($#)) && [[ "$1" != -* ]]; then command="$1"; shift; fi
@@ -273,6 +276,7 @@ case "$command" in
   purge) action=purge; expect_no_more "$@" ;;
   agent|service|network)
     sub="${1:-list}"; (($#)) && shift
+    [[ "$sub" == -h || "$sub" == --help ]] && { help_for "$command"; exit 0; }
     args=()
     for a in "$@"; do
       case "$a" in --global) global=1 ;; -h|--help) help_for "$command"; exit 0 ;; *) args+=("$a") ;; esac
