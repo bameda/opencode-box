@@ -88,6 +88,7 @@ usually enough.
 | [Network](docs/network.md) | How the pieces fit, restricted and open mode, allowing destinations |
 | [Security](docs/security.md) | What the container can and cannot reach |
 | [Troubleshooting](docs/troubleshooting.md) | Common problems, known limitations and maintenance |
+| [Development](docs/development.md) | Running the tests and trying changes |
 
 ## Security in a nutshell
 

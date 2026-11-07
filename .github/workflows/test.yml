@@ -1,0 +1,21 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Tests
+        run: uvx pytest
+      - name: ShellCheck
+        run: |
+          shellcheck bin/roke install.sh docker/entrypoint.sh docker/gateway/gateway.sh \
+            services/ssh-target/entrypoint.sh agents/*/install.sh
+          shellcheck -s bash agents/*/setup.sh

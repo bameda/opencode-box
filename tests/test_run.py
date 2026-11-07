@@ -1,0 +1,87 @@
+import hashlib
+from pathlib import Path
+
+from helpers import after, compose_files, project_name
+
+
+def test_compose_project_name(env):
+    shop = env.project()
+    digest = hashlib.sha1(str(shop.resolve()).encode()).hexdigest()[:8]
+    assert project_name(env.roke(cwd=shop).last("run")) == f"roke-shop-{digest}"
+
+
+def test_run_args_and_mounts(env):
+    shop = env.project()
+    (env.config / "projects" / "shop").mkdir(parents=True)
+    (env.config / "projects" / "shop" / "AGENTS.md").write_text("# private\n")
+    call = env.roke(cwd=shop).last("run")
+    args = call["args"]
+    assert args[args.index("run") + 1] == "--rm"
+    assert "-T" in args
+    assert f"{shop}/.git:{shop}/.git:ro" in args
+    assert "ROKE_GIT_READONLY=1" in args
+    assert any(a.endswith("/AGENTS.md:/run/roke/user-AGENTS.md:ro") for a in args)
+    assert any(a.endswith("/projects/shop/AGENTS.md:/run/roke/project-AGENTS.md:ro") for a in args)
+    assert after(call, "box") == []
+    assert call["env"]["PROJECT_DIR"] == str(shop)
+    assert call["env"]["ROKE_PROJECT_CONFIG"] == str(env.config / "projects" / "shop")
+
+
+def test_git_rw_and_projects_without_git(env):
+    shop = env.project()
+    assert not any(".git:" in a for a in env.roke("--git-rw", cwd=shop).last("run")["args"])
+    other = env.project("other", git=False)
+    assert not any(".git:" in a for a in env.roke(cwd=other).last("run")["args"])
+
+
+def test_continue_shell_exec(env):
+    shop = env.project()
+    call = env.roke("continue", cwd=shop).last("run")
+    assert "ROKE_CONTINUE=1" in call["args"] and after(call, "box") == []
+    assert after(env.roke("shell", cwd=shop).last("run"), "box") == ["bash"]
+    call = env.roke("exec", "psql", "-c", "select 1", cwd=shop).last("run")
+    assert after(call, "box") == ["psql", "-c", "select 1"]
+    call = env.roke("exec", "-s", "postgres", "psql", cwd=shop).last("run")
+    assert after(call, "box") == ["psql"] and call["env"]["ROKE_SERVICES"] == "postgres"
+
+
+def test_ports_are_published_by_the_gateway(env):
+    shop = env.project()
+    files = compose_files(env.roke("-p", "5173", "-p", "0.0.0.0:3000:3000", cwd=shop).last("run"))
+    ports_file = Path(files[-1])
+    assert ports_file.name.endswith(".ports.yaml")
+    text = ports_file.read_text()
+    assert '"127.0.0.1:5173:5173"' in text and '"0.0.0.0:3000:3000"' in text
+    env.write_project_env('ROKE_PORTS="8080"\n')
+    files = compose_files(env.roke(cwd=shop).last("run"))
+    assert '"127.0.0.1:8080:8080"' in Path(files[-1]).read_text()
+
+
+def test_serena(env):
+    shop = env.project()
+    assert env.roke(cwd=shop).last("run")["env"]["ROKE_SERENA"] == "0"
+    assert env.roke("--serena", cwd=shop).last("run")["env"]["ROKE_SERENA"] == "1"
+    env.write_project_env("ROKE_SERENA=1\n")
+    assert env.roke("--no-serena", cwd=shop).last("run")["env"]["ROKE_SERENA"] == "0"
+
+
+def test_settings_files_precedence(env):
+    shop = env.project()
+    env.append(env.config / "roke.env", "POSTGRES_DB=global\nMAILPIT_UI_PORT=1\n")
+    env.write_project_env("POSTGRES_DB=project\n")
+    (env.config / "projects" / "shop" / "secrets.env").write_text("POSTGRES_DB=secret\n")
+    exported = env.roke(cwd=shop).last("run")["env"]
+    assert exported["POSTGRES_DB"] == "secret"
+    assert exported["MAILPIT_UI_PORT"] == "1"
+
+
+def test_another_project_with_C(env):
+    shop = env.project()
+    call = env.roke("-C", str(shop), "shell", cwd=env.home).last("run")
+    assert call["env"]["PROJECT_DIR"] == str(shop)
+
+
+def test_host_uid_override(env):
+    env.append(env.config / "roke.env", "ROKE_HOST_UID=0\nROKE_HOST_GID=0\n")
+    exported = env.roke(cwd=env.project()).last("run")["env"]
+    assert exported["HOST_UID"] == "0" and exported["HOST_GID"] == "0"
